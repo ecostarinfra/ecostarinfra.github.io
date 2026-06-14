@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Lotus Valley – Ecostar Infra</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',sans-serif;background:#f5f5f0;color:#2d2d2d}
+:root{--green:#2d7a4f;--green2:#1a5c38;--gold:#c8960c;--red:#c0392b;--orange:#e67e22;--gray:#7f8c8d;--light:#ecf0eb;--white:#fff}
+
+/* NAV */
+nav{background:var(--green2);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100}
+nav .logo{color:#fff;font-size:1.3rem;font-weight:700;letter-spacing:1px}
+nav .logo span{color:var(--gold)}
+nav ul{list-style:none;display:flex;gap:1.5rem}
+nav ul li a{color:#cce8d8;text-decoration:none;font-size:.9rem;transition:color .2s}
+nav ul li a:hover{color:#fff}
+nav .admin-btn{background:var(--gold);color:#fff;border:none;padding:.4rem 1rem;border-radius:6px;cursor:pointer;font-size:.85rem;font-weight:600}
+
+/* HERO */
+.hero{background:linear-gradient(135deg,#1a5c38 0%,#2d7a4f 60%,#3a9960 100%);color:#fff;text-align:center;padding:3.5rem 1rem 2.5rem}
+.hero h1{font-size:3rem;font-weight:800;letter-spacing:2px;text-shadow:0 2px 8px rgba(0,0,0,.3)}
+.hero .tagline{font-size:1.2rem;color:#a8e6c2;margin:.5rem 0 1.5rem;font-style:italic}
+.hero-stats{display:flex;justify-content:center;gap:2rem;flex-wrap:wrap;margin-top:1.5rem}
+.hero-stat{background:rgba(255,255,255,.12);border-radius:10px;padding:.8rem 1.5rem;min-width:110px}
+.hero-stat .num{font-size:1.6rem;font-weight:700;color:#fff}
+.hero-stat .lbl{font-size:.78rem;color:#a8e6c2}
+
+/* CONTACT BAR */
+.contact-bar{background:var(--green2);color:#cce8d8;text-align:center;padding:.5rem 1rem;font-size:.85rem;display:flex;justify-content:center;gap:2rem;flex-wrap:wrap}
+.contact-bar a{color:#cce8d8;text-decoration:none}
+.contact-bar a:hover{color:#fff}
+
+/* FILTER BAR */
+.filter-bar{background:#fff;padding:.8rem 1.5rem;display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;border-bottom:1px solid #ddd;position:sticky;top:60px;z-index:90}
+.filter-bar label{font-size:.8rem;color:#555;margin-right:.2rem}
+.filter-bar select,.filter-bar input{padding:.3rem .6rem;border:1px solid #ccc;border-radius:5px;font-size:.82rem}
+.filter-bar button{padding:.3rem .8rem;border:1px solid #ccc;border-radius:5px;background:#fff;cursor:pointer;font-size:.82rem;font-weight:600;transition:all .15s}
+.filter-bar button:hover{background:var(--green);color:#fff;border-color:var(--green)}
+.filter-bar button.active{background:var(--green);color:#fff;border-color:var(--green)}
+
+/* LEGEND */
+.legend{display:flex;gap:1rem;flex-wrap:wrap;padding:.6rem 1.5rem;background:#f9f9f6;border-bottom:1px solid #e0e0d8;align-items:center}
+.leg-item{display:flex;align-items:center;gap:.35rem;font-size:.78rem;color:#444}
+.leg-dot{width:14px;height:14px;border-radius:3px;border:1px solid rgba(0,0,0,.15)}
+
+/* MAP SECTION */
+.map-section{padding:1.2rem 1.5rem}
+.map-section h2{font-size:1.1rem;color:var(--green2);margin-bottom:.8rem;font-weight:600}
+.map-wrapper{position:relative;width:100%;background:#e8ede5;border-radius:12px;overflow:auto;border:2px solid #c5d5c0}
+#mapContainer{position:relative;transform-origin:0 0;transition:transform .1s;display:inline-block}
+#layoutImg{display:block;width:100%}
+.plot-overlay{position:absolute;border-radius:1px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;font-size:6.5px;font-weight:700;color:rgba(0,0,0,.75);border:0.5px solid rgba(0,0,0,.2)}
+.plot-overlay:hover{filter:brightness(1.15);z-index:10;transform:scale(1.05)}
+.plot-overlay.available{background:rgba(46,160,90,.55)}
+.plot-overlay.booked{background:rgba(192,57,43,.6)}
+.plot-overlay.reserved{background:rgba(230,126,34,.6)}
+.plot-overlay.not-available{background:rgba(100,100,100,.55)}
+.plot-overlay.highlighted{outline:3px solid #fff;z-index:20;filter:brightness(1.3)}
+
+/* ZOOM CONTROLS */
+.zoom-controls{position:absolute;bottom:12px;right:12px;display:flex;flex-direction:column;gap:4px;z-index:50}
+.zoom-controls button{width:32px;height:32px;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer;font-size:1.1rem;font-weight:600;color:#333}
+
+/* POPUP */
+.popup-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center}
+.popup-overlay.open{display:flex}
+.popup{background:#fff;border-radius:14px;padding:1.5rem;width:340px;max-width:95vw;position:relative;box-shadow:0 8px 40px rgba(0,0,0,.18)}
+.popup h3{font-size:1.1rem;color:var(--green2);margin-bottom:1rem;border-bottom:2px solid var(--green);padding-bottom:.4rem}
+.popup .close-btn{position:absolute;top:10px;right:12px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:#888}
+.popup-row{display:flex;justify-content:space-between;margin:.4rem 0;font-size:.88rem}
+.popup-row .pk{color:#666;font-weight:500}
+.popup-row .pv{font-weight:600;color:#2d2d2d}
+.status-badge{display:inline-block;padding:.2rem .7rem;border-radius:20px;font-size:.8rem;font-weight:700}
+.status-available{background:#d4edda;color:#155724}
+.status-booked{background:#f8d7da;color:#721c24}
+.status-reserved{background:#fff3cd;color:#856404}
+.status-not-available{background:#e2e3e5;color:#383d41}
+.popup .enquire-btn{width:100%;margin-top:1rem;padding:.7rem;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:.95rem;font-weight:700;cursor:pointer;transition:background .2s}
+.popup .enquire-btn:hover{background:var(--green2)}
+
+/* ENQUIRY FORM */
+.enquiry-section{background:#fff;padding:2rem 1.5rem;border-top:4px solid var(--green)}
+.enquiry-section h2{color:var(--green2);font-size:1.4rem;margin-bottom:1.2rem}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.form-group{display:flex;flex-direction:column;gap:.3rem}
+.form-group label{font-size:.82rem;color:#555;font-weight:600}
+.form-group input,.form-group select,.form-group textarea{padding:.55rem .7rem;border:1.5px solid #ddd;border-radius:7px;font-size:.9rem;outline:none;transition:border .2s;font-family:inherit}
+.form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--green)}
+.form-group.full{grid-column:1/-1}
+.submit-btn{margin-top:.5rem;padding:.75rem 2rem;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;transition:background .2s}
+.submit-btn:hover{background:var(--green2)}
+.form-success{display:none;background:#d4edda;color:#155724;padding:1rem;border-radius:8px;margin-top:1rem;text-align:center;font-weight:600}
+
+/* FOOTER */
+footer{background:var(--green2);color:#cce8d8;text-align:center;padding:1.5rem 1rem;font-size:.85rem}
+footer a{color:#a8e6c2;text-decoration:none}
+
+/* ADMIN PANEL */
+.admin-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center}
+.admin-modal.open{display:flex}
+.admin-box{background:#fff;border-radius:14px;width:95vw;max-width:900px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column}
+.admin-header{background:var(--green2);color:#fff;padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between}
+.admin-header h3{font-size:1.1rem}
+.admin-header button{background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer}
+.admin-body{padding:1rem 1.5rem;overflow-y:auto;flex:1}
+.admin-login{display:flex;flex-direction:column;gap:.8rem;max-width:300px;margin:2rem auto;text-align:center}
+.admin-login h4{color:var(--green2);font-size:1.1rem}
+.admin-login input{padding:.6rem;border:1.5px solid #ddd;border-radius:7px;font-size:.9rem}
+.admin-login button{padding:.65rem;background:var(--green);color:#fff;border:none;border-radius:7px;cursor:pointer;font-weight:700}
+.admin-login .err{color:var(--red);font-size:.82rem}
+.admin-tools{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem}
+.admin-tools button{padding:.4rem .9rem;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer;font-size:.82rem;font-weight:600}
+.admin-tools button:hover{background:var(--green);color:#fff;border-color:var(--green)}
+.admin-search{padding:.4rem .8rem;border:1px solid #ccc;border-radius:6px;font-size:.82rem;width:180px}
+.admin-table{width:100%;border-collapse:collapse;font-size:.85rem}
+.admin-table th{background:var(--green2);color:#fff;padding:.5rem .8rem;text-align:left}
+.admin-table td{padding:.45rem .8rem;border-bottom:1px solid #eee}
+.admin-table tr:hover td{background:#f0f7f3}
+.admin-table select{padding:.25rem .4rem;border:1px solid #ccc;border-radius:4px;font-size:.82rem;background:#fff}
+.admin-contact-section{margin-top:1.5rem;border-top:2px solid #e0e0d8;padding-top:1rem}
+.admin-contact-section h4{color:var(--green2);font-size:1rem;margin-bottom:.8rem;font-weight:600}
+.contact-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+.contact-form-group{display:flex;flex-direction:column;gap:.25rem}
+.contact-form-group label{font-size:.78rem;color:#555;font-weight:600}
+.contact-form-group input{padding:.45rem .6rem;border:1.5px solid #ddd;border-radius:6px;font-size:.85rem}
+.contact-form-group input:focus{outline:none;border-color:var(--green)}
+.save-contact-btn{margin-top:.5rem;padding:.5rem 1.2rem;background:var(--green);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:.85rem}
+.save-contact-btn:hover{background:var(--green2)}
+.save-msg{font-size:.8rem;color:#155724;margin-left:.5rem;display:none}
+
+@media(max-width:600px){
+  .form-grid{grid-template-columns:1fr}
+  .hero h1{font-size:2rem}
+  .contact-form-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">🌸 Lotus <span>Valley</span></div>
+  <ul>
+    <li><a href="#map">Plot Map</a></li>
+    <li><a href="#enquiry">Enquire</a></li>
+  </ul>
+  <button class="admin-btn" onclick="openAdmin()">Admin Panel</button>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <h1>LOTUS VALLEY</h1>
+  <div class="tagline">Live Life River Side</div>
+  <div style="font-size:.9rem;color:#a8e6c2;margin-bottom:1rem">by <strong style="color:#fff">Ecostar Infra</strong> · Bhopal Bypass, Hoshangabad Road</div>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="num" id="statTotal">370</div><div class="lbl">Total Plots</div></div>
+    <div class="hero-stat"><div class="num" id="statAvail">0</div><div class="lbl">Available</div></div>
+    <div class="hero-stat"><div class="num" id="statBooked">0</div><div class="lbl">Booked</div></div>
+    <div class="hero-stat"><div class="num" id="statReserved">0</div><div class="lbl">Reserved</div></div>
+  </div>
+</div>
+
+<!-- CONTACT BAR -->
+<div class="contact-bar" id="contactBar">
+  <span>📞 <a id="ph1Link" href="tel:7777800508"><span id="ph1Disp">77778 00508</span></a></span>
+  <span>📞 <a id="ph2Link" href="tel:7777800576"><span id="ph2Disp">7777800576</span></a></span>
+  <span>✉️ <a id="emailLink" href="mailto:info@ecostarinfra.com"><span id="emailDisp">info@ecostarinfra.com</span></a></span>
+  <span>🌐 <a id="webLink" href="https://ecostarinfra.com" target="_blank"><span id="webDisp">ecostarinfra.com</span></a></span>
+</div>
+
+<!-- FILTER BAR -->
+<div class="filter-bar">
+  <label>Status:</label>
+  <button class="active" onclick="setFilter('status','all',this)">All</button>
+  <button onclick="setFilter('status','available',this)">Available</button>
+  <button onclick="setFilter('status','booked',this)">Booked</button>
+  <button onclick="setFilter('status','reserved',this)">Reserved</button>
+  <button onclick="setFilter('status','not-available',this)">Not Available</button>
+  <span style="margin-left:.5rem;border-left:1px solid #ccc;padding-left:.5rem">
+    <label>Type:</label>
+    <select id="typeFilter" onchange="filterPlots()">
+      <option value="all">All Types</option>
+      <option value="1">Type 1</option>
+      <option value="2">Type 2</option>
+      <option value="3">Type 3</option>
+      <option value="4">Type 4</option>
+      <option value="5">Type 5</option>
+      <option value="6">Type 6</option>
+      <option value="7">Type 7</option>
+      <option value="8">Type 8</option>
+      <option value="9">Type 9</option>
+    </select>
+  </span>
+  <span style="margin-left:.5rem">
+    <label>Search plot:</label>
+    <input id="searchInput" type="text" placeholder="e.g. 101" style="width:80px" oninput="searchPlot()"/>
+  </span>
+</div>
+
+<!-- LEGEND -->
+<div class="legend">
+  <strong style="font-size:.8rem;color:#333">Status:</strong>
+  <div class="leg-item"><div class="leg-dot" style="background:rgba(46,160,90,.7)"></div> Available</div>
+  <div class="leg-item"><div class="leg-dot" style="background:rgba(192,57,43,.7)"></div> Booked</div>
+  <div class="leg-item"><div class="leg-dot" style="background:rgba(230,126,34,.7)"></div> Reserved</div>
+  <div class="leg-item"><div class="leg-dot" style="background:rgba(100,100,100,.6)"></div> Not Available</div>
+  <span style="margin-left:1rem;border-left:1px solid #ccc;padding-left:1rem">
+  <strong style="font-size:.8rem;color:#333">Plot Types:</strong>
+  </span>
+  <div class="leg-item"><div class="leg-dot" style="background:#2ecc71"></div> T1: 26.2×76.5ft</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#ff6eb4"></div> T2: 24.6×39.4ft</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#3daad4"></div> T3: 32.8×50ft</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#c0c0c0"></div> T4: 24.6×50ft</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#888888"></div> T5: 32.8×65.6ft</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#a0a0a0"></div> T6: 24.6×65.6ft</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#e8c96b"></div> T7: 22×45ft</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#f0e040"></div> T8: Irregular</div>
+  <div class="leg-item"><div class="leg-dot" style="background:#a8d8b0"></div> T9: Mixed Use</div>
+</div>
+
+<!-- MAP -->
+<div class="map-section" id="map">
+  <h2>🗺️ Interactive Plot Layout – Lotus Valley</h2>
+  <div class="map-wrapper" id="mapWrapper">
+    <div id="mapContainer">
+      <img id="layoutImg" src="https://i.imgur.com/placeholder.png" alt="Lotus Valley Layout Map" onerror="this.style.display='none'"/>
+      <div id="plotsLayer" style="position:absolute;top:0;left:0;width:100%;height:100%"></div>
+    </div>
+    <div class="zoom-controls">
+      <button onclick="zoom(1.2)" title="Zoom In">+</button>
+      <button onclick="zoom(0.85)" title="Zoom Out">−</button>
+      <button onclick="resetZoom()" title="Reset" style="font-size:.75rem">⟳</button>
+    </div>
+  </div>
+  <div style="margin-top:.5rem;font-size:.78rem;color:#888">💡 Click any plot to view details. Scroll or pinch to zoom. Drag to pan.</div>
+</div>
+
+<!-- PLOT POPUP -->
+<div class="popup-overlay" id="popupOverlay" onclick="if(event.target===this)closePopup()">
+  <div class="popup">
+    <button class="close-btn" onclick="closePopup()">×</button>
+    <h3 id="ppTitle">Plot Details</h3>
+    <div class="popup-row"><span class="pk">Plot Number</span><span class="pv" id="ppNum">—</span></div>
+    <div class="popup-row"><span class="pk">Plot Type</span><span class="pv" id="ppType">—</span></div>
+    <div class="popup-row"><span class="pk">Dimensions</span><span class="pv" id="ppDim">—</span></div>
+    <div class="popup-row"><span class="pk">Area</span><span class="pv" id="ppArea">—</span></div>
+    <div class="popup-row"><span class="pk">Status</span><span class="pv"><span class="status-badge" id="ppStatus">—</span></span></div>
+    <button class="enquire-btn" onclick="enquireFromPopup()">📩 Enquire About This Plot</button>
+  </div>
+</div>
+
+<!-- ENQUIRY FORM -->
+<div class="enquiry-section" id="enquiry">
+  <h2>📩 Send an Enquiry</h2>
+  <div class="form-grid" id="enquiryForm">
+    <div class="form-group"><label>Full Name *</label><input id="fname" type="text" placeholder="Your full name"/></div>
+    <div class="form-group"><label>Phone Number *</label><input id="fphone" type="tel" placeholder="e.g. 98765 43210"/></div>
+    <div class="form-group"><label>Email Address</label><input id="femail" type="email" placeholder="your@email.com"/></div>
+    <div class="form-group">
+      <label>Plot of Interest</label>
+      <select id="fplot">
+        <option value="">— Select a plot —</option>
+      </select>
+    </div>
+    <div class="form-group full"><label>Message</label><textarea id="fmsg" rows="3" placeholder="Any specific requirements or questions..."></textarea></div>
+    <div class="form-group full">
+      <button class="submit-btn" onclick="submitEnquiry()">Submit Enquiry →</button>
+    </div>
+  </div>
+  <div class="form-success" id="formSuccess">✅ Thank you! Your enquiry has been submitted. Our team will contact you shortly.</div>
+</div>
+
+<!-- FOOTER -->
+<footer id="footer">
+  <div style="font-size:1.1rem;font-weight:700;color:#fff;margin-bottom:.3rem">🌸 LOTUS VALLEY by Ecostar Infra</div>
+  <div id="footerContact">📞 <span id="fph1">77778 00508</span> / <span id="fph2">7777800576</span> &nbsp;|&nbsp; ✉️ <a id="femlLink" href="mailto:info@ecostarinfra.com" style="color:#a8e6c2"><span id="femailF">info@ecostarinfra.com</span></a> &nbsp;|&nbsp; 🌐 <a id="fwebLink" href="https://ecostarinfra.com" target="_blank" style="color:#a8e6c2"><span id="fwebF">ecostarinfra.com</span></a></div>
+  <div style="margin-top:.5rem;font-size:.75rem;color:#7aaa8a">Near Bhopal Bypass, Hoshangabad Road, Bhopal</div>
+</footer>
+
+<!-- ADMIN MODAL -->
+<div class="admin-modal" id="adminModal">
+  <div class="admin-box">
+    <div class="admin-header">
+      <h3>🔐 Admin Panel – Lotus Valley</h3>
+      <button onclick="closeAdmin()">×</button>
+    </div>
+    <div class="admin-body" id="adminBody">
+      <div class="admin-login" id="adminLogin">
+        <h4>Admin Login</h4>
+        <input type="password" id="adminPass" placeholder="Enter password" onkeydown="if(event.key==='Enter')checkAdmin()"/>
+        <button onclick="checkAdmin()">Login</button>
+        <div class="err" id="adminErr"></div>
+      </div>
+      <div style="display:none" id="adminPanel">
+        <div class="admin-tools">
+          <button onclick="exportExcel()">⬇ Export to Excel</button>
+          <label style="padding:.4rem .9rem;border:1px solid #ccc;border-radius:6px;cursor:pointer;font-size:.82rem;font-weight:600">
+            ⬆ Import from Excel <input type="file" accept=".xlsx,.xls" style="display:none" onchange="importExcel(this)"/>
+          </label>
+          <input class="admin-search" id="adminSearch" type="text" placeholder="Search plot #..." oninput="renderAdminTable()"/>
+          <select id="adminStatusFilter" onchange="renderAdminTable()" style="padding:.4rem .6rem;border:1px solid #ccc;border-radius:6px;font-size:.82rem">
+            <option value="all">All Statuses</option>
+            <option value="available">Available</option>
+            <option value="booked">Booked</option>
+            <option value="reserved">Reserved</option>
+            <option value="not-available">Not Available</option>
+          </select>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="admin-table">
+            <thead><tr><th>Plot #</th><th>Type</th><th>Dimensions (ft)</th><th>Area (sq ft)</th><th>Status</th></tr></thead>
+            <tbody id="adminTableBody"></tbody>
+          </table>
+        </div>
+        <!-- CONTACT INFO SECTION -->
+        <div class="admin-contact-section">
+          <h4>📞 Edit Contact Information</h4>
+          <div class="contact-form-grid">
+            <div class="contact-form-group"><label>Phone 1</label><input id="aph1" type="text" placeholder="77778 00508"/></div>
+            <div class="contact-form-group"><label>Phone 2</label><input id="aph2" type="text" placeholder="7777800576"/></div>
+            <div class="contact-form-group"><label>Email</label><input id="aemail" type="email" placeholder="info@ecostarinfra.com"/></div>
+            <div class="contact-form-group"><label>Website</label><input id="aweb" type="text" placeholder="ecostarinfra.com"/></div>
+          </div>
+          <div style="margin-top:.6rem;display:flex;align-items:center">
+            <button class="save-contact-btn" onclick="saveContactInfo()">Save Contact Info</button>
+            <span class="save-msg" id="saveMsg">✅ Saved!</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────
+const PLOT_TYPES = {
+  1:{label:'Type 1',dim:'26.2 × 76.5 ft',area:2004,color:'#2ecc71'},
+  2:{label:'Type 2',dim:'24.6 × 39.4 ft',area:969,color:'#ff6eb4'},
+  3:{label:'Type 3',dim:'32.8 × 50 ft',area:1640,color:'#3daad4'},
+  4:{label:'Type 4',dim:'24.6 × 50 ft',area:1230,color:'#c0c0c0'},
+  5:{label:'Type 5',dim:'32.8 × 65.6 ft',area:2152,color:'#888888'},
+  6:{label:'Type 6',dim:'24.6 × 65.6 ft',area:1614,color:'#a0a0a0'},
+  7:{label:'Type 7',dim:'22 × 45 ft',area:990,color:'#e8c96b'},
+  8:{label:'Type 8 (Irregular)',dim:'Irregular',area:null,color:'#f0e040'},
+  9:{label:'Type 9 (Mixed Use)',dim:'Mixed Use',area:null,color:'#a8d8b0'},
+};
+
+// Contact info state
+let contactInfo = {
+  ph1:'77778 00508', ph1raw:'7777800508',
+  ph2:'7777800576',
+  email:'info@ecostarinfra.com',
+  web:'ecostarinfra.com'
+};
+
+// Generate plots 1-370 with type assignment based on map layout
+function assignType(n){
+  if(n<=5)return 8;
+  if(n>=6&&n<=21)return 1;
+  if(n>=22&&n<=35)return 2;
+  if(n>=36&&n<=55)return 3;
+  if(n>=56&&n<=90)return 4;
+  if(n>=91&&n<=130)return 7;
+  if(n>=131&&n<=180)return 4;
+  if(n>=181&&n<=220)return 3;
+  if(n>=221&&n<=260)return 7;
+  if(n>=261&&n<=300)return 6;
+  if(n>=301&&n<=330)return 5;
+  if(n>=331&&n<=355)return 2;
+  if(n>=356&&n<=365)return 9;
+  if(n>=366&&n<=370)return 8;
+  return 4;
+}
+
+let plots = [];
+for(let i=1;i<=370;i++){
+  plots.push({id:i, type:assignType(i), status:'available'});
+}
+// Mark a few as booked/reserved for demo
+[12,34,56,78,90,110,145,178,200,222,245,280,310,340].forEach(n=>{if(plots[n-1])plots[n-1].status='booked'});
+[15,40,67,100,133,160,190,215,250,275,305,335].forEach(n=>{if(plots[n-1])plots[n-1].status='reserved'});
+[3,7,22,50].forEach(n=>{if(plots[n-1])plots[n-1].status='not-available'});
+
+// ─── MAP RENDERING ───────────────────────────────────────────────────────
+// Since we can't load the actual uploaded image via URL, we render a schematic grid map
+const ADMIN_PASS = 'lotus2024';
+let scale = 1, offsetX = 0, offsetY = 0, isDragging = false, dragStart = {};
+let currentFilter = {status:'all', type:'all'};
+let currentPlot = null;
+
+// Real layout image dimensions (approx, based on uploaded map)
+const IMG_URL = 'https://ecostarinfra.github.io/lotus-valley-map.png';
+const IMG_W = 1288, IMG_H = 906; // natural size of the layout PNG
+
+function buildSchematicMap(){
+  const container = document.getElementById('mapContainer');
+  const img = document.getElementById('layoutImg');
+  img.src = IMG_URL;
+  img.style.display='block';
+  img.style.maxWidth = IMG_W+'px';
+  container.style.position='relative';
+  container.style.width='100%';
+
+  // Build plot rects as % positions relative to image, based on the grid
+  // visible in the Lotus Valley layout (approx columns/rows of plot blocks)
+  const plotRects = generatePlotRects();
+  window._plotRects = plotRects;
+
+  // Build overlay layer once image loads (so % positioning matches rendered size)
+  function renderOverlays(){
+    const layer = document.getElementById('plotsLayer');
+    layer.innerHTML='';
+    layer.style.position='absolute';
+    layer.style.top='0';layer.style.left='0';
+    layer.style.width='100%';layer.style.height='100%';
+    plotRects.forEach(pr=>{
+      const p = plots.find(pl=>pl.id===pr.id);
+      if(!p)return;
+      const div=document.createElement('div');
+      div.className='plot-overlay '+p.status;
+      div.style.left=(pr.x/IMG_W*100)+'%';
+      div.style.top=(pr.y/IMG_H*100)+'%';
+      div.style.width=(pr.w/IMG_W*100)+'%';
+      div.style.height=(pr.h/IMG_H*100)+'%';
+      div.textContent=pr.id;
+      div.dataset.id=pr.id;
+      div.addEventListener('click',()=>openPlotPopup(p));
+      layer.appendChild(div);
+    });
+    applyFilterVisibility();
+    updateStats();
+  }
+
+  if(img.complete && img.naturalWidth>0){
+    renderOverlays();
+  } else {
+    img.addEventListener('load', renderOverlays);
+    img.addEventListener('error', renderOverlays); // still render overlays even if image fails
+  }
+}
+
+// Generates approximate plot rectangles (in image pixel coords) matching
+// the Lotus Valley layout's grid blocks. Plot numbering follows the
+// left-to-right, top-to-bottom pattern visible in the uploaded layout.
+function generatePlotRects(){
+  const rects=[];
+  let id=1;
+
+  // Helper to add a block of plots in a grid
+  function addBlock(x0,y0,cols,rows,cw,ch,gap,startId,endId){
+    let n=startId;
+    for(let r=0;r<rows;r++){
+      for(let c=0;c<cols;c++){
+        if(n>endId)return;
+        rects.push({id:n, x:x0+c*(cw+gap), y:y0+r*(ch+gap), w:cw, h:ch});
+        n++;
+      }
+    }
+  }
+
+  // Top-left small block (plots 1-21, type 1 area)
+  addBlock(40, 95, 2, 11, 38, 36, 2, 1, 21);
+  // Pink block left-middle (plots 22-35, type 2)
+  addBlock(35, 480, 2, 7, 40, 38, 2, 22, 35);
+  // Large central white grid (plots 36-262 approx) — main body
+  addBlock(310, 175, 9, 25, 42, 26, 1, 36, 262);
+  // Right side yellow/orange block (plots 263-350)
+  addBlock(820, 70, 6, 15, 44, 38, 2, 263, 350);
+  // Bottom small blocks (plots 351-370)
+  addBlock(40, 700, 5, 4, 40, 36, 2, 351, 370);
+
+  return rects;
+}
+
+function getStatusColor(status){
+  return {available:'rgba(46,160,90,0.6)',booked:'rgba(192,57,43,0.65)',reserved:'rgba(230,126,34,0.65)','not-available':'rgba(100,100,100,0.6)'}[status]||'rgba(100,100,100,0.5)';
+}
+
+function applyFilterVisibility(){
+  const sf=currentFilter.status, tf=currentFilter.type;
+  document.querySelectorAll('.plot-overlay').forEach(div=>{
+    const id=parseInt(div.dataset.id);
+    const p=plots.find(pl=>pl.id===id);
+    if(!p)return;
+    const typeMatch=tf==='all'||p.type===parseInt(tf);
+    const statusMatch=sf==='all'||p.status===sf;
+    div.style.opacity=(typeMatch&&statusMatch)?'1':'0.08';
+    div.style.pointerEvents=(typeMatch&&statusMatch)?'auto':'none';
+  });
+}
+
+function drawCanvas(){
+  // Refresh overlay colors & visibility (kept name for compatibility with callers)
+  document.querySelectorAll('.plot-overlay').forEach(div=>{
+    const id=parseInt(div.dataset.id);
+    const p=plots.find(pl=>pl.id===id);
+    if(!p)return;
+    div.className='plot-overlay '+p.status;
+  });
+  applyFilterVisibility();
+  updateStats();
+}
+
+function updateStats(){
+  const a=plots.filter(p=>p.status==='available').length;
+  const b=plots.filter(p=>p.status==='booked').length;
+  const r=plots.filter(p=>p.status==='reserved').length;
+  document.getElementById('statTotal').textContent=plots.length;
+  document.getElementById('statAvail').textContent=a;
+  document.getElementById('statBooked').textContent=b;
+  document.getElementById('statReserved').textContent=r;
+}
+
+// ─── FILTER ─────────────────────────────────────────────────────────────
+function setFilter(key,val,btn){
+  currentFilter[key]=val;
+  if(key==='status'){
+    document.querySelectorAll('.filter-bar button').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  applyFilterVisibility();
+}
+function filterPlots(){
+  currentFilter.type=document.getElementById('typeFilter').value;
+  applyFilterVisibility();
+}
+function searchPlot(){
+  document.querySelectorAll('.plot-overlay').forEach(d=>d.classList.remove('highlighted'));
+  const v=document.getElementById('searchInput').value.trim();
+  if(!v)return;
+  const div=document.querySelector(`.plot-overlay[data-id="${v}"]`);
+  if(div){
+    div.classList.add('highlighted');
+    div.scrollIntoView({behavior:'smooth',block:'center',inline:'center'});
+  }
+}
+
+// ─── POPUP ───────────────────────────────────────────────────────────────
+function openPlotPopup(p){
+  currentPlot=p;
+  const pt=PLOT_TYPES[p.type];
+  document.getElementById('ppTitle').textContent=`Plot #${p.id}`;
+  document.getElementById('ppNum').textContent=p.id;
+  document.getElementById('ppType').textContent=pt.label;
+  document.getElementById('ppDim').textContent=pt.dim;
+  document.getElementById('ppArea').textContent=pt.area?pt.area.toLocaleString()+' sq ft':'—';
+  const sb=document.getElementById('ppStatus');
+  sb.textContent=p.status.replace('-',' ').replace(/\b\w/g,c=>c.toUpperCase());
+  sb.className='status-badge status-'+p.status;
+  document.getElementById('popupOverlay').classList.add('open');
+}
+function closePopup(){document.getElementById('popupOverlay').classList.remove('open')}
+function enquireFromPopup(){
+  closePopup();
+  document.getElementById('fplot').value=currentPlot?currentPlot.id:'';
+  document.getElementById('enquiry').scrollIntoView({behavior:'smooth'});
+}
+
+// ─── ENQUIRY FORM ────────────────────────────────────────────────────────
+function populatePlotSelect(){
+  const sel=document.getElementById('fplot');
+  sel.innerHTML='<option value="">— Select a plot —</option>';
+  plots.filter(p=>p.status==='available').forEach(p=>{
+    const pt=PLOT_TYPES[p.type];
+    sel.innerHTML+=`<option value="${p.id}">Plot #${p.id} – ${pt.label} (${pt.dim})</option>`;
+  });
+}
+function submitEnquiry(){
+  const n=document.getElementById('fname').value.trim();
+  const ph=document.getElementById('fphone').value.trim();
+  if(!n||!ph){alert('Please fill in your name and phone number.');return;}
+  document.getElementById('enquiryForm').style.display='none';
+  document.getElementById('formSuccess').style.display='block';
+}
+
+// ─── ZOOM/PAN ─────────────────────────────────────────────────────────────
+function zoom(factor){
+  scale=Math.min(Math.max(scale*factor,0.5),4);
+  document.getElementById('mapContainer').style.transform=`scale(${scale}) translate(${offsetX}px,${offsetY}px)`;
+}
+function resetZoom(){scale=1;offsetX=0;offsetY=0;document.getElementById('mapContainer').style.transform='scale(1)'}
+
+// ─── ADMIN ────────────────────────────────────────────────────────────────
+function openAdmin(){
+  document.getElementById('adminModal').classList.add('open');
+  document.getElementById('adminLogin').style.display='flex';
+  document.getElementById('adminPanel').style.display='none';
+  document.getElementById('adminPass').value='';
+  document.getElementById('adminErr').textContent='';
+  loadContactInputs();
+}
+function closeAdmin(){document.getElementById('adminModal').classList.remove('open')}
+function checkAdmin(){
+  const p=document.getElementById('adminPass').value;
+  if(p===ADMIN_PASS){
+    document.getElementById('adminLogin').style.display='none';
+    document.getElementById('adminPanel').style.display='block';
+    renderAdminTable();
+    loadContactInputs();
+  }else{
+    document.getElementById('adminErr').textContent='Incorrect password.';
+  }
+}
+function renderAdminTable(){
+  const search=document.getElementById('adminSearch').value.toLowerCase();
+  const sf=document.getElementById('adminStatusFilter').value;
+  const tbody=document.getElementById('adminTableBody');
+  tbody.innerHTML='';
+  plots.filter(p=>{
+    const sm=sf==='all'||p.status===sf;
+    const qm=!search||String(p.id).includes(search)||PLOT_TYPES[p.type].label.toLowerCase().includes(search);
+    return sm&&qm;
+  }).forEach(p=>{
+    const pt=PLOT_TYPES[p.type];
+    tbody.innerHTML+=`<tr>
+      <td><strong>#${p.id}</strong></td>
+      <td>${pt.label}</td>
+      <td>${pt.dim}</td>
+      <td>${pt.area?pt.area.toLocaleString()+' sq ft':'—'}</td>
+      <td><select onchange="changePlotStatus(${p.id},this.value)">
+        <option value="available"${p.status==='available'?' selected':''}>Available</option>
+        <option value="booked"${p.status==='booked'?' selected':''}>Booked</option>
+        <option value="reserved"${p.status==='reserved'?' selected':''}>Reserved</option>
+        <option value="not-available"${p.status==='not-available'?' selected':''}>Not Available</option>
+      </select></td>
+    </tr>`;
+  });
+}
+function changePlotStatus(id,status){
+  const p=plots.find(pl=>pl.id===id);
+  if(p){p.status=status;drawCanvas();populatePlotSelect();}
+}
+
+// ─── EXCEL EXPORT/IMPORT ──────────────────────────────────────────────────
+function exportExcel(){
+  const data=plots.map(p=>{
+    const pt=PLOT_TYPES[p.type];
+    return {
+      'Plot Number':p.id,
+      'Plot Type':pt.label,
+      'Dimensions (ft)':pt.dim,
+      'Area (sq ft)':pt.area||'N/A',
+      'Status':p.status
+    };
+  });
+  const ws=XLSX.utils.json_to_sheet(data);
+  const wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Plots');
+  XLSX.writeFile(wb,'LotusValley_Plots.xlsx');
+}
+function importExcel(input){
+  const file=input.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const wb=XLSX.read(e.target.result,{type:'binary'});
+    const ws=wb.Sheets[wb.SheetNames[0]];
+    const rows=XLSX.utils.sheet_to_json(ws);
+    let updated=0;
+    rows.forEach(row=>{
+      const id=parseInt(row['Plot Number']||row['plot_number']||row['Plot #']||row['id']);
+      const status=(row['Status']||row['status']||'').toLowerCase().trim().replace(' ','-');
+      const valid=['available','booked','reserved','not-available'];
+      if(id&&valid.includes(status)){
+        const p=plots.find(pl=>pl.id===id);
+        if(p){p.status=status;updated++;}
+      }
+    });
+    drawCanvas();populatePlotSelect();renderAdminTable();
+    alert(`✅ Import complete! ${updated} plot(s) updated.`);
+  };
+  reader.readAsBinaryString(file);
+  input.value='';
+}
+
+// ─── CONTACT INFO ─────────────────────────────────────────────────────────
+function loadContactInputs(){
+  document.getElementById('aph1').value=contactInfo.ph1;
+  document.getElementById('aph2').value=contactInfo.ph2;
+  document.getElementById('aemail').value=contactInfo.email;
+  document.getElementById('aweb').value=contactInfo.web;
+}
+function saveContactInfo(){
+  contactInfo.ph1=document.getElementById('aph1').value.trim()||contactInfo.ph1;
+  contactInfo.ph2=document.getElementById('aph2').value.trim()||contactInfo.ph2;
+  contactInfo.email=document.getElementById('aemail').value.trim()||contactInfo.email;
+  contactInfo.web=document.getElementById('aweb').value.trim()||contactInfo.web;
+  const ph1raw=contactInfo.ph1.replace(/\s/g,'');
+  const ph2raw=contactInfo.ph2.replace(/\s/g,'');
+  // Update nav contact bar
+  document.getElementById('ph1Disp').textContent=contactInfo.ph1;
+  document.getElementById('ph2Disp').textContent=contactInfo.ph2;
+  document.getElementById('emailDisp').textContent=contactInfo.email;
+  document.getElementById('webDisp').textContent=contactInfo.web;
+  document.getElementById('ph1Link').href='tel:'+ph1raw;
+  document.getElementById('ph2Link').href='tel:'+ph2raw;
+  document.getElementById('emailLink').href='mailto:'+contactInfo.email;
+  document.getElementById('webLink').href='https://'+contactInfo.web.replace('https://','');
+  // Update footer
+  document.getElementById('fph1').textContent=contactInfo.ph1;
+  document.getElementById('fph2').textContent=contactInfo.ph2;
+  document.getElementById('femailF').textContent=contactInfo.email;
+  document.getElementById('fwebF').textContent=contactInfo.web;
+  document.getElementById('femlLink').href='mailto:'+contactInfo.email;
+  document.getElementById('fwebLink').href='https://'+contactInfo.web.replace('https://','');
+  const msg=document.getElementById('saveMsg');
+  msg.style.display='inline';
+  setTimeout(()=>msg.style.display='none',2500);
+}
+
+// ─── INIT ──────────────────────────────────────────────────────────────────
+window.addEventListener('load',()=>{
+  buildSchematicMap();
+  populatePlotSelect();
+});
+</script>
+</body>
+</html>
