@@ -354,9 +354,16 @@ footer a{color:#a8e6c2;text-decoration:none}
             <div><label>Cell width</label><input type="number" id="bCellW" step="1"/></div>
             <div><label>Cell height</label><input type="number" id="bCellH" step="1"/></div>
             <div><label>Columns</label><input type="number" id="bCols" step="1"/></div>
+            <div><label>Rows (if col-major)</label><input type="number" id="bRows" step="1"/></div>
             <div><label>Angle (deg)</label><input type="number" id="bAngle" step="0.5"/></div>
             <div><label>Row gap</label><input type="number" id="bRowGap" step="0.5"/></div>
             <div><label>Col gap</label><input type="number" id="bColGap" step="0.5"/></div>
+            <div><label>Column-major?</label>
+              <select id="bColMajor" style="padding:.4rem;border:1.5px solid #ddd;border-radius:6px;font-size:.82rem;width:100%">
+                <option value="0">No (row-major)</option>
+                <option value="1">Yes (col-major)</option>
+              </select>
+            </div>
           </div>
           <div style="margin-top:.6rem;display:flex;align-items:center">
             <button class="save-calib-btn" onclick="applyBlock()">Apply Block</button>
@@ -458,8 +465,8 @@ const BLOCKS = [
   // Block B: small mixed yellow/pink block (4-21)
   {start:4, end:21, cols:2, x:330, y:380, cellW:68, cellH:60, angle:18, rowGap:3, colGap:3},
 
-  // Block C: main large central grid (22-263)
-  {start:22, end:263, cols:11, x:560, y:380, cellW:80, cellH:64, angle:6, rowGap:2, colGap:2},
+  // Block C: main large central grid (22-263), column-major (11 plots per column)
+  {start:22, end:263, cols:22, rows:11, colMajor:true, x:599, y:308, cellW:61, cellH:36, angle:21, rowGap:0, colGap:0},
 
   // Block D: mixed-use block (264-274)
   {start:264, end:274, cols:6, x:1380, y:740, cellW:68, cellH:70, angle:10, rowGap:3, colGap:3},
@@ -487,6 +494,7 @@ function generatePlotRects(){
     const cos = Math.cos(rad), sin = Math.sin(rad);
     let n = b.start;
     let row=0, col=0;
+    const major = b.colMajor ? b.rows : b.cols; // items per line
     while(n<=b.end){
       const lx = col*(b.cellW+b.colGap);
       const ly = row*(b.cellH+b.rowGap);
@@ -502,8 +510,13 @@ function generatePlotRects(){
       const id = b.prefix ? b.prefix+n : n;
       rects.push({id:id, points:corners});
       n++;
-      col++;
-      if(col>=b.cols){col=0; row++;}
+      if(b.colMajor){
+        row++;
+        if(row>=b.rows){row=0; col++;}
+      } else {
+        col++;
+        if(col>=b.cols){col=0; row++;}
+      }
     }
   });
   return rects;
@@ -601,9 +614,11 @@ function loadBlockValues(){
   document.getElementById('bCellW').value = b.cellW;
   document.getElementById('bCellH').value = b.cellH;
   document.getElementById('bCols').value = b.cols;
+  document.getElementById('bRows').value = b.rows||'';
   document.getElementById('bAngle').value = b.angle;
   document.getElementById('bRowGap').value = b.rowGap;
   document.getElementById('bColGap').value = b.colGap;
+  document.getElementById('bColMajor').value = b.colMajor?'1':'0';
 }
 function applyBlock(){
   const i = parseInt(document.getElementById('blockSelect').value);
@@ -613,9 +628,11 @@ function applyBlock(){
   b.cellW = parseFloat(document.getElementById('bCellW').value)||50;
   b.cellH = parseFloat(document.getElementById('bCellH').value)||50;
   b.cols = parseInt(document.getElementById('bCols').value)||1;
+  b.rows = parseInt(document.getElementById('bRows').value)||undefined;
   b.angle = parseFloat(document.getElementById('bAngle').value)||0;
   b.rowGap = parseFloat(document.getElementById('bRowGap').value)||0;
   b.colGap = parseFloat(document.getElementById('bColGap').value)||0;
+  b.colMajor = document.getElementById('bColMajor').value==='1';
   plotRects = generatePlotRects();
   renderOverlays();
   const msg=document.getElementById('calibMsg');
