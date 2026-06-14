@@ -50,19 +50,16 @@ nav .admin-btn{background:var(--gold);color:#fff;border:none;padding:.4rem 1rem;
 .map-section{padding:1.2rem 1.5rem}
 .map-section h2{font-size:1.1rem;color:var(--green2);margin-bottom:.8rem;font-weight:600}
 .map-wrapper{position:relative;width:100%;background:#e8ede5;border-radius:12px;overflow:auto;border:2px solid #c5d5c0}
-#mapContainer{position:relative;transform-origin:0 0;transition:transform .1s;display:inline-block}
+#mapContainer{position:relative;width:100%}
 #layoutImg{display:block;width:100%}
-.plot-overlay{position:absolute;border-radius:1px;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;font-size:6.5px;font-weight:700;color:rgba(0,0,0,.75);border:0.5px solid rgba(0,0,0,.2)}
-.plot-overlay:hover{filter:brightness(1.15);z-index:10;transform:scale(1.05)}
-.plot-overlay.available{background:rgba(46,160,90,.55)}
-.plot-overlay.booked{background:rgba(192,57,43,.6)}
-.plot-overlay.reserved{background:rgba(230,126,34,.6)}
-.plot-overlay.not-available{background:rgba(100,100,100,.55)}
-.plot-overlay.highlighted{outline:3px solid #fff;z-index:20;filter:brightness(1.3)}
-
-/* ZOOM CONTROLS */
-.zoom-controls{position:absolute;bottom:12px;right:12px;display:flex;flex-direction:column;gap:4px;z-index:50}
-.zoom-controls button{width:32px;height:32px;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer;font-size:1.1rem;font-weight:600;color:#333}
+.plot-poly{fill:rgba(46,160,90,.35);stroke:rgba(0,0,0,.3);stroke-width:1;transition:opacity .15s}
+.plot-poly:hover{fill-opacity:.55}
+.plot-poly.available{fill:rgba(46,160,90,.35)}
+.plot-poly.booked{fill:rgba(192,57,43,.45)}
+.plot-poly.reserved{fill:rgba(230,126,34,.45)}
+.plot-poly.not-available{fill:rgba(100,100,100,.4)}
+.plot-poly.highlighted{stroke:#fff200;stroke-width:3}
+.plot-label{font-size:9px;font-weight:700;fill:rgba(0,0,0,.75);pointer-events:none}
 
 /* POPUP */
 .popup-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center}
@@ -122,19 +119,26 @@ footer a{color:#a8e6c2;text-decoration:none}
 .admin-table select{padding:.25rem .4rem;border:1px solid #ccc;border-radius:4px;font-size:.82rem;background:#fff}
 .admin-contact-section{margin-top:1.5rem;border-top:2px solid #e0e0d8;padding-top:1rem}
 .admin-contact-section h4{color:var(--green2);font-size:1rem;margin-bottom:.8rem;font-weight:600}
+.admin-calib-section{margin-top:1.5rem;border-top:2px solid #e0e0d8;padding-top:1rem}
+.admin-calib-section h4{color:var(--green2);font-size:1rem;margin-bottom:.5rem;font-weight:600}
+.admin-calib-section p{font-size:.8rem;color:#666;margin-bottom:.6rem}
+.calib-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;align-items:end}
+.calib-grid label{font-size:.75rem;color:#555;font-weight:600;display:block;margin-bottom:.2rem}
+.calib-grid input{width:100%;padding:.4rem;border:1.5px solid #ddd;border-radius:6px;font-size:.82rem}
 .contact-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
 .contact-form-group{display:flex;flex-direction:column;gap:.25rem}
 .contact-form-group label{font-size:.78rem;color:#555;font-weight:600}
 .contact-form-group input{padding:.45rem .6rem;border:1.5px solid #ddd;border-radius:6px;font-size:.85rem}
 .contact-form-group input:focus{outline:none;border-color:var(--green)}
-.save-contact-btn{margin-top:.5rem;padding:.5rem 1.2rem;background:var(--green);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:.85rem}
-.save-contact-btn:hover{background:var(--green2)}
+.save-contact-btn,.save-calib-btn{margin-top:.5rem;padding:.5rem 1.2rem;background:var(--green);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:.85rem}
+.save-contact-btn:hover,.save-calib-btn:hover{background:var(--green2)}
 .save-msg{font-size:.8rem;color:#155724;margin-left:.5rem;display:none}
 
 @media(max-width:600px){
   .form-grid{grid-template-columns:1fr}
   .hero h1{font-size:2rem}
   .contact-form-grid{grid-template-columns:1fr}
+  .calib-grid{grid-template-columns:repeat(2,1fr)}
 }
 </style>
 </head>
@@ -192,11 +196,18 @@ footer a{color:#a8e6c2;text-decoration:none}
       <option value="7">Type 7</option>
       <option value="8">Type 8</option>
       <option value="9">Type 9</option>
+      <option value="E">Type E (Special)</option>
+      <option value="L">Type L (Special)</option>
+      <option value="M">Type M (Special)</option>
     </select>
   </span>
   <span style="margin-left:.5rem">
     <label>Search plot:</label>
-    <input id="searchInput" type="text" placeholder="e.g. 101" style="width:80px" oninput="searchPlot()"/>
+    <input id="searchInput" type="text" placeholder="e.g. 101 or E5" style="width:90px" oninput="searchPlot()"/>
+  </span>
+  <span style="margin-left:.5rem;border-left:1px solid #ccc;padding-left:.5rem">
+    <label>Show grid:</label>
+    <input type="checkbox" id="showOverlays" checked onchange="toggleOverlays()" style="width:auto"/>
   </span>
 </div>
 
@@ -208,34 +219,30 @@ footer a{color:#a8e6c2;text-decoration:none}
   <div class="leg-item"><div class="leg-dot" style="background:rgba(230,126,34,.7)"></div> Reserved</div>
   <div class="leg-item"><div class="leg-dot" style="background:rgba(100,100,100,.6)"></div> Not Available</div>
   <span style="margin-left:1rem;border-left:1px solid #ccc;padding-left:1rem">
-  <strong style="font-size:.8rem;color:#333">Plot Types:</strong>
+  <strong style="font-size:.8rem;color:#333">Plot Types (per layout legend):</strong>
   </span>
-  <div class="leg-item"><div class="leg-dot" style="background:#2ecc71"></div> T1: 26.2×76.5ft</div>
-  <div class="leg-item"><div class="leg-dot" style="background:#ff6eb4"></div> T2: 24.6×39.4ft</div>
-  <div class="leg-item"><div class="leg-dot" style="background:#3daad4"></div> T3: 32.8×50ft</div>
-  <div class="leg-item"><div class="leg-dot" style="background:#c0c0c0"></div> T4: 24.6×50ft</div>
-  <div class="leg-item"><div class="leg-dot" style="background:#888888"></div> T5: 32.8×65.6ft</div>
-  <div class="leg-item"><div class="leg-dot" style="background:#a0a0a0"></div> T6: 24.6×65.6ft</div>
-  <div class="leg-item"><div class="leg-dot" style="background:#e8c96b"></div> T7: 22×45ft</div>
-  <div class="leg-item"><div class="leg-dot" style="background:#f0e040"></div> T8: Irregular</div>
-  <div class="leg-item"><div class="leg-dot" style="background:#a8d8b0"></div> T9: Mixed Use</div>
+  <div class="leg-item">T1: 8.00×23.33m (26.2×76.5ft)</div>
+  <div class="leg-item">T2: 7.50×12.00m (24.6×39.4ft)</div>
+  <div class="leg-item">T3: 10.00×15.24m (32.8×50ft)</div>
+  <div class="leg-item">T4: 7.50×15.24m (24.6×50ft)</div>
+  <div class="leg-item">T5: 10.00×20.00m (32.8×65.6ft)</div>
+  <div class="leg-item">T6: 7.50×20.00m (24.6×65.6ft)</div>
+  <div class="leg-item">T7: 6.70×13.71m (22×45ft)</div>
+  <div class="leg-item">T8: Irregular</div>
+  <div class="leg-item">T9: Mixed Use</div>
+  <div class="leg-item">E/L/M Series: Special plots (size on request)</div>
 </div>
 
 <!-- MAP -->
 <div class="map-section" id="map">
   <h2>🗺️ Interactive Plot Layout – Lotus Valley</h2>
   <div class="map-wrapper" id="mapWrapper">
-    <div id="mapContainer">
-      <img id="layoutImg" src="https://i.imgur.com/placeholder.png" alt="Lotus Valley Layout Map" onerror="this.style.display='none'"/>
-      <div id="plotsLayer" style="position:absolute;top:0;left:0;width:100%;height:100%"></div>
-    </div>
-    <div class="zoom-controls">
-      <button onclick="zoom(1.2)" title="Zoom In">+</button>
-      <button onclick="zoom(0.85)" title="Zoom Out">−</button>
-      <button onclick="resetZoom()" title="Reset" style="font-size:.75rem">⟳</button>
+    <div id="mapContainer" style="position:relative">
+      <img id="layoutImg" src="https://ecostarinfra.github.io/lotus-valley-map.jpeg" alt="Lotus Valley Layout Map" style="display:block;width:100%"/>
+      <svg id="plotsLayerSvg" viewBox="0 0 2264 1517" preserveAspectRatio="none" style="position:absolute;top:0;left:0;width:100%;height:100%"></svg>
     </div>
   </div>
-  <div style="margin-top:.5rem;font-size:.78rem;color:#888">💡 Click any plot to view details. Scroll or pinch to zoom. Drag to pan.</div>
+  <div style="margin-top:.5rem;font-size:.78rem;color:#888" id="calibNote">💡 Click any plot marker to view details. If markers don't align with the layout, open Admin Panel → Map Calibration to adjust.</div>
 </div>
 
 <!-- PLOT POPUP -->
@@ -309,12 +316,49 @@ footer a{color:#a8e6c2;text-decoration:none}
             <option value="not-available">Not Available</option>
           </select>
         </div>
-        <div style="overflow-x:auto">
+        <div style="overflow-x:auto;max-height:280px;overflow-y:auto">
           <table class="admin-table">
             <thead><tr><th>Plot #</th><th>Type</th><th>Dimensions (ft)</th><th>Area (sq ft)</th><th>Status</th></tr></thead>
             <tbody id="adminTableBody"></tbody>
           </table>
         </div>
+
+        <!-- MAP CALIBRATION SECTION -->
+        <div class="admin-calib-section">
+          <h4>📐 Block Alignment</h4>
+          <p>Each block of plots can be repositioned, rotated, and scaled independently to match the real layout image. Select a block, adjust, then Apply.</p>
+          <div style="margin-bottom:.5rem">
+            <label style="font-size:.78rem;font-weight:600;color:#555">Block:</label>
+            <select id="blockSelect" onchange="loadBlockValues()" style="padding:.35rem .6rem;border:1px solid #ccc;border-radius:6px;font-size:.82rem">
+              <option value="0">A: Plots 1-3</option>
+              <option value="1">B: Plots 4-21</option>
+              <option value="2">C: Plots 22-263 (main grid)</option>
+              <option value="3">D: Plots 264-274</option>
+              <option value="4">E: Plots 275-357 (Type7)</option>
+              <option value="5">F: Plots 358-369</option>
+              <option value="6">G: E1-E32</option>
+              <option value="7">H: L1-L19</option>
+              <option value="8">I: M1-M28</option>
+            </select>
+          </div>
+          <div class="calib-grid">
+            <div><label>Origin X</label><input type="number" id="bX" step="1"/></div>
+            <div><label>Origin Y</label><input type="number" id="bY" step="1"/></div>
+            <div><label>Cell width</label><input type="number" id="bCellW" step="1"/></div>
+            <div><label>Cell height</label><input type="number" id="bCellH" step="1"/></div>
+            <div><label>Columns</label><input type="number" id="bCols" step="1"/></div>
+            <div><label>Angle (deg)</label><input type="number" id="bAngle" step="0.5"/></div>
+            <div><label>Row gap</label><input type="number" id="bRowGap" step="0.5"/></div>
+            <div><label>Col gap</label><input type="number" id="bColGap" step="0.5"/></div>
+          </div>
+          <div style="margin-top:.6rem;display:flex;align-items:center">
+            <button class="save-calib-btn" onclick="applyBlock()">Apply Block</button>
+            <button class="save-calib-btn" style="background:#888;margin-left:.5rem" onclick="showCoords()">Show image coords on click</button>
+            <span class="save-msg" id="calibMsg">✅ Applied!</span>
+          </div>
+          <div id="coordReadout" style="font-size:.78rem;color:#666;margin-top:.4rem;font-family:monospace"></div>
+        </div>
+
         <!-- CONTACT INFO SECTION -->
         <div class="admin-contact-section">
           <h4>📞 Edit Contact Information</h4>
@@ -335,170 +379,198 @@ footer a{color:#a8e6c2;text-decoration:none}
 </div>
 
 <script>
-// ─── DATA ───────────────────────────────────────────────────────────────
+// ─── PLOT TYPE DATA (from layout legend, converted to ft & sq ft) ─────────
 const PLOT_TYPES = {
-  1:{label:'Type 1',dim:'26.2 × 76.5 ft',area:2004,color:'#2ecc71'},
-  2:{label:'Type 2',dim:'24.6 × 39.4 ft',area:969,color:'#ff6eb4'},
-  3:{label:'Type 3',dim:'32.8 × 50 ft',area:1640,color:'#3daad4'},
-  4:{label:'Type 4',dim:'24.6 × 50 ft',area:1230,color:'#c0c0c0'},
-  5:{label:'Type 5',dim:'32.8 × 65.6 ft',area:2152,color:'#888888'},
-  6:{label:'Type 6',dim:'24.6 × 65.6 ft',area:1614,color:'#a0a0a0'},
-  7:{label:'Type 7',dim:'22 × 45 ft',area:990,color:'#e8c96b'},
-  8:{label:'Type 8 (Irregular)',dim:'Irregular',area:null,color:'#f0e040'},
-  9:{label:'Type 9 (Mixed Use)',dim:'Mixed Use',area:null,color:'#a8d8b0'},
+  1:{label:'Type 1',dim:'26.2 × 76.5 ft',area:2004},
+  2:{label:'Type 2',dim:'24.6 × 39.4 ft',area:969},
+  3:{label:'Type 3',dim:'32.8 × 50 ft',area:1640},
+  4:{label:'Type 4',dim:'24.6 × 50 ft',area:1230},
+  5:{label:'Type 5',dim:'32.8 × 65.6 ft',area:2152},
+  6:{label:'Type 6',dim:'24.6 × 65.6 ft',area:1614},
+  7:{label:'Type 7',dim:'22 × 45 ft',area:990},
+  8:{label:'Type 8 (Irregular)',dim:'Irregular',area:null},
+  9:{label:'Type 9 (Mixed Use)',dim:'Mixed Use',area:null},
+  'E':{label:'Type E (Special)',dim:'Contact for details',area:null},
+  'L':{label:'Type L (Special)',dim:'Contact for details',area:null},
+  'M':{label:'Type M (Special)',dim:'Contact for details',area:null},
 };
 
-// Contact info state
 let contactInfo = {
-  ph1:'77778 00508', ph1raw:'7777800508',
-  ph2:'7777800576',
-  email:'info@ecostarinfra.com',
-  web:'ecostarinfra.com'
+  ph1:'77778 00508', ph2:'7777800576',
+  email:'info@ecostarinfra.com', web:'ecostarinfra.com'
 };
 
-// Generate plots 1-370 with type assignment based on map layout
-function assignType(n){
-  if(n<=5)return 8;
-  if(n>=6&&n<=21)return 1;
-  if(n>=22&&n<=35)return 2;
-  if(n>=36&&n<=55)return 3;
-  if(n>=56&&n<=90)return 4;
-  if(n>=91&&n<=130)return 7;
-  if(n>=131&&n<=180)return 4;
-  if(n>=181&&n<=220)return 3;
-  if(n>=221&&n<=260)return 7;
-  if(n>=261&&n<=300)return 6;
-  if(n>=301&&n<=330)return 5;
-  if(n>=331&&n<=355)return 2;
-  if(n>=356&&n<=365)return 9;
-  if(n>=366&&n<=370)return 8;
-  return 4;
-}
-
-let plots = [];
-for(let i=1;i<=370;i++){
-  plots.push({id:i, type:assignType(i), status:'available'});
-}
-// Mark a few as booked/reserved for demo
-[12,34,56,78,90,110,145,178,200,222,245,280,310,340].forEach(n=>{if(plots[n-1])plots[n-1].status='booked'});
-[15,40,67,100,133,160,190,215,250,275,305,335].forEach(n=>{if(plots[n-1])plots[n-1].status='reserved'});
-[3,7,22,50].forEach(n=>{if(plots[n-1])plots[n-1].status='not-available'});
-
-// ─── MAP RENDERING ───────────────────────────────────────────────────────
-// Since we can't load the actual uploaded image via URL, we render a schematic grid map
 const ADMIN_PASS = 'lotus2024';
-let scale = 1, offsetX = 0, offsetY = 0, isDragging = false, dragStart = {};
 let currentFilter = {status:'all', type:'all'};
 let currentPlot = null;
+let plots = [];
 
-// Real layout image dimensions (approx, based on uploaded map)
-const IMG_URL = 'https://ecostarinfra.github.io/lotus-valley-map.png';
-const IMG_W = 1288, IMG_H = 906; // natural size of the layout PNG
-
-function buildSchematicMap(){
-  const container = document.getElementById('mapContainer');
-  const img = document.getElementById('layoutImg');
-  img.src = IMG_URL;
-  img.style.display='block';
-  img.style.maxWidth = IMG_W+'px';
-  container.style.position='relative';
-  container.style.width='100%';
-
-  // Build plot rects as % positions relative to image, based on the grid
-  // visible in the Lotus Valley layout (approx columns/rows of plot blocks)
-  const plotRects = generatePlotRects();
-  window._plotRects = plotRects;
-
-  // Build overlay layer once image loads (so % positioning matches rendered size)
-  function renderOverlays(){
-    const layer = document.getElementById('plotsLayer');
-    layer.innerHTML='';
-    layer.style.position='absolute';
-    layer.style.top='0';layer.style.left='0';
-    layer.style.width='100%';layer.style.height='100%';
-    plotRects.forEach(pr=>{
-      const p = plots.find(pl=>pl.id===pr.id);
-      if(!p)return;
-      const div=document.createElement('div');
-      div.className='plot-overlay '+p.status;
-      div.style.left=(pr.x/IMG_W*100)+'%';
-      div.style.top=(pr.y/IMG_H*100)+'%';
-      div.style.width=(pr.w/IMG_W*100)+'%';
-      div.style.height=(pr.h/IMG_H*100)+'%';
-      div.textContent=pr.id;
-      div.dataset.id=pr.id;
-      div.addEventListener('click',()=>openPlotPopup(p));
-      layer.appendChild(div);
-    });
-    applyFilterVisibility();
-    updateStats();
-  }
-
-  if(img.complete && img.naturalWidth>0){
-    renderOverlays();
-  } else {
-    img.addEventListener('load', renderOverlays);
-    img.addEventListener('error', renderOverlays); // still render overlays even if image fails
-  }
+// Type assignment by plot-number ranges (approx, based on legend colors visible in layout)
+function assignType(n){
+  if(n<=3)return 1;          // green block top-left (1-3)
+  if(n>=4&&n<=21)return 8;    // yellow/pink mixed small block (4-21)
+  if(n>=22&&n<=109&&[22,65,66,109,110,153,154,197,198,238,239,263].includes(n))return 3; // blue Type3 plots
+  if(n>=22&&n<=263)return 4;  // main white grid = Type4
+  if(n>=264&&n<=274)return 9; // mixed use block
+  if(n>=275&&n<=357)return 7; // right side orange Type7 block
+  if(n>=358&&n<=369)return 8; // top irregular yellow block
+  return 4;
 }
+for(let i=1;i<=369;i++){
+  plots.push({id:i, type:assignType(i), status:'available'});
+}
+// E-series (E1-E32) - special plots, left side
+for(let i=1;i<=32;i++){
+  plots.push({id:'E'+i, type:'E', status:'available'});
+}
+// L-series (L1-L19) - special plots, left side
+for(let i=1;i<=19;i++){
+  plots.push({id:'L'+i, type:'L', status:'available'});
+}
+// M-series (M1-M28) - special plots, bottom-left
+for(let i=1;i<=28;i++){
+  plots.push({id:'M'+i, type:'M', status:'available'});
+}
+// Demo statuses
+[12,34,56,78,90,110,145,178,200,222,245,280,310,340].forEach(n=>{const p=plots.find(pl=>pl.id===n);if(p)p.status='booked'});
+[15,40,67,100,133,160,190,215,250,275,305,335].forEach(n=>{const p=plots.find(pl=>pl.id===n);if(p)p.status='reserved'});
+[3,7,219,250].forEach(n=>{const p=plots.find(pl=>pl.id===n);if(p)p.status='not-available'});
 
-// Generates approximate plot rectangles (in image pixel coords) matching
-// the Lotus Valley layout's grid blocks. Plot numbering follows the
-// left-to-right, top-to-bottom pattern visible in the uploaded layout.
+// ─── BLOCK DEFINITIONS ────────────────────────────────────────────────────
+// Each block: a rotated rectangular grid of plots. Defined by:
+//  - origin (x,y) = position of plot 1's top-left corner (in viewBox units, image is 2264x1517)
+//  - cellW, cellH = size of one plot cell along the block's local axes
+//  - cols = plots per row before wrapping to next row
+//  - angle = rotation of the block's local axes vs the image (degrees, clockwise)
+//  - count = number of plots in this block (startId..endId)
+//  - rowGap/colGap = extra spacing between rows/cols (for road gaps)
+//  - prefix = optional string prefix for plot IDs (e.g. 'E', 'L', 'M')
+const BLOCKS = [
+  // Block A: top-left small green block (plots 1-3)
+  {start:1, end:3, cols:1, x:480, y:300, cellW:62, cellH:78, angle:18, rowGap:4, colGap:0},
+
+  // Block B: small mixed yellow/pink block (4-21)
+  {start:4, end:21, cols:2, x:330, y:380, cellW:68, cellH:60, angle:18, rowGap:3, colGap:3},
+
+  // Block C: main large central grid (22-263)
+  {start:22, end:263, cols:11, x:560, y:380, cellW:80, cellH:64, angle:6, rowGap:2, colGap:2},
+
+  // Block D: mixed-use block (264-274)
+  {start:264, end:274, cols:6, x:1380, y:740, cellW:68, cellH:70, angle:10, rowGap:3, colGap:3},
+
+  // Block E (Type7 plots): right side orange block (275-357)
+  {start:275, end:357, cols:7, x:1040, y:160, cellW:76, cellH:66, angle:-12, rowGap:2, colGap:2},
+
+  // Block F: top irregular yellow block (358-369)
+  {start:358, end:369, cols:5, x:1050, y:40, cellW:68, cellH:60, angle:-18, rowGap:2, colGap:2},
+
+  // Block G: E-series (E1-E32), left side purple/pink block
+  {start:1, end:32, cols:2, x:155, y:760, cellW:55, cellH:38, angle:55, rowGap:2, colGap:2, prefix:'E'},
+
+  // Block H: L-series (L1-L19), left side near E block
+  {start:1, end:19, cols:1, x:230, y:700, cellW:60, cellH:40, angle:55, rowGap:2, colGap:0, prefix:'L'},
+
+  // Block I: M-series (M1-M28), bottom-left block
+  {start:1, end:28, cols:4, x:130, y:1180, cellW:55, cellH:45, angle:18, rowGap:2, colGap:2, prefix:'M'},
+];
+
 function generatePlotRects(){
   const rects=[];
-  let id=1;
-
-  // Helper to add a block of plots in a grid
-  function addBlock(x0,y0,cols,rows,cw,ch,gap,startId,endId){
-    let n=startId;
-    for(let r=0;r<rows;r++){
-      for(let c=0;c<cols;c++){
-        if(n>endId)return;
-        rects.push({id:n, x:x0+c*(cw+gap), y:y0+r*(ch+gap), w:cw, h:ch});
-        n++;
-      }
+  BLOCKS.forEach(b=>{
+    const rad = b.angle * Math.PI/180;
+    const cos = Math.cos(rad), sin = Math.sin(rad);
+    let n = b.start;
+    let row=0, col=0;
+    while(n<=b.end){
+      const lx = col*(b.cellW+b.colGap);
+      const ly = row*(b.cellH+b.rowGap);
+      const dx = lx*cos - ly*sin;
+      const dy = lx*sin + ly*cos;
+      const cx = b.x + dx;
+      const cy = b.y + dy;
+      const corners = [[0,0],[b.cellW,0],[b.cellW,b.cellH],[0,b.cellH]].map(([px,py])=>{
+        const rx = px*cos - py*sin;
+        const ry = px*sin + py*cos;
+        return [cx+rx, cy+ry];
+      });
+      const id = b.prefix ? b.prefix+n : n;
+      rects.push({id:id, points:corners});
+      n++;
+      col++;
+      if(col>=b.cols){col=0; row++;}
     }
-  }
-
-  // Top-left small block (plots 1-21, type 1 area)
-  addBlock(40, 95, 2, 11, 38, 36, 2, 1, 21);
-  // Pink block left-middle (plots 22-35, type 2)
-  addBlock(35, 480, 2, 7, 40, 38, 2, 22, 35);
-  // Large central white grid (plots 36-262 approx) — main body
-  addBlock(310, 175, 9, 25, 42, 26, 1, 36, 262);
-  // Right side yellow/orange block (plots 263-350)
-  addBlock(820, 70, 6, 15, 44, 38, 2, 263, 350);
-  // Bottom small blocks (plots 351-370)
-  addBlock(40, 700, 5, 4, 40, 36, 2, 351, 370);
-
+  });
   return rects;
 }
 
-function getStatusColor(status){
-  return {available:'rgba(46,160,90,0.6)',booked:'rgba(192,57,43,0.65)',reserved:'rgba(230,126,34,0.65)','not-available':'rgba(100,100,100,0.6)'}[status]||'rgba(100,100,100,0.5)';
+let plotRects = generatePlotRects();
+
+// ─── MAP RENDERING (SVG) ───────────────────────────────────────────────────
+function buildMap(){
+  renderOverlays();
+}
+
+function renderOverlays(){
+  const svg = document.getElementById('plotsLayerSvg');
+  svg.innerHTML='';
+  plotRects.forEach(pr=>{
+    const p = plots.find(pl=>String(pl.id)===String(pr.id));
+    if(!p)return;
+    const ptsStr = pr.points.map(pt=>pt.join(',')).join(' ');
+    const poly = document.createElementNS('http://www.w3.org/2000/svg','polygon');
+    poly.setAttribute('points', ptsStr);
+    poly.setAttribute('class','plot-poly '+p.status);
+    poly.setAttribute('data-id', pr.id);
+    poly.style.cursor='pointer';
+    poly.addEventListener('click',()=>openPlotPopup(p));
+
+    const cx = pr.points.reduce((s,pt)=>s+pt[0],0)/4;
+    const cy = pr.points.reduce((s,pt)=>s+pt[1],0)/4;
+    const label = document.createElementNS('http://www.w3.org/2000/svg','text');
+    label.setAttribute('x',cx);
+    label.setAttribute('y',cy);
+    label.setAttribute('text-anchor','middle');
+    label.setAttribute('dominant-baseline','central');
+    label.setAttribute('class','plot-label');
+    label.setAttribute('data-id', pr.id);
+    label.textContent = pr.id;
+    label.style.pointerEvents='none';
+
+    svg.appendChild(poly);
+    svg.appendChild(label);
+  });
+  applyFilterVisibility();
+  updateStats();
+}
+
+function toggleOverlays(){
+  const show=document.getElementById('showOverlays').checked;
+  document.getElementById('plotsLayerSvg').style.display = show?'block':'none';
 }
 
 function applyFilterVisibility(){
   const sf=currentFilter.status, tf=currentFilter.type;
-  document.querySelectorAll('.plot-overlay').forEach(div=>{
-    const id=parseInt(div.dataset.id);
-    const p=plots.find(pl=>pl.id===id);
+  document.querySelectorAll('.plot-poly').forEach(poly=>{
+    const id=poly.dataset.id;
+    const p=plots.find(pl=>String(pl.id)===id);
     if(!p)return;
-    const typeMatch=tf==='all'||p.type===parseInt(tf);
+    const typeMatch=tf==='all'||String(p.type)===tf;
     const statusMatch=sf==='all'||p.status===sf;
-    div.style.opacity=(typeMatch&&statusMatch)?'1':'0.08';
-    div.style.pointerEvents=(typeMatch&&statusMatch)?'auto':'none';
+    const show = typeMatch&&statusMatch;
+    poly.style.opacity = show ? '' : '0.05';
+    poly.style.pointerEvents = show ? 'auto' : 'none';
+    const label = document.querySelector(`.plot-label[data-id="${id}"]`);
+    if(label) label.style.opacity = show ? '' : '0.05';
   });
 }
 
 function drawCanvas(){
-  // Refresh overlay colors & visibility (kept name for compatibility with callers)
-  document.querySelectorAll('.plot-overlay').forEach(div=>{
-    const id=parseInt(div.dataset.id);
-    const p=plots.find(pl=>pl.id===id);
+  document.querySelectorAll('.plot-poly').forEach(poly=>{
+    const id=poly.dataset.id;
+    const p=plots.find(pl=>String(pl.id)===id);
     if(!p)return;
-    div.className='plot-overlay '+p.status;
+    const wasHighlighted=poly.classList.contains('highlighted');
+    poly.setAttribute('class','plot-poly '+p.status+(wasHighlighted?' highlighted':''));
   });
   applyFilterVisibility();
   updateStats();
@@ -513,6 +585,60 @@ function updateStats(){
   document.getElementById('statBooked').textContent=b;
   document.getElementById('statReserved').textContent=r;
 }
+
+// ─── BLOCK CALIBRATION (Admin) ────────────────────────────────────────────
+function loadBlockValues(){
+  const i = parseInt(document.getElementById('blockSelect').value);
+  const b = BLOCKS[i];
+  document.getElementById('bX').value = b.x;
+  document.getElementById('bY').value = b.y;
+  document.getElementById('bCellW').value = b.cellW;
+  document.getElementById('bCellH').value = b.cellH;
+  document.getElementById('bCols').value = b.cols;
+  document.getElementById('bAngle').value = b.angle;
+  document.getElementById('bRowGap').value = b.rowGap;
+  document.getElementById('bColGap').value = b.colGap;
+}
+function applyBlock(){
+  const i = parseInt(document.getElementById('blockSelect').value);
+  const b = BLOCKS[i];
+  b.x = parseFloat(document.getElementById('bX').value)||0;
+  b.y = parseFloat(document.getElementById('bY').value)||0;
+  b.cellW = parseFloat(document.getElementById('bCellW').value)||50;
+  b.cellH = parseFloat(document.getElementById('bCellH').value)||50;
+  b.cols = parseInt(document.getElementById('bCols').value)||1;
+  b.angle = parseFloat(document.getElementById('bAngle').value)||0;
+  b.rowGap = parseFloat(document.getElementById('bRowGap').value)||0;
+  b.colGap = parseFloat(document.getElementById('bColGap').value)||0;
+  plotRects = generatePlotRects();
+  renderOverlays();
+  const msg=document.getElementById('calibMsg');
+  msg.style.display='inline';
+  setTimeout(()=>msg.style.display='none',1500);
+}
+let coordModeOn=false;
+function showCoords(){
+  coordModeOn = !coordModeOn;
+  const svg = document.getElementById('plotsLayerSvg');
+  if(coordModeOn){
+    svg.style.cursor='crosshair';
+    document.getElementById('coordReadout').textContent='Click on the image to read viewBox coordinates...';
+  } else {
+    svg.style.cursor='';
+    document.getElementById('coordReadout').textContent='';
+  }
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  const svg = document.getElementById('plotsLayerSvg');
+  svg.addEventListener('click', e=>{
+    if(!coordModeOn)return;
+    const rect = svg.getBoundingClientRect();
+    const vb = svg.viewBox.baseVal;
+    const x = vb.x + (e.clientX-rect.left)/rect.width * vb.width;
+    const y = vb.y + (e.clientY-rect.top)/rect.height * vb.height;
+    document.getElementById('coordReadout').textContent = `x: ${Math.round(x)}, y: ${Math.round(y)}`;
+  });
+});
 
 // ─── FILTER ─────────────────────────────────────────────────────────────
 function setFilter(key,val,btn){
@@ -576,13 +702,6 @@ function submitEnquiry(){
   document.getElementById('formSuccess').style.display='block';
 }
 
-// ─── ZOOM/PAN ─────────────────────────────────────────────────────────────
-function zoom(factor){
-  scale=Math.min(Math.max(scale*factor,0.5),4);
-  document.getElementById('mapContainer').style.transform=`scale(${scale}) translate(${offsetX}px,${offsetY}px)`;
-}
-function resetZoom(){scale=1;offsetX=0;offsetY=0;document.getElementById('mapContainer').style.transform='scale(1)'}
-
 // ─── ADMIN ────────────────────────────────────────────────────────────────
 function openAdmin(){
   document.getElementById('adminModal').classList.add('open');
@@ -600,6 +719,7 @@ function checkAdmin(){
     document.getElementById('adminPanel').style.display='block';
     renderAdminTable();
     loadContactInputs();
+    loadBlockValues();
   }else{
     document.getElementById('adminErr').textContent='Incorrect password.';
   }
@@ -620,7 +740,7 @@ function renderAdminTable(){
       <td>${pt.label}</td>
       <td>${pt.dim}</td>
       <td>${pt.area?pt.area.toLocaleString()+' sq ft':'—'}</td>
-      <td><select onchange="changePlotStatus(${p.id},this.value)">
+      <td><select onchange="changePlotStatus('${p.id}',this.value)">
         <option value="available"${p.status==='available'?' selected':''}>Available</option>
         <option value="booked"${p.status==='booked'?' selected':''}>Booked</option>
         <option value="reserved"${p.status==='reserved'?' selected':''}>Reserved</option>
@@ -630,7 +750,7 @@ function renderAdminTable(){
   });
 }
 function changePlotStatus(id,status){
-  const p=plots.find(pl=>pl.id===id);
+  const p=plots.find(pl=>String(pl.id)===String(id));
   if(p){p.status=status;drawCanvas();populatePlotSelect();}
 }
 
@@ -690,7 +810,6 @@ function saveContactInfo(){
   contactInfo.web=document.getElementById('aweb').value.trim()||contactInfo.web;
   const ph1raw=contactInfo.ph1.replace(/\s/g,'');
   const ph2raw=contactInfo.ph2.replace(/\s/g,'');
-  // Update nav contact bar
   document.getElementById('ph1Disp').textContent=contactInfo.ph1;
   document.getElementById('ph2Disp').textContent=contactInfo.ph2;
   document.getElementById('emailDisp').textContent=contactInfo.email;
@@ -699,7 +818,6 @@ function saveContactInfo(){
   document.getElementById('ph2Link').href='tel:'+ph2raw;
   document.getElementById('emailLink').href='mailto:'+contactInfo.email;
   document.getElementById('webLink').href='https://'+contactInfo.web.replace('https://','');
-  // Update footer
   document.getElementById('fph1').textContent=contactInfo.ph1;
   document.getElementById('fph2').textContent=contactInfo.ph2;
   document.getElementById('femailF').textContent=contactInfo.email;
@@ -713,7 +831,7 @@ function saveContactInfo(){
 
 // ─── INIT ──────────────────────────────────────────────────────────────────
 window.addEventListener('load',()=>{
-  buildSchematicMap();
+  buildMap();
   populatePlotSelect();
 });
 </script>
