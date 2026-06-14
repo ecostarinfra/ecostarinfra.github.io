@@ -52,14 +52,16 @@ nav .admin-btn{background:var(--gold);color:#fff;border:none;padding:.4rem 1rem;
 .map-wrapper{position:relative;width:100%;background:#e8ede5;border-radius:12px;overflow:auto;border:2px solid #c5d5c0}
 #mapContainer{position:relative;width:100%}
 #layoutImg{display:block;width:100%}
-.plot-poly{fill:rgba(46,160,90,.35);stroke:rgba(0,0,0,.3);stroke-width:1;transition:opacity .15s}
-.plot-poly:hover{fill-opacity:.55}
-.plot-poly.available{fill:rgba(46,160,90,.35)}
-.plot-poly.booked{fill:rgba(192,57,43,.45)}
-.plot-poly.reserved{fill:rgba(230,126,34,.45)}
-.plot-poly.not-available{fill:rgba(100,100,100,.4)}
-.plot-poly.highlighted{stroke:#fff200;stroke-width:3}
-.plot-label{font-size:9px;font-weight:700;fill:rgba(0,0,0,.75);pointer-events:none}
+.plot-pin{cursor:pointer;transition:all .1s}
+.plot-pin circle{stroke:rgba(0,0,0,.3);stroke-width:1}
+.plot-pin.available circle{fill:rgba(46,160,90,.85)}
+.plot-pin.booked circle{fill:rgba(192,57,43,.9)}
+.plot-pin.reserved circle{fill:rgba(230,126,34,.9)}
+.plot-pin.not-available circle{fill:rgba(100,100,100,.85)}
+.plot-pin:hover circle{stroke:#fff;stroke-width:2}
+.plot-pin.highlighted circle{stroke:#fff200;stroke-width:3}
+.plot-pin text{font-size:10px;font-weight:700;fill:#fff;pointer-events:none}
+.plot-pin.dimmed{opacity:.08}
 
 /* POPUP */
 .popup-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center}
@@ -242,7 +244,7 @@ footer a{color:#a8e6c2;text-decoration:none}
       <svg id="plotsLayerSvg" viewBox="0 0 2264 1517" preserveAspectRatio="none" style="position:absolute;top:0;left:0;width:100%;height:100%"></svg>
     </div>
   </div>
-  <div style="margin-top:.5rem;font-size:.78rem;color:#888" id="calibNote">💡 Click any plot marker to view details. If markers don't align with the layout, open Admin Panel → Map Calibration to adjust.</div>
+  <div style="margin-top:.5rem;font-size:.78rem;color:#888" id="calibNote">💡 Click any colored pin to view plot details. Pins are positioned at each plot's approximate location — if a pin looks misplaced, use Admin Panel → Plot Pin Calibration to nudge that block's pins.</div>
 </div>
 
 <!-- PLOT POPUP -->
@@ -332,8 +334,8 @@ footer a{color:#a8e6c2;text-decoration:none}
 
         <!-- MAP CALIBRATION SECTION -->
         <div class="admin-calib-section">
-          <h4>📐 Block Alignment (4-corner mapping)</h4>
-          <p>Each block maps onto a quadrilateral with 4 corners: TL (top-left), TR (top-right), BR (bottom-right), BL (bottom-left) of the block's outer plot boundary. Click "Show coords" to find these on the map, enter them below, then Apply.</p>
+          <h4>📐 Plot Pin Calibration (4-corner mapping)</h4>
+          <p>Each block places its plot pins inside a quadrilateral with 4 corners: TL (top-left), TR (top-right), BR (bottom-right), BL (bottom-left) — the outer boundary of where that block's plot numbers appear. Click "Show coords" to find these on the map, enter them below, then Apply.</p>
           <div style="margin-bottom:.5rem">
             <label style="font-size:.78rem;font-weight:600;color:#555">Block:</label>
             <select id="blockSelect" onchange="loadBlockValues()" style="padding:.35rem .6rem;border:1px solid #ccc;border-radius:6px;font-size:.82rem">
@@ -512,16 +514,11 @@ function generatePlotRects(){
     let n = b.start;
     let row=0, col=0;
     while(n<=b.end){
-      const u0=col/b.cols, u1=(col+1)/b.cols;
-      const v0=row/b.rows, v1=(row+1)/b.rows;
-      const corners = [
-        bilerp(quad,u0,v0), // top-left
-        bilerp(quad,u1,v0), // top-right
-        bilerp(quad,u1,v1), // bottom-right
-        bilerp(quad,u0,v1), // bottom-left
-      ];
+      // center of this cell in grid-space
+      const u=(col+0.5)/b.cols, v=(row+0.5)/b.rows;
+      const center = bilerp(quad,u,v);
       const id = b.prefix ? b.prefix+n : n;
-      rects.push({id:id, points:corners});
+      rects.push({id:id, cx:center[0], cy:center[1]});
       n++;
       if(b.colMajor){
         row++;
@@ -548,28 +545,27 @@ function renderOverlays(){
   plotRects.forEach(pr=>{
     const p = plots.find(pl=>String(pl.id)===String(pr.id));
     if(!p)return;
-    const ptsStr = pr.points.map(pt=>pt.join(',')).join(' ');
-    const poly = document.createElementNS('http://www.w3.org/2000/svg','polygon');
-    poly.setAttribute('points', ptsStr);
-    poly.setAttribute('class','plot-poly '+p.status);
-    poly.setAttribute('data-id', pr.id);
-    poly.style.cursor='pointer';
-    poly.addEventListener('click',()=>openPlotPopup(p));
 
-    const cx = pr.points.reduce((s,pt)=>s+pt[0],0)/4;
-    const cy = pr.points.reduce((s,pt)=>s+pt[1],0)/4;
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.setAttribute('class','plot-pin '+p.status);
+    g.setAttribute('data-id', pr.id);
+    g.addEventListener('click',()=>openPlotPopup(p));
+
+    const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    circle.setAttribute('cx',pr.cx);
+    circle.setAttribute('cy',pr.cy);
+    circle.setAttribute('r',13);
+    g.appendChild(circle);
+
     const label = document.createElementNS('http://www.w3.org/2000/svg','text');
-    label.setAttribute('x',cx);
-    label.setAttribute('y',cy);
+    label.setAttribute('x',pr.cx);
+    label.setAttribute('y',pr.cy);
     label.setAttribute('text-anchor','middle');
     label.setAttribute('dominant-baseline','central');
-    label.setAttribute('class','plot-label');
-    label.setAttribute('data-id', pr.id);
     label.textContent = pr.id;
-    label.style.pointerEvents='none';
+    g.appendChild(label);
 
-    svg.appendChild(poly);
-    svg.appendChild(label);
+    svg.appendChild(g);
   });
   applyFilterVisibility();
   updateStats();
@@ -582,27 +578,25 @@ function toggleOverlays(){
 
 function applyFilterVisibility(){
   const sf=currentFilter.status, tf=currentFilter.type;
-  document.querySelectorAll('.plot-poly').forEach(poly=>{
-    const id=poly.dataset.id;
+  document.querySelectorAll('.plot-pin').forEach(pin=>{
+    const id=pin.dataset.id;
     const p=plots.find(pl=>String(pl.id)===id);
     if(!p)return;
     const typeMatch=tf==='all'||String(p.type)===tf;
     const statusMatch=sf==='all'||p.status===sf;
     const show = typeMatch&&statusMatch;
-    poly.style.opacity = show ? '' : '0.05';
-    poly.style.pointerEvents = show ? 'auto' : 'none';
-    const label = document.querySelector(`.plot-label[data-id="${id}"]`);
-    if(label) label.style.opacity = show ? '' : '0.05';
+    pin.classList.toggle('dimmed', !show);
+    pin.style.pointerEvents = show ? 'auto' : 'none';
   });
 }
 
 function drawCanvas(){
-  document.querySelectorAll('.plot-poly').forEach(poly=>{
-    const id=poly.dataset.id;
+  document.querySelectorAll('.plot-pin').forEach(pin=>{
+    const id=pin.dataset.id;
     const p=plots.find(pl=>String(pl.id)===id);
     if(!p)return;
-    const wasHighlighted=poly.classList.contains('highlighted');
-    poly.setAttribute('class','plot-poly '+p.status+(wasHighlighted?' highlighted':''));
+    const wasHighlighted=pin.classList.contains('highlighted');
+    pin.setAttribute('class','plot-pin '+p.status+(wasHighlighted?' highlighted':''));
   });
   applyFilterVisibility();
   updateStats();
@@ -691,13 +685,13 @@ function filterPlots(){
   applyFilterVisibility();
 }
 function searchPlot(){
-  document.querySelectorAll('.plot-overlay').forEach(d=>d.classList.remove('highlighted'));
+  document.querySelectorAll('.plot-pin').forEach(d=>d.classList.remove('highlighted'));
   const v=document.getElementById('searchInput').value.trim();
   if(!v)return;
-  const div=document.querySelector(`.plot-overlay[data-id="${v}"]`);
-  if(div){
-    div.classList.add('highlighted');
-    div.scrollIntoView({behavior:'smooth',block:'center',inline:'center'});
+  const pin=document.querySelector(`.plot-pin[data-id="${v}"]`);
+  if(pin){
+    pin.classList.add('highlighted');
+    pin.scrollIntoView({behavior:'smooth',block:'center',inline:'center'});
   }
 }
 
