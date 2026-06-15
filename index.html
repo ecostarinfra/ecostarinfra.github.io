@@ -8,18 +8,16 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',sans-serif;background:#f5f5f0;color:#2d2d2d}
-:root{--green:#2d7a4f;--green2:#1a5c38;--gold:#c8960c;--red:#c0392b;--orange:#e67e22;--gray:#7f8c8d;--light:#ecf0eb;--white:#fff}
+:root{--green:#2d7a4f;--green2:#1a5c38;--gold:#c8960c;--red:#c0392b;--orange:#e67e22;--gray:#7f8c8d}
 
-/* NAV */
 nav{background:var(--green2);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100}
 nav .logo{color:#fff;font-size:1.3rem;font-weight:700;letter-spacing:1px}
 nav .logo span{color:var(--gold)}
 nav ul{list-style:none;display:flex;gap:1.5rem}
-nav ul li a{color:#cce8d8;text-decoration:none;font-size:.9rem;transition:color .2s}
+nav ul li a{color:#cce8d8;text-decoration:none;font-size:.9rem}
 nav ul li a:hover{color:#fff}
 nav .admin-btn{background:var(--gold);color:#fff;border:none;padding:.4rem 1rem;border-radius:6px;cursor:pointer;font-size:.85rem;font-weight:600}
 
-/* HERO */
 .hero{background:linear-gradient(135deg,#1a5c38 0%,#2d7a4f 60%,#3a9960 100%);color:#fff;text-align:center;padding:3.5rem 1rem 2.5rem}
 .hero h1{font-size:3rem;font-weight:800;letter-spacing:2px;text-shadow:0 2px 8px rgba(0,0,0,.3)}
 .hero .tagline{font-size:1.2rem;color:#a8e6c2;margin:.5rem 0 1.5rem;font-style:italic}
@@ -28,35 +26,31 @@ nav .admin-btn{background:var(--gold);color:#fff;border:none;padding:.4rem 1rem;
 .hero-stat .num{font-size:1.6rem;font-weight:700;color:#fff}
 .hero-stat .lbl{font-size:.78rem;color:#a8e6c2}
 
-/* CONTACT BAR */
 .contact-bar{background:var(--green2);color:#cce8d8;text-align:center;padding:.5rem 1rem;font-size:.85rem;display:flex;justify-content:center;gap:2rem;flex-wrap:wrap}
 .contact-bar a{color:#cce8d8;text-decoration:none}
 .contact-bar a:hover{color:#fff}
 
-/* FILTER BAR */
 .filter-bar{background:#fff;padding:.8rem 1.5rem;display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;border-bottom:1px solid #ddd;position:sticky;top:60px;z-index:90}
 .filter-bar label{font-size:.8rem;color:#555;margin-right:.2rem}
 .filter-bar select,.filter-bar input{padding:.3rem .6rem;border:1px solid #ccc;border-radius:5px;font-size:.82rem}
-.filter-bar button{padding:.3rem .8rem;border:1px solid #ccc;border-radius:5px;background:#fff;cursor:pointer;font-size:.82rem;font-weight:600;transition:all .15s}
+.filter-bar button{padding:.3rem .8rem;border:1px solid #ccc;border-radius:5px;background:#fff;cursor:pointer;font-size:.82rem;font-weight:600}
 .filter-bar button:hover{background:var(--green);color:#fff;border-color:var(--green)}
 .filter-bar button.active{background:var(--green);color:#fff;border-color:var(--green)}
 
-/* LEGEND */
-.legend{display:flex;gap:1rem;flex-wrap:wrap;padding:.6rem 1.5rem;background:#f9f9f6;border-bottom:1px solid #e0e0d8;align-items:center}
-.leg-item{display:flex;align-items:center;gap:.35rem;font-size:.78rem;color:#444}
-.leg-dot{width:14px;height:14px;border-radius:3px;border:1px solid rgba(0,0,0,.15)}
+.legend{display:flex;gap:1rem;flex-wrap:wrap;padding:.6rem 1.5rem;background:#f9f9f6;border-bottom:1px solid #e0e0d8;align-items:center;font-size:.78rem;color:#444}
+.leg-dot{width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.15);display:inline-block;vertical-align:middle;margin-right:4px}
 
-/* MAP SECTION */
 .map-section{padding:1.2rem 1.5rem}
 .map-section h2{font-size:1.1rem;color:var(--green2);margin-bottom:.8rem;font-weight:600}
 .map-wrapper{position:relative;width:100%;background:#e8ede5;border-radius:12px;overflow:auto;border:2px solid #c5d5c0;max-height:75vh;cursor:grab}
 .map-wrapper.dragging{cursor:grabbing;user-select:none}
 #mapContainer{position:relative;display:inline-block}
 #layoutImg{display:block;pointer-events:none}
-.zoom-controls{position:sticky;bottom:12px;float:right;margin-right:12px;display:flex;gap:6px;z-index:50;background:rgba(255,255,255,.9);padding:4px;border-radius:8px}
+.zoom-controls{position:sticky;bottom:12px;float:right;margin-right:12px;display:flex;gap:6px;z-index:50;background:rgba(255,255,255,.92);padding:4px;border-radius:8px}
 .zoom-controls button{width:36px;height:36px;border:1.5px solid var(--green);border-radius:6px;background:#fff;color:var(--green);font-size:1.1rem;font-weight:700;cursor:pointer}
-.plot-pin{cursor:pointer;transition:all .1s}
-.plot-pin circle{stroke:rgba(0,0,0,.3);stroke-width:1}
+
+.plot-pin{cursor:pointer}
+.plot-pin circle{stroke:rgba(0,0,0,.3);stroke-width:1;vector-effect:non-scaling-stroke}
 .plot-pin.available circle{fill:rgba(46,160,90,.85)}
 .plot-pin.booked circle{fill:rgba(192,57,43,.9)}
 .plot-pin.reserved circle{fill:rgba(230,126,34,.9)}
@@ -66,7 +60,6 @@ nav .admin-btn{background:var(--gold);color:#fff;border:none;padding:.4rem 1rem;
 .plot-pin text{font-weight:700;fill:#fff;pointer-events:none}
 .plot-pin.dimmed{opacity:.08}
 
-/* POPUP */
 .popup-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center}
 .popup-overlay.open{display:flex}
 .popup{background:#fff;border-radius:14px;padding:1.5rem;width:340px;max-width:95vw;position:relative;box-shadow:0 8px 40px rgba(0,0,0,.18)}
@@ -80,27 +73,24 @@ nav .admin-btn{background:var(--gold);color:#fff;border:none;padding:.4rem 1rem;
 .status-booked{background:#f8d7da;color:#721c24}
 .status-reserved{background:#fff3cd;color:#856404}
 .status-not-available{background:#e2e3e5;color:#383d41}
-.popup .enquire-btn{width:100%;margin-top:1rem;padding:.7rem;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:.95rem;font-weight:700;cursor:pointer;transition:background .2s}
+.popup .enquire-btn{width:100%;margin-top:1rem;padding:.7rem;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:.95rem;font-weight:700;cursor:pointer}
 .popup .enquire-btn:hover{background:var(--green2)}
 
-/* ENQUIRY FORM */
 .enquiry-section{background:#fff;padding:2rem 1.5rem;border-top:4px solid var(--green)}
 .enquiry-section h2{color:var(--green2);font-size:1.4rem;margin-bottom:1.2rem}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
 .form-group{display:flex;flex-direction:column;gap:.3rem}
 .form-group label{font-size:.82rem;color:#555;font-weight:600}
-.form-group input,.form-group select,.form-group textarea{padding:.55rem .7rem;border:1.5px solid #ddd;border-radius:7px;font-size:.9rem;outline:none;transition:border .2s;font-family:inherit}
+.form-group input,.form-group select,.form-group textarea{padding:.55rem .7rem;border:1.5px solid #ddd;border-radius:7px;font-size:.9rem;outline:none;font-family:inherit}
 .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--green)}
 .form-group.full{grid-column:1/-1}
-.submit-btn{margin-top:.5rem;padding:.75rem 2rem;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;transition:background .2s}
+.submit-btn{margin-top:.5rem;padding:.75rem 2rem;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer}
 .submit-btn:hover{background:var(--green2)}
 .form-success{display:none;background:#d4edda;color:#155724;padding:1rem;border-radius:8px;margin-top:1rem;text-align:center;font-weight:600}
 
-/* FOOTER */
 footer{background:var(--green2);color:#cce8d8;text-align:center;padding:1.5rem 1rem;font-size:.85rem}
 footer a{color:#a8e6c2;text-decoration:none}
 
-/* ADMIN PANEL */
 .admin-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center}
 .admin-modal.open{display:flex}
 .admin-box{background:#fff;border-radius:14px;width:95vw;max-width:900px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column}
@@ -122,22 +112,24 @@ footer a{color:#a8e6c2;text-decoration:none}
 .admin-table td{padding:.45rem .8rem;border-bottom:1px solid #eee}
 .admin-table tr:hover td{background:#f0f7f3}
 .admin-table select{padding:.25rem .4rem;border:1px solid #ccc;border-radius:4px;font-size:.82rem;background:#fff}
-.admin-contact-section{margin-top:1.5rem;border-top:2px solid #e0e0d8;padding-top:1rem}
-.admin-contact-section h4{color:var(--green2);font-size:1rem;margin-bottom:.8rem;font-weight:600}
-.admin-calib-section{margin-top:1.5rem;border-top:2px solid #e0e0d8;padding-top:1rem}
-.admin-calib-section h4{color:var(--green2);font-size:1rem;margin-bottom:.5rem;font-weight:600}
-.admin-calib-section p{font-size:.8rem;color:#666;margin-bottom:.6rem}
+.admin-section{margin-top:1.5rem;border-top:2px solid #e0e0d8;padding-top:1rem}
+.admin-section h4{color:var(--green2);font-size:1rem;margin-bottom:.5rem;font-weight:600}
+.admin-section p{font-size:.8rem;color:#666;margin-bottom:.6rem}
 .calib-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;align-items:end}
 .calib-grid label{font-size:.75rem;color:#555;font-weight:600;display:block;margin-bottom:.2rem}
-.calib-grid input{width:100%;padding:.4rem;border:1.5px solid #ddd;border-radius:6px;font-size:.82rem}
+.calib-grid input,.calib-grid select{width:100%;padding:.4rem;border:1.5px solid #ddd;border-radius:6px;font-size:.82rem}
 .contact-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
 .contact-form-group{display:flex;flex-direction:column;gap:.25rem}
 .contact-form-group label{font-size:.78rem;color:#555;font-weight:600}
 .contact-form-group input{padding:.45rem .6rem;border:1.5px solid #ddd;border-radius:6px;font-size:.85rem}
 .contact-form-group input:focus{outline:none;border-color:var(--green)}
-.save-contact-btn,.save-calib-btn{margin-top:.5rem;padding:.5rem 1.2rem;background:var(--green);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:.85rem}
-.save-contact-btn:hover,.save-calib-btn:hover{background:var(--green2)}
+.action-btn{margin-top:.5rem;padding:.5rem 1.2rem;background:var(--green);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:.85rem}
+.action-btn:hover{background:var(--green2)}
+.action-btn.secondary{background:#888}
+.action-btn.danger{background:#c0392b}
 .save-msg{font-size:.8rem;color:#155724;margin-left:.5rem;display:none}
+
+#coordFloater{display:none;position:fixed;bottom:16px;left:16px;background:rgba(26,92,56,.95);color:#fff;padding:.8rem 1rem;border-radius:10px;z-index:400;font-size:.85rem;box-shadow:0 4px 20px rgba(0,0,0,.25);max-width:280px}
 
 @media(max-width:600px){
   .form-grid{grid-template-columns:1fr}
@@ -149,7 +141,6 @@ footer a{color:#a8e6c2;text-decoration:none}
 </head>
 <body>
 
-<!-- NAV -->
 <nav>
   <div class="logo">🌸 Lotus <span>Valley</span></div>
   <ul>
@@ -159,20 +150,18 @@ footer a{color:#a8e6c2;text-decoration:none}
   <button class="admin-btn" onclick="openAdmin()">Admin Panel</button>
 </nav>
 
-<!-- HERO -->
 <div class="hero">
   <h1>LOTUS VALLEY</h1>
   <div class="tagline">Live Life River Side</div>
   <div style="font-size:.9rem;color:#a8e6c2;margin-bottom:1rem">by <strong style="color:#fff">Ecostar Infra</strong> · Bhopal Bypass, Hoshangabad Road</div>
   <div class="hero-stats">
-    <div class="hero-stat"><div class="num" id="statTotal">370</div><div class="lbl">Total Plots</div></div>
+    <div class="hero-stat"><div class="num" id="statTotal">0</div><div class="lbl">Total Plots</div></div>
     <div class="hero-stat"><div class="num" id="statAvail">0</div><div class="lbl">Available</div></div>
     <div class="hero-stat"><div class="num" id="statBooked">0</div><div class="lbl">Booked</div></div>
     <div class="hero-stat"><div class="num" id="statReserved">0</div><div class="lbl">Reserved</div></div>
   </div>
 </div>
 
-<!-- CONTACT BAR -->
 <div class="contact-bar" id="contactBar">
   <span>📞 <a id="ph1Link" href="tel:7777800508"><span id="ph1Disp">77778 00508</span></a></span>
   <span>📞 <a id="ph2Link" href="tel:7777800576"><span id="ph2Disp">7777800576</span></a></span>
@@ -180,7 +169,6 @@ footer a{color:#a8e6c2;text-decoration:none}
   <span>🌐 <a id="webLink" href="https://ecostarinfra.com" target="_blank"><span id="webDisp">ecostarinfra.com</span></a></span>
 </div>
 
-<!-- FILTER BAR -->
 <div class="filter-bar">
   <label>Status:</label>
   <button class="active" onclick="setFilter('status','all',this)">All</button>
@@ -211,40 +199,37 @@ footer a{color:#a8e6c2;text-decoration:none}
     <input id="searchInput" type="text" placeholder="e.g. 101 or E5" style="width:90px" oninput="searchPlot()"/>
   </span>
   <span style="margin-left:.5rem;border-left:1px solid #ccc;padding-left:.5rem">
-    <label>Pin size:</label>
-    <input type="range" id="pinSizeSlider" min="6" max="30" value="20" step="1" oninput="updatePinSize(this.value)" style="width:80px;vertical-align:middle"/>
+    <label for="pinSizeSlider">Pin size:</label>
+    <input type="range" id="pinSizeSlider" min="6" max="30" value="20" step="1" oninput="updatePinSize(this.value)"/>
+    <span id="pinSizeLabel" style="font-size:.78rem;color:#666">20</span>
   </span>
 </div>
 
-<!-- LEGEND -->
 <div class="legend">
-  <strong style="font-size:.8rem;color:#333">Status:</strong>
-  <div class="leg-item"><div class="leg-dot" style="background:rgba(46,160,90,.7)"></div> Available</div>
-  <div class="leg-item"><div class="leg-dot" style="background:rgba(192,57,43,.7)"></div> Booked</div>
-  <div class="leg-item"><div class="leg-dot" style="background:rgba(230,126,34,.7)"></div> Reserved</div>
-  <div class="leg-item"><div class="leg-dot" style="background:rgba(100,100,100,.6)"></div> Not Available</div>
-  <span style="margin-left:1rem;border-left:1px solid #ccc;padding-left:1rem">
-  <strong style="font-size:.8rem;color:#333">Plot Types (per layout legend):</strong>
-  </span>
-  <div class="leg-item">T1: 8.00×23.33m (26.2×76.5ft)</div>
-  <div class="leg-item">T2: 7.50×12.00m (24.6×39.4ft)</div>
-  <div class="leg-item">T3: 10.00×15.24m (32.8×50ft)</div>
-  <div class="leg-item">T4: 7.50×15.24m (24.6×50ft)</div>
-  <div class="leg-item">T5: 10.00×20.00m (32.8×65.6ft)</div>
-  <div class="leg-item">T6: 7.50×20.00m (24.6×65.6ft)</div>
-  <div class="leg-item">T7: 6.70×13.71m (22×45ft)</div>
-  <div class="leg-item">T8: Irregular</div>
-  <div class="leg-item">T9: Mixed Use</div>
-  <div class="leg-item">E/L/M Series: Special plots (size on request)</div>
+  <strong>Status:</strong>
+  <span><span class="leg-dot" style="background:rgba(46,160,90,.85)"></span>Available</span>
+  <span><span class="leg-dot" style="background:rgba(192,57,43,.9)"></span>Booked</span>
+  <span><span class="leg-dot" style="background:rgba(230,126,34,.9)"></span>Reserved</span>
+  <span><span class="leg-dot" style="background:rgba(100,100,100,.85)"></span>Not Available</span>
+  <span style="margin-left:1rem;border-left:1px solid #ccc;padding-left:1rem"><strong>Plot Types:</strong></span>
+  <span>T1: 26.2×76.5ft</span>
+  <span>T2: 24.6×39.4ft</span>
+  <span>T3: 32.8×50ft</span>
+  <span>T4: 24.6×50ft</span>
+  <span>T5: 32.8×65.6ft</span>
+  <span>T6: 24.6×65.6ft</span>
+  <span>T7: 22×45ft</span>
+  <span>T8: Irregular</span>
+  <span>T9: Mixed Use</span>
+  <span>E/L/M: Special (size on request)</span>
 </div>
 
-<!-- MAP -->
 <div class="map-section" id="map">
   <h2>🗺️ Interactive Plot Layout – Lotus Valley</h2>
   <div class="map-wrapper" id="mapWrapper">
     <div id="mapContainer">
       <img id="layoutImg" src="https://ecostarinfra.github.io/lotus-valley-map.jpeg" alt="Lotus Valley Layout Map"/>
-      <svg id="plotsLayerSvg" viewBox="0 0 2264 1517" style="position:absolute;top:0;left:0;width:100%;height:100%"></svg>
+      <svg id="plotsLayerSvg" viewBox="0 0 2264 1517"></svg>
     </div>
   </div>
   <div class="zoom-controls">
@@ -252,10 +237,9 @@ footer a{color:#a8e6c2;text-decoration:none}
     <button onclick="zoomMap(0.8)">−</button>
     <button onclick="resetMapZoom()" style="font-size:.65rem">Reset</button>
   </div>
-  <div style="margin-top:.5rem;font-size:.78rem;color:#888" id="calibNote">💡 Click any colored pin to view plot details. Pins are positioned at each plot's approximate location — if a pin looks misplaced, use Admin Panel → Plot Pin Calibration to nudge that block's pins.</div>
+  <div style="margin-top:.5rem;font-size:.78rem;color:#888;clear:both">💡 Click and drag to pan, use +/− to zoom, click a pin to view plot details.</div>
 </div>
 
-<!-- PLOT POPUP -->
 <div class="popup-overlay" id="popupOverlay" onclick="if(event.target===this)closePopup()">
   <div class="popup">
     <button class="close-btn" onclick="closePopup()">×</button>
@@ -269,7 +253,6 @@ footer a{color:#a8e6c2;text-decoration:none}
   </div>
 </div>
 
-<!-- ENQUIRY FORM -->
 <div class="enquiry-section" id="enquiry">
   <h2>📩 Send an Enquiry</h2>
   <div class="form-grid" id="enquiryForm">
@@ -278,33 +261,26 @@ footer a{color:#a8e6c2;text-decoration:none}
     <div class="form-group"><label>Email Address</label><input id="femail" type="email" placeholder="your@email.com"/></div>
     <div class="form-group">
       <label>Plot of Interest</label>
-      <select id="fplot">
-        <option value="">— Select a plot —</option>
-      </select>
+      <select id="fplot"><option value="">— Select a plot —</option></select>
     </div>
     <div class="form-group full"><label>Message</label><textarea id="fmsg" rows="3" placeholder="Any specific requirements or questions..."></textarea></div>
-    <div class="form-group full">
-      <button class="submit-btn" onclick="submitEnquiry()">Submit Enquiry →</button>
-    </div>
+    <div class="form-group full"><button class="submit-btn" onclick="submitEnquiry()">Submit Enquiry →</button></div>
   </div>
   <div class="form-success" id="formSuccess">✅ Thank you! Your enquiry has been submitted. Our team will contact you shortly.</div>
 </div>
 
-<!-- FOOTER -->
 <footer id="footer">
   <div style="font-size:1.1rem;font-weight:700;color:#fff;margin-bottom:.3rem">🌸 LOTUS VALLEY by Ecostar Infra</div>
   <div id="footerContact">📞 <span id="fph1">77778 00508</span> / <span id="fph2">7777800576</span> &nbsp;|&nbsp; ✉️ <a id="femlLink" href="mailto:info@ecostarinfra.com" style="color:#a8e6c2"><span id="femailF">info@ecostarinfra.com</span></a> &nbsp;|&nbsp; 🌐 <a id="fwebLink" href="https://ecostarinfra.com" target="_blank" style="color:#a8e6c2"><span id="fwebF">ecostarinfra.com</span></a></div>
   <div style="margin-top:.5rem;font-size:.75rem;color:#7aaa8a">Near Bhopal Bypass, Hoshangabad Road, Bhopal</div>
 </footer>
 
-<!-- FLOATING COORD READOUT (shown when coord-pick mode is active) -->
-<div id="coordFloater" style="display:none;position:fixed;bottom:16px;left:16px;background:rgba(26,92,56,.95);color:#fff;padding:.8rem 1rem;border-radius:10px;z-index:400;font-size:.85rem;box-shadow:0 4px 20px rgba(0,0,0,.25);max-width:280px">
+<div id="coordFloater">
   <div style="font-weight:700;margin-bottom:.3rem">📐 Click on the map to get coordinates</div>
   <div id="coordFloaterReadout" style="font-family:monospace;margin-bottom:.5rem">x: —, y: —</div>
-  <button onclick="exitCoordMode()" style="padding:.4rem .9rem;background:#fff;color:var(--green2);border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:.8rem">Done – Back to Admin</button>
+  <button class="action-btn" onclick="exitCoordMode()" style="background:#fff;color:#1a5c38">Done – Back to Admin</button>
 </div>
 
-<!-- ADMIN MODAL -->
 <div class="admin-modal" id="adminModal">
   <div class="admin-box">
     <div class="admin-header">
@@ -315,7 +291,7 @@ footer a{color:#a8e6c2;text-decoration:none}
       <div class="admin-login" id="adminLogin">
         <h4>Admin Login</h4>
         <input type="password" id="adminPass" placeholder="Enter password" onkeydown="if(event.key==='Enter')checkAdmin()"/>
-        <button onclick="checkAdmin()">Login</button>
+        <button onclick="checkAdmin()" class="action-btn">Login</button>
         <div class="err" id="adminErr"></div>
       </div>
       <div style="display:none" id="adminPanel">
@@ -333,34 +309,32 @@ footer a{color:#a8e6c2;text-decoration:none}
             <option value="not-available">Not Available</option>
           </select>
         </div>
-        <div style="overflow-x:auto;max-height:280px;overflow-y:auto">
+        <div style="overflow-x:auto;max-height:260px;overflow-y:auto">
           <table class="admin-table">
             <thead><tr><th>Plot #</th><th>Type</th><th>Dimensions (ft)</th><th>Area (sq ft)</th><th>Status</th></tr></thead>
             <tbody id="adminTableBody"></tbody>
           </table>
         </div>
 
-        <!-- PIN POSITION IMPORT SECTION -->
-        <div class="admin-calib-section">
+        <div class="admin-section">
           <h4>📍 Import Pin Positions (JSON)</h4>
-          <p>Use the Pin Placement Tool to manually mark each plot's position on the map, export the JSON, and paste it here. This will override all computed positions with your exact placements.</p>
-          <textarea id="pinJsonInput" placeholder='{"22": {"x": 600, "y": 310}, "23": {"x": 590, "y": 345}, "E1": {"x": 200, "y": 700}}' style="width:100%;height:120px;font-family:monospace;font-size:.8rem;padding:.6rem;border:1.5px solid #ddd;border-radius:6px"></textarea>
+          <p>Use the Pin Placement Tool to manually mark each plot's position on the map, export the JSON, and paste it here.</p>
+          <textarea id="pinJsonInput" placeholder='{"22": {"x": 600, "y": 310}, "E1": {"x": 200, "y": 700}}' style="width:100%;height:110px;font-family:monospace;font-size:.8rem;padding:.6rem;border:1.5px solid #ddd;border-radius:6px"></textarea>
           <div style="margin-top:.6rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
-            <button class="save-calib-btn" onclick="importPinJSON()">Import & Apply</button>
-            <button class="save-calib-btn" style="background:#888" onclick="exportPinJSON()">Export current positions</button>
-            <button class="save-calib-btn" style="background:#c0392b" onclick="clearPinOverrides()">Clear overrides</button>
+            <button class="action-btn" onclick="importPinJSON()">Import & Apply</button>
+            <button class="action-btn secondary" onclick="exportPinJSON()">Export current positions</button>
+            <button class="action-btn danger" onclick="clearPinOverrides()">Clear overrides</button>
             <span class="save-msg" id="pinImportMsg">✅ Imported!</span>
           </div>
           <div id="pinImportStatus" style="font-size:.78rem;color:#666;margin-top:.4rem"></div>
         </div>
 
-        <!-- MAP CALIBRATION SECTION -->
-        <div class="admin-calib-section">
-          <h4>📐 Plot Pin Calibration (4-corner mapping)</h4>
-          <p>Used as a fallback for any plots NOT covered by the JSON import above. Each block places its plot pins inside a quadrilateral with 4 corners: TL (top-left), TR (top-right), BR (bottom-right), BL (bottom-left).</p>
+        <div class="admin-section">
+          <h4>📐 Plot Pin Calibration (4-corner mapping, fallback)</h4>
+          <p>Used for any plots NOT covered by the JSON import above. Click "Show coords" to find corner positions on the map.</p>
           <div style="margin-bottom:.5rem">
             <label style="font-size:.78rem;font-weight:600;color:#555">Block:</label>
-            <select id="blockSelect" onchange="loadBlockValues()" style="padding:.35rem .6rem;border:1px solid #ccc;border-radius:6px;font-size:.82rem">
+            <select id="blockSelect" onchange="loadBlockValues()">
               <option value="0">A: Plots 1-3</option>
               <option value="1">B: Plots 4-21</option>
               <option value="2">C: Plots 22-263 (main grid)</option>
@@ -381,24 +355,15 @@ footer a{color:#a8e6c2;text-decoration:none}
             <div><label>BR y</label><input type="number" id="bBRy" step="1"/></div>
             <div><label>BL x</label><input type="number" id="bBLx" step="1"/></div>
             <div><label>BL y</label><input type="number" id="bBLy" step="1"/></div>
-            <div><label>Columns</label><input type="number" id="bCols" step="1"/></div>
-            <div><label>Rows</label><input type="number" id="bRows" step="1"/></div>
-            <div><label>Column-major?</label>
-              <select id="bColMajor" style="padding:.4rem;border:1.5px solid #ddd;border-radius:6px;font-size:.82rem;width:100%">
-                <option value="0">No (row-major)</option>
-                <option value="1">Yes (col-major)</option>
-              </select>
-            </div>
           </div>
           <div style="margin-top:.6rem;display:flex;align-items:center">
-            <button class="save-calib-btn" onclick="applyBlock()">Apply Block</button>
-            <button class="save-calib-btn" style="background:#888;margin-left:.5rem" onclick="showCoords()">Show image coords on click</button>
+            <button class="action-btn" onclick="applyBlock()">Apply Block</button>
+            <button class="action-btn secondary" onclick="showCoords()">Show image coords on click</button>
             <span class="save-msg" id="calibMsg">✅ Applied!</span>
           </div>
         </div>
 
-        <!-- CONTACT INFO SECTION -->
-        <div class="admin-contact-section">
+        <div class="admin-section">
           <h4>📞 Edit Contact Information</h4>
           <div class="contact-form-grid">
             <div class="contact-form-group"><label>Phone 1</label><input id="aph1" type="text" placeholder="77778 00508"/></div>
@@ -407,7 +372,7 @@ footer a{color:#a8e6c2;text-decoration:none}
             <div class="contact-form-group"><label>Website</label><input id="aweb" type="text" placeholder="ecostarinfra.com"/></div>
           </div>
           <div style="margin-top:.6rem;display:flex;align-items:center">
-            <button class="save-contact-btn" onclick="saveContactInfo()">Save Contact Info</button>
+            <button class="action-btn" onclick="saveContactInfo()">Save Contact Info</button>
             <span class="save-msg" id="saveMsg">✅ Saved!</span>
           </div>
         </div>
@@ -417,7 +382,6 @@ footer a{color:#a8e6c2;text-decoration:none}
 </div>
 
 <script>
-// ─── PLOT TYPE DATA (from layout legend, converted to ft & sq ft) ─────────
 const PLOT_TYPES = {
   1:{label:'Type 1',dim:'26.2 × 76.5 ft',area:2004},
   2:{label:'Type 2',dim:'24.6 × 39.4 ft',area:969},
@@ -443,85 +407,41 @@ let currentFilter = {status:'all', type:'all'};
 let currentPlot = null;
 let plots = [];
 
-// Type assignment by plot-number ranges (approx, based on legend colors visible in layout)
 function assignType(n){
-  if(n<=3)return 1;          // green block top-left (1-3)
-  if(n>=4&&n<=21)return 8;    // yellow/pink mixed small block (4-21)
-  if(n>=22&&n<=109&&[22,65,66,109,110,153,154,197,198,238,239,263].includes(n))return 3; // blue Type3 plots
-  if(n>=22&&n<=263)return 4;  // main white grid = Type4
-  if(n>=264&&n<=274)return 9; // mixed use block
-  if(n>=275&&n<=357)return 7; // right side orange Type7 block
-  if(n>=358&&n<=369)return 8; // top irregular yellow block
+  if(n<=3)return 1;
+  if(n>=4&&n<=21)return 8;
+  if(n>=22&&n<=109&&[22,65,66,109,110,153,154,197,198,238,239,263].includes(n))return 3;
+  if(n>=22&&n<=263)return 4;
+  if(n>=264&&n<=274)return 9;
+  if(n>=275&&n<=357)return 7;
+  if(n>=358&&n<=369)return 8;
   return 4;
 }
 for(let i=1;i<=369;i++){
   plots.push({id:i, type:assignType(i), status:'available'});
 }
-// E-series (E1-E32) - special plots, left side
-for(let i=1;i<=32;i++){
-  plots.push({id:'E'+i, type:'E', status:'available'});
-}
-// L-series (L1-L19) - special plots, left side
-for(let i=1;i<=19;i++){
-  plots.push({id:'L'+i, type:'L', status:'available'});
-}
-// M-series (M1-M28) - special plots, bottom-left
-for(let i=1;i<=28;i++){
-  plots.push({id:'M'+i, type:'M', status:'available'});
-}
-// Demo statuses
+for(let i=1;i<=32;i++) plots.push({id:'E'+i, type:'E', status:'available'});
+for(let i=1;i<=19;i++) plots.push({id:'L'+i, type:'L', status:'available'});
+for(let i=1;i<=28;i++) plots.push({id:'M'+i, type:'M', status:'available'});
+
 [12,34,56,78,90,110,145,178,200,222,245,280,310,340].forEach(n=>{const p=plots.find(pl=>pl.id===n);if(p)p.status='booked'});
 [15,40,67,100,133,160,190,215,250,275,305,335].forEach(n=>{const p=plots.find(pl=>pl.id===n);if(p)p.status='reserved'});
 [3,7,219,250].forEach(n=>{const p=plots.find(pl=>pl.id===n);if(p)p.status='not-available'});
 
-// ─── BLOCK DEFINITIONS (Quadrilateral mapping) ────────────────────────────
-// Each block maps a grid of (rows x cols) plots into a quadrilateral defined
-// by 4 corners in image space: TL, TR, BR, BL (top-left, top-right,
-// bottom-right, bottom-left of the WHOLE block's plot area).
-// Plots fill the grid either row-major (left-to-right, then next row down)
-// or column-major (top-to-bottom, then next column right), per `colMajor`.
-// Bilinear interpolation maps each cell's 4 corners from grid-space (0..1)
-// into image-space using the 4 block corners.
+// ─── BLOCK DEFINITIONS (4-corner quad mapping) ────────────────────────────
 const BLOCKS = [
-  // Block A: top-left small green block (plots 1-3) - 1 col x 3 rows
-  {start:1, end:3, cols:1, rows:3, colMajor:false,
-   TL:[455,290], TR:[505,270], BR:[545,430], BL:[495,450]},
-
-  // Block B: small mixed yellow/pink block (4-21) - 2 cols x 9 rows
-  {start:4, end:21, cols:2, rows:9, colMajor:false,
-   TL:[330,395], TR:[430,365], BR:[510,640], BL:[410,670]},
-
-  // Block C: main central grid (22-263), snake pattern: 11 column-slots x 2 bands x 11 rows
+  {start:1, end:3, cols:1, rows:3, TL:[455,290], TR:[505,270], BR:[545,430], BL:[495,450]},
+  {start:4, end:21, cols:2, rows:9, TL:[330,395], TR:[430,365], BR:[510,640], BL:[410,670]},
   {start:22, end:263, pattern:'snake-2band', slots:11, bandRows:11,
    TL:[599,308], TR:[1290,470], BR:[1180,790], BL:[500,620]},
-
-  // Block D: mixed-use block (264-274) - 6 cols x 2 rows (11 plots, last row partial)
-  {start:264, end:274, cols:6, rows:2, colMajor:false,
-   TL:[1380,720], TR:[1620,790], BR:[1580,920], BL:[1340,850]},
-
-  // Block E (Type7 plots): right side orange block (275-357), 7 cols x 12 rows (83 plots)
-  {start:275, end:357, cols:7, rows:12, colMajor:false,
-   TL:[1180,140], TR:[1650,290], BR:[1550,600], BL:[1100,460]},
-
-  // Block F: top irregular yellow block (358-369), 5 cols x 3 rows (12 plots)
-  {start:358, end:369, cols:5, rows:3, colMajor:false,
-   TL:[1080,40], TR:[1310,30], BR:[1340,170], BL:[1110,180]},
-
-  // Block G: E-series (E1-E32), 2 cols x 16 rows
-  {start:1, end:32, cols:2, rows:16, colMajor:false, prefix:'E',
-   TL:[170,690], TR:[300,650], BR:[420,1040], BL:[290,1080]},
-
-  // Block H: L-series (L1-L19), 1 col x 19 rows
-  {start:1, end:19, cols:1, rows:19, colMajor:false, prefix:'L',
-   TL:[290,660], TR:[340,650], BR:[460,1050], BL:[410,1060]},
-
-  // Block I: M-series (M1-M28), 4 cols x 7 rows
-  {start:1, end:28, cols:4, rows:7, colMajor:false, prefix:'M',
-   TL:[90,1100], TR:[480,1050], BR:[560,1330], BL:[170,1380]},
+  {start:264, end:274, cols:6, rows:2, TL:[1380,720], TR:[1620,790], BR:[1580,920], BL:[1340,850]},
+  {start:275, end:357, cols:7, rows:12, TL:[1180,140], TR:[1650,290], BR:[1550,600], BL:[1100,460]},
+  {start:358, end:369, cols:5, rows:3, TL:[1080,40], TR:[1310,30], BR:[1340,170], BL:[1110,180]},
+  {start:1, end:32, cols:2, rows:16, prefix:'E', TL:[170,690], TR:[300,650], BR:[420,1040], BL:[290,1080]},
+  {start:1, end:19, cols:1, rows:19, prefix:'L', TL:[290,660], TR:[340,650], BR:[460,1050], BL:[410,1060]},
+  {start:1, end:28, cols:4, rows:7, prefix:'M', TL:[90,1100], TR:[480,1050], BR:[560,1330], BL:[170,1380]},
 ];
 
-// Bilinear interpolation: given grid-space (u,v) in [0,1], map to image-space
-// using the 4 corners of the quad.
 function bilerp(quad,u,v){
   const [TL,TR,BR,BL] = quad;
   const top = [TL[0]+(TR[0]-TL[0])*u, TL[1]+(TR[1]-TL[1])*u];
@@ -535,24 +455,16 @@ function generatePlotRects(){
     const quad = [b.TL,b.TR,b.BR,b.BL];
 
     if(b.pattern==='snake-2band'){
-      // 11 column-slots, each with 2 stacked bands (upper+lower) of `bandRows` each.
-      // Odd slots (1,3,5..): number top-to-bottom through upper then lower band.
-      // Even slots (2,4,6..): number bottom-to-top through lower then upper band.
-      const slots = b.slots;       // number of column-slots
-      const bandRows = b.bandRows; // rows per band
-      const totalCols = slots;     // grid columns = slots
-      const totalRows = bandRows*2;// grid rows = 2 bands
+      const slots = b.slots, bandRows = b.bandRows;
+      const totalCols = slots, totalRows = bandRows*2;
       let n = b.start;
       for(let slot=0; slot<slots; slot++){
-        const odd = (slot%2===0); // slot index 0 = column-slot 1 (odd)
-        // build list of (row) positions in numbering order for this slot
+        const odd = (slot%2===0);
         let rowsOrder=[];
         if(odd){
-          // upper band top->bottom (rows 0..bandRows-1), then lower band top->bottom (rows bandRows..2*bandRows-1)
           for(let r=0;r<bandRows;r++)rowsOrder.push(r);
           for(let r=bandRows;r<2*bandRows;r++)rowsOrder.push(r);
         } else {
-          // lower band bottom->top (rows 2*bandRows-1..bandRows), then upper band bottom->top (rows bandRows-1..0)
           for(let r=2*bandRows-1;r>=bandRows;r--)rowsOrder.push(r);
           for(let r=bandRows-1;r>=0;r--)rowsOrder.push(r);
         }
@@ -575,26 +487,18 @@ function generatePlotRects(){
       const id = b.prefix ? b.prefix+n : n;
       rects.push({id:id, cx:center[0], cy:center[1]});
       n++;
-      if(b.colMajor){
-        row++;
-        if(row>=b.rows){row=0; col++;}
-      } else {
-        col++;
-        if(col>=b.cols){col=0; row++;}
-      }
+      col++;
+      if(col>=b.cols){col=0; row++;}
     }
   });
   return rects;
 }
 
 let plotRects = generatePlotRects();
-let pinOverrides = {}; // id (string) -> {x,y} manually placed positions, takes precedence
-let pinBaseSize = 20; // pin radius in px (constant on-screen size, independent of zoom)
-
-function updatePinSize(val){
-  pinBaseSize = parseFloat(val)||13;
-  renderOverlays();
-}
+let pinOverrides = {};
+let pinBaseSize = 20;
+let mapZoom = 1;
+let IMG_W = 2264, IMG_H = 1517;
 
 function getEffectiveRects(){
   return plotRects.map(pr=>{
@@ -604,34 +508,17 @@ function getEffectiveRects(){
   });
 }
 
-// ─── MAP RENDERING ───────────────────────────────────────────────────────
-let mapZoom = 1;
-let IMG_W = 2264, IMG_H = 1517; // updated to real natural size on load
-
+// ─── MAP / OVERLAY RENDERING ───────────────────────────────────────────────
 function buildMap(){
   const img = document.getElementById('layoutImg');
-  const container = document.getElementById('mapContainer');
-  const svg = document.getElementById('plotsLayerSvg');
-
   function setup(){
     IMG_W = img.naturalWidth || IMG_W;
     IMG_H = img.naturalHeight || IMG_H;
-    img.style.width = IMG_W+'px';
-    img.style.height = IMG_H+'px';
-    container.style.width = IMG_W+'px';
-    container.style.height = IMG_H+'px';
-    svg.setAttribute('viewBox',`0 0 ${IMG_W} ${IMG_H}`);
-    svg.style.width = IMG_W+'px';
-    svg.style.height = IMG_H+'px';
+    document.getElementById('plotsLayerSvg').setAttribute('viewBox',`0 0 ${IMG_W} ${IMG_H}`);
     fitMapToWidth();
-    renderOverlays();
   }
-  if(img.complete && img.naturalWidth>0){
-    setup();
-  } else {
-    img.addEventListener('load', setup);
-    img.addEventListener('error', renderOverlays);
-  }
+  if(img.complete && img.naturalWidth>0){ setup(); }
+  else { img.addEventListener('load', setup); img.addEventListener('error', renderOverlays); }
 }
 
 function fitMapToWidth(){
@@ -644,73 +531,33 @@ function zoomMap(factor){
   mapZoom = Math.min(Math.max(mapZoom*factor, 0.15), 4);
   applyMapZoom();
 }
-function resetMapZoom(){
-  fitMapToWidth();
-}
+function resetMapZoom(){ fitMapToWidth(); }
 function applyMapZoom(){
   const img = document.getElementById('layoutImg');
   const container = document.getElementById('mapContainer');
   const svg = document.getElementById('plotsLayerSvg');
   const w = IMG_W*mapZoom, h = IMG_H*mapZoom;
-  img.style.width = w+'px';
-  img.style.height = h+'px';
-  container.style.width = w+'px';
-  container.style.height = h+'px';
-  svg.style.width = w+'px';
-  svg.style.height = h+'px';
+  img.style.width = w+'px'; img.style.height = h+'px';
+  container.style.width = w+'px'; container.style.height = h+'px';
+  svg.style.width = w+'px'; svg.style.height = h+'px';
   renderOverlays();
 }
 
-// ─── PAN (drag to scroll) ──────────────────────────────────────────────────
-function setupPan(){
-  const wrapper = document.getElementById('mapWrapper');
-  let isDown=false, startX=0, startY=0, scrollL=0, scrollT=0, moved=false;
-
-  wrapper.addEventListener('mousedown', e=>{
-    if(e.button!==0)return;
-    isDown=true; moved=false;
-    startX=e.pageX; startY=e.pageY;
-    scrollL=wrapper.scrollLeft; scrollT=wrapper.scrollTop;
-    wrapper.classList.add('dragging');
-  });
-  window.addEventListener('mouseup', ()=>{
-    isDown=false;
-    wrapper.classList.remove('dragging');
-  });
-  window.addEventListener('mousemove', e=>{
-    if(!isDown)return;
-    const dx=e.pageX-startX, dy=e.pageY-startY;
-    if(Math.abs(dx)>3||Math.abs(dy)>3)moved=true;
-    wrapper.scrollLeft = scrollL - dx;
-    wrapper.scrollTop = scrollT - dy;
-  });
-  // Prevent click-through to pins if the user was dragging
-  wrapper.addEventListener('click', e=>{
-    if(moved){ e.stopPropagation(); moved=false; }
-  }, true);
-
-  // Touch support
-  let touchStartX=0, touchStartY=0, touchScrollL=0, touchScrollT=0;
-  wrapper.addEventListener('touchstart', e=>{
-    if(e.touches.length!==1)return;
-    touchStartX=e.touches[0].pageX; touchStartY=e.touches[0].pageY;
-    touchScrollL=wrapper.scrollLeft; touchScrollT=wrapper.scrollTop;
-  }, {passive:true});
-  wrapper.addEventListener('touchmove', e=>{
-    if(e.touches.length!==1)return;
-    const dx=e.touches[0].pageX-touchStartX, dy=e.touches[0].pageY-touchStartY;
-    wrapper.scrollLeft = touchScrollL - dx;
-    wrapper.scrollTop = touchScrollT - dy;
-  }, {passive:true});
+function updatePinSize(val){
+  pinBaseSize = parseFloat(val)||13;
+  const lbl = document.getElementById('pinSizeLabel');
+  if(lbl) lbl.textContent = Math.round(pinBaseSize);
+  renderOverlays();
 }
 
 function renderOverlays(){
   const svg = document.getElementById('plotsLayerSvg');
-  svg.innerHTML='';
+  while(svg.firstChild) svg.removeChild(svg.firstChild);
+  const r = pinBaseSize / mapZoom;
+  const fontSize = (pinBaseSize*0.77) / mapZoom;
   getEffectiveRects().forEach(pr=>{
     const p = plots.find(pl=>String(pl.id)===String(pr.id));
     if(!p)return;
-
     const g = document.createElementNS('http://www.w3.org/2000/svg','g');
     g.setAttribute('class','plot-pin '+p.status);
     g.setAttribute('data-id', pr.id);
@@ -719,7 +566,7 @@ function renderOverlays(){
     const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
     circle.setAttribute('cx',pr.cx);
     circle.setAttribute('cy',pr.cy);
-    circle.setAttribute('r',13);
+    circle.setAttribute('r',r);
     g.appendChild(circle);
 
     const label = document.createElementNS('http://www.w3.org/2000/svg','text');
@@ -727,6 +574,7 @@ function renderOverlays(){
     label.setAttribute('y',pr.cy);
     label.setAttribute('text-anchor','middle');
     label.setAttribute('dominant-baseline','central');
+    label.setAttribute('font-size',fontSize);
     label.textContent = pr.id;
     g.appendChild(label);
 
@@ -744,13 +592,11 @@ function applyFilterVisibility(){
     if(!p)return;
     const typeMatch=tf==='all'||String(p.type)===tf;
     const statusMatch=sf==='all'||p.status===sf;
-    const show = typeMatch&&statusMatch;
-    pin.classList.toggle('dimmed', !show);
-    pin.style.pointerEvents = show ? 'auto' : 'none';
+    pin.classList.toggle('dimmed', !(typeMatch&&statusMatch));
   });
 }
 
-function drawCanvas(){
+function refreshPinClasses(){
   document.querySelectorAll('.plot-pin').forEach(pin=>{
     const id=pin.dataset.id;
     const p=plots.find(pl=>String(pl.id)===id);
@@ -772,123 +618,45 @@ function updateStats(){
   document.getElementById('statReserved').textContent=r;
 }
 
-// ─── PIN POSITION JSON IMPORT/EXPORT ──────────────────────────────────────
-async function importPinJSON(){
-  const raw = document.getElementById('pinJsonInput').value.trim();
-  if(!raw){
-    document.getElementById('pinImportStatus').textContent = 'Paste JSON first.';
-    return;
-  }
-  try{
-    const data = JSON.parse(raw);
-    let count=0;
-    Object.entries(data).forEach(([id,pos])=>{
-      if(pos && typeof pos.x==='number' && typeof pos.y==='number'){
-        pinOverrides[id] = {x:pos.x, y:pos.y};
-        count++;
-      }
-    });
-    renderOverlays();
-    try{
-      await window.storage.set('pinOverrides', JSON.stringify(pinOverrides), true);
-    }catch(e){}
-    document.getElementById('pinImportStatus').textContent = `✅ Imported ${count} pin positions and saved. Total overrides: ${Object.keys(pinOverrides).length}.`;
-    const msg=document.getElementById('pinImportMsg');
-    msg.style.display='inline';
-    setTimeout(()=>msg.style.display='none',2000);
-  }catch(e){
-    document.getElementById('pinImportStatus').textContent = '❌ Invalid JSON: '+e.message;
-  }
-}
-function exportPinJSON(){
-  const data = {};
-  getEffectiveRects().forEach(pr=>{
-    data[String(pr.id)] = {x:Math.round(pr.cx), y:Math.round(pr.cy)};
+// ─── PAN ────────────────────────────────────────────────────────────────
+function setupPan(){
+  const wrapper = document.getElementById('mapWrapper');
+  let isDown=false, startX=0, startY=0, scrollL=0, scrollT=0, moved=false;
+
+  wrapper.addEventListener('mousedown', e=>{
+    if(e.button!==0)return;
+    isDown=true; moved=false;
+    startX=e.pageX; startY=e.pageY;
+    scrollL=wrapper.scrollLeft; scrollT=wrapper.scrollTop;
+    wrapper.classList.add('dragging');
   });
-  document.getElementById('pinJsonInput').value = JSON.stringify(data, null, 1);
-  document.getElementById('pinImportStatus').textContent = `Exported ${Object.keys(data).length} current positions (computed + overrides).`;
-}
-async function clearPinOverrides(){
-  if(!confirm('Clear all manually-imported pin positions and revert to computed positions?'))return;
-  pinOverrides = {};
-  renderOverlays();
-  try{
-    await window.storage.delete('pinOverrides', true);
-  }catch(e){}
-  document.getElementById('pinImportStatus').textContent = 'Overrides cleared.';
-}
-async function loadStoredOverrides(){
-  try{
-    const result = await window.storage.get('pinOverrides', true);
-    if(result && result.value){
-      pinOverrides = JSON.parse(result.value);
-      renderOverlays();
-    }
-  }catch(e){
-    // no stored overrides yet
-  }
+  window.addEventListener('mouseup', ()=>{ isDown=false; wrapper.classList.remove('dragging'); });
+  window.addEventListener('mousemove', e=>{
+    if(!isDown)return;
+    const dx=e.pageX-startX, dy=e.pageY-startY;
+    if(Math.abs(dx)>3||Math.abs(dy)>3)moved=true;
+    wrapper.scrollLeft = scrollL - dx;
+    wrapper.scrollTop = scrollT - dy;
+  });
+  wrapper.addEventListener('click', e=>{
+    if(moved){ e.stopPropagation(); moved=false; }
+  }, true);
+
+  let tStartX=0, tStartY=0, tScrollL=0, tScrollT=0;
+  wrapper.addEventListener('touchstart', e=>{
+    if(e.touches.length!==1)return;
+    tStartX=e.touches[0].pageX; tStartY=e.touches[0].pageY;
+    tScrollL=wrapper.scrollLeft; tScrollT=wrapper.scrollTop;
+  }, {passive:true});
+  wrapper.addEventListener('touchmove', e=>{
+    if(e.touches.length!==1)return;
+    const dx=e.touches[0].pageX-tStartX, dy=e.touches[0].pageY-tStartY;
+    wrapper.scrollLeft = tScrollL - dx;
+    wrapper.scrollTop = tScrollT - dy;
+  }, {passive:true});
 }
 
-// ─── BLOCK CALIBRATION (Admin) ────────────────────────────────────────────
-function loadBlockValues(){
-  const i = parseInt(document.getElementById('blockSelect').value);
-  const b = BLOCKS[i];
-  document.getElementById('bTLx').value = b.TL[0];
-  document.getElementById('bTLy').value = b.TL[1];
-  document.getElementById('bTRx').value = b.TR[0];
-  document.getElementById('bTRy').value = b.TR[1];
-  document.getElementById('bBRx').value = b.BR[0];
-  document.getElementById('bBRy').value = b.BR[1];
-  document.getElementById('bBLx').value = b.BL[0];
-  document.getElementById('bBLy').value = b.BL[1];
-  document.getElementById('bCols').value = b.cols;
-  document.getElementById('bRows').value = b.rows;
-  document.getElementById('bColMajor').value = b.colMajor?'1':'0';
-}
-function applyBlock(){
-  const i = parseInt(document.getElementById('blockSelect').value);
-  const b = BLOCKS[i];
-  b.TL = [parseFloat(document.getElementById('bTLx').value)||0, parseFloat(document.getElementById('bTLy').value)||0];
-  b.TR = [parseFloat(document.getElementById('bTRx').value)||0, parseFloat(document.getElementById('bTRy').value)||0];
-  b.BR = [parseFloat(document.getElementById('bBRx').value)||0, parseFloat(document.getElementById('bBRy').value)||0];
-  b.BL = [parseFloat(document.getElementById('bBLx').value)||0, parseFloat(document.getElementById('bBLy').value)||0];
-  b.cols = parseInt(document.getElementById('bCols').value)||1;
-  b.rows = parseInt(document.getElementById('bRows').value)||1;
-  b.colMajor = document.getElementById('bColMajor').value==='1';
-  plotRects = generatePlotRects();
-  renderOverlays();
-  const msg=document.getElementById('calibMsg');
-  msg.style.display='inline';
-  setTimeout(()=>msg.style.display='none',1500);
-}
-let coordModeOn=false;
-function showCoords(){
-  coordModeOn = true;
-  document.getElementById('adminModal').classList.remove('open');
-  document.getElementById('coordFloater').style.display='block';
-  const svg = document.getElementById('plotsLayerSvg');
-  svg.style.cursor='crosshair';
-  document.getElementById('coordFloaterReadout').textContent='x: —, y: —';
-}
-function exitCoordMode(){
-  coordModeOn = false;
-  document.getElementById('coordFloater').style.display='none';
-  document.getElementById('plotsLayerSvg').style.cursor='';
-  document.getElementById('adminModal').classList.add('open');
-}
-document.addEventListener('DOMContentLoaded',()=>{
-  const svg = document.getElementById('plotsLayerSvg');
-  svg.addEventListener('click', e=>{
-    if(!coordModeOn)return;
-    const rect = svg.getBoundingClientRect();
-    const vb = svg.viewBox.baseVal;
-    const x = vb.x + (e.clientX-rect.left)/rect.width * vb.width;
-    const y = vb.y + (e.clientY-rect.top)/rect.height * vb.height;
-    document.getElementById('coordFloaterReadout').textContent = `x: ${Math.round(x)}, y: ${Math.round(y)}`;
-  });
-});
-
-// ─── FILTER ─────────────────────────────────────────────────────────────
+// ─── FILTER / SEARCH ───────────────────────────────────────────────────────
 function setFilter(key,val,btn){
   currentFilter[key]=val;
   if(key==='status'){
@@ -979,7 +747,7 @@ function renderAdminTable(){
   tbody.innerHTML='';
   plots.filter(p=>{
     const sm=sf==='all'||p.status===sf;
-    const qm=!search||String(p.id).includes(search)||PLOT_TYPES[p.type].label.toLowerCase().includes(search);
+    const qm=!search||String(p.id).toLowerCase().includes(search)||PLOT_TYPES[p.type].label.toLowerCase().includes(search);
     return sm&&qm;
   }).forEach(p=>{
     const pt=PLOT_TYPES[p.type];
@@ -999,20 +767,14 @@ function renderAdminTable(){
 }
 function changePlotStatus(id,status){
   const p=plots.find(pl=>String(pl.id)===String(id));
-  if(p){p.status=status;drawCanvas();populatePlotSelect();}
+  if(p){p.status=status;refreshPinClasses();populatePlotSelect();}
 }
 
 // ─── EXCEL EXPORT/IMPORT ──────────────────────────────────────────────────
 function exportExcel(){
   const data=plots.map(p=>{
     const pt=PLOT_TYPES[p.type];
-    return {
-      'Plot Number':p.id,
-      'Plot Type':pt.label,
-      'Dimensions (ft)':pt.dim,
-      'Area (sq ft)':pt.area||'N/A',
-      'Status':p.status
-    };
+    return {'Plot Number':p.id,'Plot Type':pt.label,'Dimensions (ft)':pt.dim,'Area (sq ft)':pt.area||'N/A','Status':p.status};
   });
   const ws=XLSX.utils.json_to_sheet(data);
   const wb=XLSX.utils.book_new();
@@ -1029,20 +791,116 @@ function importExcel(input){
     const rows=XLSX.utils.sheet_to_json(ws);
     let updated=0;
     rows.forEach(row=>{
-      const id=parseInt(row['Plot Number']||row['plot_number']||row['Plot #']||row['id']);
+      const idRaw = row['Plot Number']||row['plot_number']||row['Plot #']||row['id'];
+      const id = String(idRaw).trim();
       const status=(row['Status']||row['status']||'').toLowerCase().trim().replace(' ','-');
       const valid=['available','booked','reserved','not-available'];
       if(id&&valid.includes(status)){
-        const p=plots.find(pl=>pl.id===id);
+        const p=plots.find(pl=>String(pl.id)===id);
         if(p){p.status=status;updated++;}
       }
     });
-    drawCanvas();populatePlotSelect();renderAdminTable();
+    refreshPinClasses();populatePlotSelect();renderAdminTable();
     alert(`✅ Import complete! ${updated} plot(s) updated.`);
   };
   reader.readAsBinaryString(file);
   input.value='';
 }
+
+// ─── PIN POSITION JSON IMPORT/EXPORT ──────────────────────────────────────
+async function importPinJSON(){
+  const raw = document.getElementById('pinJsonInput').value.trim();
+  if(!raw){ document.getElementById('pinImportStatus').textContent = 'Paste JSON first.'; return; }
+  try{
+    const data = JSON.parse(raw);
+    let count=0;
+    Object.entries(data).forEach(([id,pos])=>{
+      if(pos && typeof pos.x==='number' && typeof pos.y==='number'){
+        pinOverrides[id] = {x:pos.x, y:pos.y};
+        count++;
+      }
+    });
+    renderOverlays();
+    try{ await window.storage.set('pinOverrides', JSON.stringify(pinOverrides), true); }catch(e){}
+    document.getElementById('pinImportStatus').textContent = `✅ Imported ${count} pin positions and saved. Total overrides: ${Object.keys(pinOverrides).length}.`;
+    const msg=document.getElementById('pinImportMsg');
+    msg.style.display='inline';
+    setTimeout(()=>msg.style.display='none',2000);
+  }catch(e){
+    document.getElementById('pinImportStatus').textContent = '❌ Invalid JSON: '+e.message;
+  }
+}
+function exportPinJSON(){
+  const data = {};
+  getEffectiveRects().forEach(pr=>{ data[String(pr.id)] = {x:Math.round(pr.cx), y:Math.round(pr.cy)}; });
+  document.getElementById('pinJsonInput').value = JSON.stringify(data, null, 1);
+  document.getElementById('pinImportStatus').textContent = `Exported ${Object.keys(data).length} current positions (computed + overrides).`;
+}
+async function clearPinOverrides(){
+  if(!confirm('Clear all manually-imported pin positions and revert to computed positions?'))return;
+  pinOverrides = {};
+  renderOverlays();
+  try{ await window.storage.delete('pinOverrides', true); }catch(e){}
+  document.getElementById('pinImportStatus').textContent = 'Overrides cleared.';
+}
+async function loadStoredOverrides(){
+  try{
+    const result = await window.storage.get('pinOverrides', true);
+    if(result && result.value){
+      pinOverrides = JSON.parse(result.value);
+      renderOverlays();
+    }
+  }catch(e){}
+}
+
+// ─── BLOCK CALIBRATION ─────────────────────────────────────────────────────
+function loadBlockValues(){
+  const i = parseInt(document.getElementById('blockSelect').value);
+  const b = BLOCKS[i];
+  document.getElementById('bTLx').value = b.TL[0];
+  document.getElementById('bTLy').value = b.TL[1];
+  document.getElementById('bTRx').value = b.TR[0];
+  document.getElementById('bTRy').value = b.TR[1];
+  document.getElementById('bBRx').value = b.BR[0];
+  document.getElementById('bBRy').value = b.BR[1];
+  document.getElementById('bBLx').value = b.BL[0];
+  document.getElementById('bBLy').value = b.BL[1];
+}
+function applyBlock(){
+  const i = parseInt(document.getElementById('blockSelect').value);
+  const b = BLOCKS[i];
+  b.TL = [parseFloat(document.getElementById('bTLx').value)||0, parseFloat(document.getElementById('bTLy').value)||0];
+  b.TR = [parseFloat(document.getElementById('bTRx').value)||0, parseFloat(document.getElementById('bTRy').value)||0];
+  b.BR = [parseFloat(document.getElementById('bBRx').value)||0, parseFloat(document.getElementById('bBRy').value)||0];
+  b.BL = [parseFloat(document.getElementById('bBLx').value)||0, parseFloat(document.getElementById('bBLy').value)||0];
+  plotRects = generatePlotRects();
+  renderOverlays();
+  const msg=document.getElementById('calibMsg');
+  msg.style.display='inline';
+  setTimeout(()=>msg.style.display='none',1500);
+}
+let coordModeOn=false;
+function showCoords(){
+  coordModeOn = true;
+  document.getElementById('adminModal').classList.remove('open');
+  document.getElementById('coordFloater').style.display='block';
+  document.getElementById('coordFloaterReadout').textContent='x: —, y: —';
+}
+function exitCoordMode(){
+  coordModeOn = false;
+  document.getElementById('coordFloater').style.display='none';
+  document.getElementById('adminModal').classList.add('open');
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  const svg = document.getElementById('plotsLayerSvg');
+  svg.addEventListener('click', e=>{
+    if(!coordModeOn)return;
+    const rect = svg.getBoundingClientRect();
+    const x = (e.clientX-rect.left)/rect.width * IMG_W;
+    const y = (e.clientY-rect.top)/rect.height * IMG_H;
+    document.getElementById('coordFloaterReadout').textContent = `x: ${Math.round(x)}, y: ${Math.round(y)}`;
+  });
+});
 
 // ─── CONTACT INFO ─────────────────────────────────────────────────────────
 function loadContactInputs(){
@@ -1084,11 +942,7 @@ window.addEventListener('load',()=>{
   loadStoredOverrides();
   setupPan();
 });
-window.addEventListener('resize',()=>{
-  if(mapZoom===Math.min(1, (document.getElementById('mapWrapper').clientWidth-4)/IMG_W)){
-    fitMapToWidth();
-  }
-});
+window.addEventListener('resize',()=>{ fitMapToWidth(); });
 </script>
 </body>
 </html>
