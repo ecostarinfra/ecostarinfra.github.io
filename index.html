@@ -318,14 +318,16 @@ footer a{color:#a8e6c2;text-decoration:none}
         </div>
 
         <div class="admin-section">
-          <h4>📍 Import Pin Positions (JSON)</h4>
-          <p>Use the Pin Placement Tool to manually mark each plot's position on the map, export the JSON, and paste it here.</p>
+          <h4>📍 Pin Positions & Plot Statuses (file-based persistence)</h4>
+          <p>Since this site is hosted statically, live edits don't auto-save. Use the Pin Placement Tool to set positions, import below to preview, then <strong>download the JSON files and upload them to your GitHub repo</strong> (same folder as <code>index.html</code>) — the site will load them automatically on every visit.</p>
           <textarea id="pinJsonInput" placeholder='{"22": {"x": 600, "y": 310}, "E1": {"x": 200, "y": 700}}' style="width:100%;height:110px;font-family:monospace;font-size:.8rem;padding:.6rem;border:1.5px solid #ddd;border-radius:6px"></textarea>
           <div style="margin-top:.6rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
-            <button class="action-btn" onclick="importPinJSON()">Import & Apply</button>
-            <button class="action-btn secondary" onclick="exportPinJSON()">Export current positions</button>
-            <button class="action-btn danger" onclick="clearPinOverrides()">Clear overrides</button>
-            <span class="save-msg" id="pinImportMsg">✅ Imported!</span>
+            <button class="action-btn" onclick="importPinJSON()">Preview imported positions</button>
+            <button class="action-btn secondary" onclick="exportPinJSON()">Show current positions as JSON</button>
+            <button class="action-btn secondary" onclick="downloadPinPositionsFile()">⬇ Download pin-positions.json</button>
+            <button class="action-btn secondary" onclick="downloadPlotStatusFile()">⬇ Download plot-status.json</button>
+            <button class="action-btn danger" onclick="clearPinOverrides()">Clear overrides (preview only)</button>
+            <span class="save-msg" id="pinImportMsg">✅ Done!</span>
           </div>
           <div id="pinImportStatus" style="font-size:.78rem;color:#666;margin-top:.4rem"></div>
         </div>
@@ -822,8 +824,7 @@ async function importPinJSON(){
       }
     });
     renderOverlays();
-    try{ await window.storage.set('pinOverrides', JSON.stringify(pinOverrides), true); }catch(e){}
-    document.getElementById('pinImportStatus').textContent = `✅ Imported ${count} pin positions and saved. Total overrides: ${Object.keys(pinOverrides).length}.`;
+    document.getElementById('pinImportStatus').textContent = `✅ Previewing ${count} pin positions. Click "Download pin-positions.json" to make this permanent on the live site.`;
     const msg=document.getElementById('pinImportMsg');
     msg.style.display='inline';
     setTimeout(()=>msg.style.display='none',2000);
@@ -835,21 +836,82 @@ function exportPinJSON(){
   const data = {};
   getEffectiveRects().forEach(pr=>{ data[String(pr.id)] = {x:Math.round(pr.cx), y:Math.round(pr.cy)}; });
   document.getElementById('pinJsonInput').value = JSON.stringify(data, null, 1);
-  document.getElementById('pinImportStatus').textContent = `Exported ${Object.keys(data).length} current positions (computed + overrides).`;
+  document.getElementById('pinImportStatus').textContent = `Exported ${Object.keys(data).length} positions. Click "Download pin-positions.json" to save the file, then upload it to your GitHub repo (same folder as index.html).`;
 }
-async function clearPinOverrides(){
-  if(!confirm('Clear all manually-imported pin positions and revert to computed positions?'))return;
+function downloadPinPositionsFile(){
+  const data = {};
+  getEffectiveRects().forEach(pr=>{ data[String(pr.id)] = {x:Math.round(pr.cx), y:Math.round(pr.cy)}; });
+  const blob = new Blob([JSON.stringify(data,null,1)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download='pin-positions.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function downloadPlotStatusFile(){
+  const data = {};
+  plots.forEach(p=>{ data[String(p.id)] = p.status; });
+  const blob = new Blob([JSON.stringify(data,null,1)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download='plot-status.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function clearPinOverrides(){
+  if(!confirm('Clear preview overrides? (This only affects this preview session - your pin-positions.json file on the server is unchanged)'))return;
   pinOverrides = {};
   renderOverlays();
-  try{ await window.storage.delete('pinOverrides', true); }catch(e){}
-  document.getElementById('pinImportStatus').textContent = 'Overrides cleared.';
+  document.getElementById('pinImportStatus').textContent = 'Preview overrides cleared.';
 }
 async function loadStoredOverrides(){
+  // Try loading pin positions from a JSON file hosted alongside the site
   try{
-    const result = await window.storage.get('pinOverrides', true);
-    if(result && result.value){
-      pinOverrides = JSON.parse(result.value);
+    const res = await fetch('./pin-positions.json', {cache:'no-store'});
+    if(res.ok){
+      const data = await res.json();
+      Object.entries(data).forEach(([id,pos])=>{
+        if(pos && typeof pos.x==='number' && typeof pos.y==='number'){
+          pinOverrides[id]={x:pos.x,y:pos.y};
+        }
+      });
       renderOverlays();
+      console.log('Lotus Valley: loaded', Object.keys(data).length, 'pin positions from pin-positions.json');
+    }
+  }catch(e){
+    console.warn('Lotus Valley: pin-positions.json not found or invalid:', e.message);
+  }
+
+  // Try loading plot statuses from a JSON file hosted alongside the site
+  try{
+    const res = await fetch('./plot-status.json', {cache:'no-store'});
+    if(res.ok){
+      const data = await res.json();
+      let count=0;
+      Object.entries(data).forEach(([id,status])=>{
+        const valid=['available','booked','reserved','not-available'];
+        if(valid.includes(status)){
+          const p=plots.find(pl=>String(pl.id)===String(id));
+          if(p){p.status=status;count++;}
+        }
+      });
+      refreshPinClasses();
+      populatePlotSelect();
+      console.log('Lotus Valley: loaded', count, 'plot statuses from plot-status.json');
+    }
+  }catch(e){
+    console.warn('Lotus Valley: plot-status.json not found or invalid:', e.message);
+  }
+
+  // Also check in-session storage (works in Claude.ai preview) as a fallback/override
+  try{
+    if(window.storage && typeof window.storage.get==='function'){
+      const result = await window.storage.get('pinOverrides', true);
+      if(result && result.value){
+        const stored = JSON.parse(result.value);
+        Object.assign(pinOverrides, stored);
+        renderOverlays();
+      }
     }
   }catch(e){}
 }
