@@ -44,8 +44,9 @@ nav .admin-btn{background:var(--gold);color:#fff;border:none;padding:.4rem 1rem;
 .map-section h2{font-size:1.1rem;color:var(--green2);margin-bottom:.8rem;font-weight:600}
 .map-wrapper{position:relative;width:100%;background:#e8ede5;border-radius:12px;overflow:auto;border:2px solid #c5d5c0;max-height:75vh;cursor:grab}
 .map-wrapper.dragging{cursor:grabbing;user-select:none}
-#mapContainer{position:relative;display:inline-block}
+#mapContainer{position:relative;display:inline-block;line-height:0}
 #layoutImg{display:block;pointer-events:none}
+#plotsLayerSvg{position:absolute;top:0;left:0;display:block}
 .zoom-controls{position:sticky;bottom:12px;float:right;margin-right:12px;display:flex;gap:6px;z-index:50;background:rgba(255,255,255,.92);padding:4px;border-radius:8px}
 .zoom-controls button{width:36px;height:36px;border:1.5px solid var(--green);border-radius:6px;background:#fff;color:var(--green);font-size:1.1rem;font-weight:700;cursor:pointer}
 
