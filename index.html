@@ -49,9 +49,11 @@ nav .admin-btn{background:var(--gold);color:#fff;border:none;padding:.4rem 1rem;
 /* MAP SECTION */
 .map-section{padding:1.2rem 1.5rem}
 .map-section h2{font-size:1.1rem;color:var(--green2);margin-bottom:.8rem;font-weight:600}
-.map-wrapper{position:relative;width:100%;background:#e8ede5;border-radius:12px;overflow:auto;border:2px solid #c5d5c0}
-#mapContainer{position:relative;width:100%}
-#layoutImg{display:block;width:100%}
+.map-wrapper{position:relative;width:100%;background:#e8ede5;border-radius:12px;overflow:auto;border:2px solid #c5d5c0;max-height:75vh}
+#mapContainer{position:relative;display:inline-block}
+#layoutImg{display:block}
+.zoom-controls{position:sticky;bottom:12px;float:right;margin-right:12px;display:flex;gap:6px;z-index:50;background:rgba(255,255,255,.9);padding:4px;border-radius:8px}
+.zoom-controls button{width:36px;height:36px;border:1.5px solid var(--green);border-radius:6px;background:#fff;color:var(--green);font-size:1.1rem;font-weight:700;cursor:pointer}
 .plot-pin{cursor:pointer;transition:all .1s}
 .plot-pin circle{stroke:rgba(0,0,0,.3);stroke-width:1}
 .plot-pin.available circle{fill:rgba(46,160,90,.85)}
@@ -60,7 +62,7 @@ nav .admin-btn{background:var(--gold);color:#fff;border:none;padding:.4rem 1rem;
 .plot-pin.not-available circle{fill:rgba(100,100,100,.85)}
 .plot-pin:hover circle{stroke:#fff;stroke-width:2}
 .plot-pin.highlighted circle{stroke:#fff200;stroke-width:3}
-.plot-pin text{font-size:10px;font-weight:700;fill:#fff;pointer-events:none}
+.plot-pin text{font-weight:700;fill:#fff;pointer-events:none}
 .plot-pin.dimmed{opacity:.08}
 
 /* POPUP */
@@ -239,10 +241,15 @@ footer a{color:#a8e6c2;text-decoration:none}
 <div class="map-section" id="map">
   <h2>🗺️ Interactive Plot Layout – Lotus Valley</h2>
   <div class="map-wrapper" id="mapWrapper">
-    <div id="mapContainer" style="position:relative">
-      <img id="layoutImg" src="https://ecostarinfra.github.io/lotus-valley-map.jpeg" alt="Lotus Valley Layout Map" style="display:block;width:100%"/>
-      <svg id="plotsLayerSvg" viewBox="0 0 2264 1517" preserveAspectRatio="none" style="position:absolute;top:0;left:0;width:100%;height:100%"></svg>
+    <div id="mapContainer">
+      <img id="layoutImg" src="https://ecostarinfra.github.io/lotus-valley-map.jpeg" alt="Lotus Valley Layout Map"/>
+      <svg id="plotsLayerSvg" viewBox="0 0 2264 1517" style="position:absolute;top:0;left:0;width:100%;height:100%"></svg>
     </div>
+  </div>
+  <div class="zoom-controls">
+    <button onclick="zoomMap(1.25)">+</button>
+    <button onclick="zoomMap(0.8)">−</button>
+    <button onclick="resetMapZoom()" style="font-size:.65rem">Reset</button>
   </div>
   <div style="margin-top:.5rem;font-size:.78rem;color:#888" id="calibNote">💡 Click any colored pin to view plot details. Pins are positioned at each plot's approximate location — if a pin looks misplaced, use Admin Panel → Plot Pin Calibration to nudge that block's pins.</div>
 </div>
@@ -590,8 +597,60 @@ function getEffectiveRects(){
   });
 }
 
-// ─── MAP RENDERING (SVG) ───────────────────────────────────────────────────
+// ─── MAP RENDERING ───────────────────────────────────────────────────────
+let mapZoom = 1;
+let IMG_W = 2264, IMG_H = 1517; // updated to real natural size on load
+
 function buildMap(){
+  const img = document.getElementById('layoutImg');
+  const container = document.getElementById('mapContainer');
+  const svg = document.getElementById('plotsLayerSvg');
+
+  function setup(){
+    IMG_W = img.naturalWidth || IMG_W;
+    IMG_H = img.naturalHeight || IMG_H;
+    img.style.width = IMG_W+'px';
+    img.style.height = IMG_H+'px';
+    container.style.width = IMG_W+'px';
+    container.style.height = IMG_H+'px';
+    svg.setAttribute('viewBox',`0 0 ${IMG_W} ${IMG_H}`);
+    svg.style.width = IMG_W+'px';
+    svg.style.height = IMG_H+'px';
+    fitMapToWidth();
+    renderOverlays();
+  }
+  if(img.complete && img.naturalWidth>0){
+    setup();
+  } else {
+    img.addEventListener('load', setup);
+    img.addEventListener('error', renderOverlays);
+  }
+}
+
+function fitMapToWidth(){
+  const wrapper = document.getElementById('mapWrapper');
+  const availW = wrapper.clientWidth - 4;
+  mapZoom = Math.min(1, availW/IMG_W);
+  applyMapZoom();
+}
+function zoomMap(factor){
+  mapZoom = Math.min(Math.max(mapZoom*factor, 0.15), 4);
+  applyMapZoom();
+}
+function resetMapZoom(){
+  fitMapToWidth();
+}
+function applyMapZoom(){
+  const img = document.getElementById('layoutImg');
+  const container = document.getElementById('mapContainer');
+  const svg = document.getElementById('plotsLayerSvg');
+  const w = IMG_W*mapZoom, h = IMG_H*mapZoom;
+  img.style.width = w+'px';
+  img.style.height = h+'px';
+  container.style.width = w+'px';
+  container.style.height = h+'px';
+  svg.style.width = w+'px';
+  svg.style.height = h+'px';
   renderOverlays();
 }
 
@@ -978,6 +1037,11 @@ window.addEventListener('load',()=>{
   buildMap();
   populatePlotSelect();
   loadStoredOverrides();
+});
+window.addEventListener('resize',()=>{
+  if(mapZoom===Math.min(1, (document.getElementById('mapWrapper').clientWidth-4)/IMG_W)){
+    fitMapToWidth();
+  }
 });
 </script>
 </body>
