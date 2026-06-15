@@ -251,6 +251,15 @@ footer a{color:#a8e6c2;text-decoration:none}
     <div class="popup-row"><span class="pk">Area</span><span class="pv" id="ppArea">—</span></div>
     <div class="popup-row"><span class="pk">Status</span><span class="pv"><span class="status-badge" id="ppStatus">—</span></span></div>
     <button class="enquire-btn" onclick="enquireFromPopup()">📩 Enquire About This Plot</button>
+    <button class="enquire-btn" id="reserveBtn" style="background:var(--gold);margin-top:.6rem" onclick="openReserveForm()">💳 Reserve Online</button>
+    <div id="reserveForm" style="display:none;margin-top:1rem;border-top:1px solid #eee;padding-top:1rem">
+      <div style="font-size:.85rem;color:#555;margin-bottom:.6rem" id="reserveFeeNote">Reservation fee: ₹<span id="reserveFeeAmt">10,000</span></div>
+      <div class="form-group" style="margin-bottom:.5rem"><label>Full Name *</label><input id="rname" type="text" placeholder="Your full name"/></div>
+      <div class="form-group" style="margin-bottom:.5rem"><label>Phone Number *</label><input id="rphone" type="tel" placeholder="e.g. 98765 43210"/></div>
+      <div class="form-group" style="margin-bottom:.5rem"><label>Email Address</label><input id="remail" type="email" placeholder="your@email.com"/></div>
+      <button class="enquire-btn" style="background:var(--gold)" onclick="proceedToPayment()">Proceed to Payment →</button>
+      <div style="font-size:.75rem;color:#888;margin-top:.5rem">You'll be redirected to a secure payment page in a new tab. After payment, please share your payment reference with us via phone/WhatsApp so we can confirm your reservation.</div>
+    </div>
   </div>
 </div>
 
@@ -367,6 +376,26 @@ footer a{color:#a8e6c2;text-decoration:none}
         </div>
 
         <div class="admin-section">
+          <h4>💳 Online Reservation Settings</h4>
+          <p>Configure a payment link (from Razorpay, Instamojo, PayU, etc.) for online plot reservations. When set, an available plot's popup will show a "Reserve Online" button leading to this link.</p>
+          <div class="contact-form-grid">
+            <div class="contact-form-group"><label>Enable Reserve Online?</label>
+              <select id="rcEnabled">
+                <option value="1">Yes</option>
+                <option value="0">No</option>
+              </select>
+            </div>
+            <div class="contact-form-group"><label>Reservation Fee (₹)</label><input id="rcFee" type="number" min="0" step="500" placeholder="10000"/></div>
+            <div class="contact-form-group" style="grid-column:1/-1"><label>Payment Link URL</label><input id="rcLink" type="text" placeholder="https://rzp.io/l/yourlink123"/></div>
+          </div>
+          <div style="margin-top:.6rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
+            <button class="action-btn" onclick="saveReserveConfig()">Save Reservation Settings</button>
+            <button class="action-btn secondary" onclick="downloadSiteConfigFile()">⬇ Download site-config.json</button>
+            <span class="save-msg" id="reserveMsg">✅ Saved!</span>
+          </div>
+        </div>
+
+        <div class="admin-section">
           <h4>📞 Edit Contact Information</h4>
           <div class="contact-form-grid">
             <div class="contact-form-group"><label>Phone 1</label><input id="aph1" type="text" placeholder="77778 00508"/></div>
@@ -374,8 +403,9 @@ footer a{color:#a8e6c2;text-decoration:none}
             <div class="contact-form-group"><label>Email</label><input id="aemail" type="email" placeholder="info@ecostarinfra.com"/></div>
             <div class="contact-form-group"><label>Website</label><input id="aweb" type="text" placeholder="ecostarinfra.com"/></div>
           </div>
-          <div style="margin-top:.6rem;display:flex;align-items:center">
+          <div style="margin-top:.6rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
             <button class="action-btn" onclick="saveContactInfo()">Save Contact Info</button>
+            <button class="action-btn secondary" onclick="downloadSiteConfigFile()">⬇ Download site-config.json</button>
             <span class="save-msg" id="saveMsg">✅ Saved!</span>
           </div>
         </div>
@@ -403,6 +433,12 @@ const PLOT_TYPES = {
 let contactInfo = {
   ph1:'77778 00508', ph2:'7777800576',
   email:'info@ecostarinfra.com', web:'ecostarinfra.com'
+};
+
+let reserveConfig = {
+  enabled:true,
+  feeAmount:10000,
+  paymentLink:'' // e.g. https://rzp.io/l/yourlink123
 };
 
 const ADMIN_PASS = 'lotus2024';
@@ -695,6 +731,21 @@ function openPlotPopup(p){
   const sb=document.getElementById('ppStatus');
   sb.textContent=p.status.replace('-',' ').replace(/\b\w/g,c=>c.toUpperCase());
   sb.className='status-badge status-'+p.status;
+
+  // Reserve button only for available plots, and only if configured
+  const reserveBtn = document.getElementById('reserveBtn');
+  const reserveForm = document.getElementById('reserveForm');
+  reserveForm.style.display='none';
+  document.getElementById('rname').value='';
+  document.getElementById('rphone').value='';
+  document.getElementById('remail').value='';
+  if(reserveConfig.enabled && reserveConfig.paymentLink && p.status==='available'){
+    reserveBtn.style.display='block';
+    document.getElementById('reserveFeeAmt').textContent = reserveConfig.feeAmount.toLocaleString('en-IN');
+  } else {
+    reserveBtn.style.display='none';
+  }
+
   document.getElementById('popupOverlay').classList.add('open');
 }
 function closePopup(){document.getElementById('popupOverlay').classList.remove('open')}
@@ -702,6 +753,23 @@ function enquireFromPopup(){
   closePopup();
   document.getElementById('fplot').value=currentPlot?currentPlot.id:'';
   document.getElementById('enquiry').scrollIntoView({behavior:'smooth'});
+}
+function openReserveForm(){
+  const form = document.getElementById('reserveForm');
+  form.style.display = form.style.display==='none' ? 'block' : 'none';
+}
+function proceedToPayment(){
+  const n=document.getElementById('rname').value.trim();
+  const ph=document.getElementById('rphone').value.trim();
+  if(!n||!ph){alert('Please enter your name and phone number before proceeding.');return;}
+  if(!reserveConfig.paymentLink){
+    alert('Online payment is not configured yet. Please contact us directly to reserve this plot.');
+    return;
+  }
+  // Open payment link in new tab. Some providers support prefill via URL params (varies by provider).
+  window.open(reserveConfig.paymentLink, '_blank');
+  alert(`Thank you, ${n}! A payment page has opened in a new tab for Plot #${currentPlot.id} (₹${reserveConfig.feeAmount.toLocaleString('en-IN')} reservation fee). After completing payment, please contact us at ${contactInfo.ph1} with your payment reference and Plot #${currentPlot.id} so we can confirm your reservation.`);
+  closePopup();
 }
 
 // ─── ENQUIRY FORM ────────────────────────────────────────────────────────
@@ -858,6 +926,15 @@ function downloadPlotStatusFile(){
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
+function downloadSiteConfigFile(){
+  const data = { contactInfo: contactInfo, reserveConfig: reserveConfig };
+  const blob = new Blob([JSON.stringify(data,null,1)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download='site-config.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
 function clearPinOverrides(){
   if(!confirm('Clear preview overrides? (This only affects this preview session - your pin-positions.json file on the server is unchanged)'))return;
   pinOverrides = {};
@@ -901,6 +978,20 @@ async function loadStoredOverrides(){
     }
   }catch(e){
     console.warn('Lotus Valley: plot-status.json not found or invalid:', e.message);
+  }
+
+  // Try loading site config (contact info + reservation settings) from a JSON file
+  try{
+    const res = await fetch('./site-config.json', {cache:'no-store'});
+    if(res.ok){
+      const data = await res.json();
+      if(data.contactInfo) Object.assign(contactInfo, data.contactInfo);
+      if(data.reserveConfig) Object.assign(reserveConfig, data.reserveConfig);
+      applyContactInfoToDOM();
+      console.log('Lotus Valley: loaded site-config.json');
+    }
+  }catch(e){
+    console.warn('Lotus Valley: site-config.json not found or invalid:', e.message);
   }
 
   // Also check in-session storage (works in Claude.ai preview) as a fallback/override
@@ -971,12 +1062,19 @@ function loadContactInputs(){
   document.getElementById('aph2').value=contactInfo.ph2;
   document.getElementById('aemail').value=contactInfo.email;
   document.getElementById('aweb').value=contactInfo.web;
+  document.getElementById('rcEnabled').value = reserveConfig.enabled ? '1':'0';
+  document.getElementById('rcFee').value = reserveConfig.feeAmount;
+  document.getElementById('rcLink').value = reserveConfig.paymentLink;
 }
-function saveContactInfo(){
-  contactInfo.ph1=document.getElementById('aph1').value.trim()||contactInfo.ph1;
-  contactInfo.ph2=document.getElementById('aph2').value.trim()||contactInfo.ph2;
-  contactInfo.email=document.getElementById('aemail').value.trim()||contactInfo.email;
-  contactInfo.web=document.getElementById('aweb').value.trim()||contactInfo.web;
+function saveReserveConfig(){
+  reserveConfig.enabled = document.getElementById('rcEnabled').value==='1';
+  reserveConfig.feeAmount = parseFloat(document.getElementById('rcFee').value)||0;
+  reserveConfig.paymentLink = document.getElementById('rcLink').value.trim();
+  const msg=document.getElementById('reserveMsg');
+  msg.style.display='inline';
+  setTimeout(()=>msg.style.display='none',2000);
+}
+function applyContactInfoToDOM(){
   const ph1raw=contactInfo.ph1.replace(/\s/g,'');
   const ph2raw=contactInfo.ph2.replace(/\s/g,'');
   document.getElementById('ph1Disp').textContent=contactInfo.ph1;
@@ -993,6 +1091,13 @@ function saveContactInfo(){
   document.getElementById('fwebF').textContent=contactInfo.web;
   document.getElementById('femlLink').href='mailto:'+contactInfo.email;
   document.getElementById('fwebLink').href='https://'+contactInfo.web.replace('https://','');
+}
+function saveContactInfo(){
+  contactInfo.ph1=document.getElementById('aph1').value.trim()||contactInfo.ph1;
+  contactInfo.ph2=document.getElementById('aph2').value.trim()||contactInfo.ph2;
+  contactInfo.email=document.getElementById('aemail').value.trim()||contactInfo.email;
+  contactInfo.web=document.getElementById('aweb').value.trim()||contactInfo.web;
+  applyContactInfoToDOM();
   const msg=document.getElementById('saveMsg');
   msg.style.display='inline';
   setTimeout(()=>msg.style.display='none',2500);
