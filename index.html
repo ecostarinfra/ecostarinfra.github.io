@@ -332,10 +332,24 @@ footer a{color:#a8e6c2;text-decoration:none}
           </table>
         </div>
 
+        <!-- PIN POSITION IMPORT SECTION -->
+        <div class="admin-calib-section">
+          <h4>📍 Import Pin Positions (JSON)</h4>
+          <p>Use the Pin Placement Tool to manually mark each plot's position on the map, export the JSON, and paste it here. This will override all computed positions with your exact placements.</p>
+          <textarea id="pinJsonInput" placeholder='{"22": {"x": 600, "y": 310}, "23": {"x": 590, "y": 345}, "E1": {"x": 200, "y": 700}}' style="width:100%;height:120px;font-family:monospace;font-size:.8rem;padding:.6rem;border:1.5px solid #ddd;border-radius:6px"></textarea>
+          <div style="margin-top:.6rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
+            <button class="save-calib-btn" onclick="importPinJSON()">Import & Apply</button>
+            <button class="save-calib-btn" style="background:#888" onclick="exportPinJSON()">Export current positions</button>
+            <button class="save-calib-btn" style="background:#c0392b" onclick="clearPinOverrides()">Clear overrides</button>
+            <span class="save-msg" id="pinImportMsg">✅ Imported!</span>
+          </div>
+          <div id="pinImportStatus" style="font-size:.78rem;color:#666;margin-top:.4rem"></div>
+        </div>
+
         <!-- MAP CALIBRATION SECTION -->
         <div class="admin-calib-section">
           <h4>📐 Plot Pin Calibration (4-corner mapping)</h4>
-          <p>Each block places its plot pins inside a quadrilateral with 4 corners: TL (top-left), TR (top-right), BR (bottom-right), BL (bottom-left) — the outer boundary of where that block's plot numbers appear. Click "Show coords" to find these on the map, enter them below, then Apply.</p>
+          <p>Used as a fallback for any plots NOT covered by the JSON import above. Each block places its plot pins inside a quadrilateral with 4 corners: TL (top-left), TR (top-right), BR (bottom-right), BL (bottom-left).</p>
           <div style="margin-bottom:.5rem">
             <label style="font-size:.78rem;font-weight:600;color:#555">Block:</label>
             <select id="blockSelect" onchange="loadBlockValues()" style="padding:.35rem .6rem;border:1px solid #ccc;border-radius:6px;font-size:.82rem">
@@ -469,8 +483,8 @@ const BLOCKS = [
   {start:4, end:21, cols:2, rows:9, colMajor:false,
    TL:[330,395], TR:[430,365], BR:[510,640], BL:[410,670]},
 
-  // Block C: main large central grid (22-263), column-major, 22 cols x 11 rows
-  {start:22, end:263, cols:22, rows:11, colMajor:true,
+  // Block C: main central grid (22-263), snake pattern: 11 column-slots x 2 bands x 11 rows
+  {start:22, end:263, pattern:'snake-2band', slots:11, bandRows:11,
    TL:[599,308], TR:[1290,470], BR:[1180,790], BL:[500,620]},
 
   // Block D: mixed-use block (264-274) - 6 cols x 2 rows (11 plots, last row partial)
@@ -511,10 +525,43 @@ function generatePlotRects(){
   const rects=[];
   BLOCKS.forEach(b=>{
     const quad = [b.TL,b.TR,b.BR,b.BL];
+
+    if(b.pattern==='snake-2band'){
+      // 11 column-slots, each with 2 stacked bands (upper+lower) of `bandRows` each.
+      // Odd slots (1,3,5..): number top-to-bottom through upper then lower band.
+      // Even slots (2,4,6..): number bottom-to-top through lower then upper band.
+      const slots = b.slots;       // number of column-slots
+      const bandRows = b.bandRows; // rows per band
+      const totalCols = slots;     // grid columns = slots
+      const totalRows = bandRows*2;// grid rows = 2 bands
+      let n = b.start;
+      for(let slot=0; slot<slots; slot++){
+        const odd = (slot%2===0); // slot index 0 = column-slot 1 (odd)
+        // build list of (row) positions in numbering order for this slot
+        let rowsOrder=[];
+        if(odd){
+          // upper band top->bottom (rows 0..bandRows-1), then lower band top->bottom (rows bandRows..2*bandRows-1)
+          for(let r=0;r<bandRows;r++)rowsOrder.push(r);
+          for(let r=bandRows;r<2*bandRows;r++)rowsOrder.push(r);
+        } else {
+          // lower band bottom->top (rows 2*bandRows-1..bandRows), then upper band bottom->top (rows bandRows-1..0)
+          for(let r=2*bandRows-1;r>=bandRows;r--)rowsOrder.push(r);
+          for(let r=bandRows-1;r>=0;r--)rowsOrder.push(r);
+        }
+        rowsOrder.forEach(r=>{
+          const u=(slot+0.5)/totalCols, v=(r+0.5)/totalRows;
+          const center = bilerp(quad,u,v);
+          const id = b.prefix ? b.prefix+n : n;
+          rects.push({id:id, cx:center[0], cy:center[1]});
+          n++;
+        });
+      }
+      return;
+    }
+
     let n = b.start;
     let row=0, col=0;
     while(n<=b.end){
-      // center of this cell in grid-space
       const u=(col+0.5)/b.cols, v=(row+0.5)/b.rows;
       const center = bilerp(quad,u,v);
       const id = b.prefix ? b.prefix+n : n;
@@ -533,6 +580,15 @@ function generatePlotRects(){
 }
 
 let plotRects = generatePlotRects();
+let pinOverrides = {}; // id (string) -> {x,y} manually placed positions, takes precedence
+
+function getEffectiveRects(){
+  return plotRects.map(pr=>{
+    const ov = pinOverrides[String(pr.id)];
+    if(ov) return {id:pr.id, cx:ov.x, cy:ov.y};
+    return pr;
+  });
+}
 
 // ─── MAP RENDERING (SVG) ───────────────────────────────────────────────────
 function buildMap(){
@@ -542,7 +598,7 @@ function buildMap(){
 function renderOverlays(){
   const svg = document.getElementById('plotsLayerSvg');
   svg.innerHTML='';
-  plotRects.forEach(pr=>{
+  getEffectiveRects().forEach(pr=>{
     const p = plots.find(pl=>String(pl.id)===String(pr.id));
     if(!p)return;
 
@@ -610,6 +666,63 @@ function updateStats(){
   document.getElementById('statAvail').textContent=a;
   document.getElementById('statBooked').textContent=b;
   document.getElementById('statReserved').textContent=r;
+}
+
+// ─── PIN POSITION JSON IMPORT/EXPORT ──────────────────────────────────────
+async function importPinJSON(){
+  const raw = document.getElementById('pinJsonInput').value.trim();
+  if(!raw){
+    document.getElementById('pinImportStatus').textContent = 'Paste JSON first.';
+    return;
+  }
+  try{
+    const data = JSON.parse(raw);
+    let count=0;
+    Object.entries(data).forEach(([id,pos])=>{
+      if(pos && typeof pos.x==='number' && typeof pos.y==='number'){
+        pinOverrides[id] = {x:pos.x, y:pos.y};
+        count++;
+      }
+    });
+    renderOverlays();
+    try{
+      await window.storage.set('pinOverrides', JSON.stringify(pinOverrides), true);
+    }catch(e){}
+    document.getElementById('pinImportStatus').textContent = `✅ Imported ${count} pin positions and saved. Total overrides: ${Object.keys(pinOverrides).length}.`;
+    const msg=document.getElementById('pinImportMsg');
+    msg.style.display='inline';
+    setTimeout(()=>msg.style.display='none',2000);
+  }catch(e){
+    document.getElementById('pinImportStatus').textContent = '❌ Invalid JSON: '+e.message;
+  }
+}
+function exportPinJSON(){
+  const data = {};
+  getEffectiveRects().forEach(pr=>{
+    data[String(pr.id)] = {x:Math.round(pr.cx), y:Math.round(pr.cy)};
+  });
+  document.getElementById('pinJsonInput').value = JSON.stringify(data, null, 1);
+  document.getElementById('pinImportStatus').textContent = `Exported ${Object.keys(data).length} current positions (computed + overrides).`;
+}
+async function clearPinOverrides(){
+  if(!confirm('Clear all manually-imported pin positions and revert to computed positions?'))return;
+  pinOverrides = {};
+  renderOverlays();
+  try{
+    await window.storage.delete('pinOverrides', true);
+  }catch(e){}
+  document.getElementById('pinImportStatus').textContent = 'Overrides cleared.';
+}
+async function loadStoredOverrides(){
+  try{
+    const result = await window.storage.get('pinOverrides', true);
+    if(result && result.value){
+      pinOverrides = JSON.parse(result.value);
+      renderOverlays();
+    }
+  }catch(e){
+    // no stored overrides yet
+  }
 }
 
 // ─── BLOCK CALIBRATION (Admin) ────────────────────────────────────────────
@@ -864,6 +977,7 @@ function saveContactInfo(){
 window.addEventListener('load',()=>{
   buildMap();
   populatePlotSelect();
+  loadStoredOverrides();
 });
 </script>
 </body>
