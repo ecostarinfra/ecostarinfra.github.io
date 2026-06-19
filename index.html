@@ -457,8 +457,11 @@ function assignType(n){
   return 4;
 }
 for(let i=1;i<=369;i++){
+  if(i===248)continue; // split into 248A and 248B due to duplicate label in source layout
   plots.push({id:i, type:assignType(i), status:'available'});
 }
+plots.push({id:'248A', type:assignType(248), status:'available'});
+plots.push({id:'248B', type:assignType(248), status:'available'});
 for(let i=1;i<=32;i++) plots.push({id:'E'+i, type:'E', status:'available'});
 for(let i=1;i<=19;i++) plots.push({id:'L'+i, type:'L', status:'available'});
 for(let i=1;i<=28;i++) plots.push({id:'M'+i, type:'M', status:'available'});
@@ -534,7 +537,9 @@ function generatePlotRects(){
 }
 
 let plotRects = generatePlotRects();
-let pinOverrides = {};
+let pinOverrides = {
+  '248B': {x:3115, y:2445}
+};
 let pinBaseSize = 20;
 let mapZoom = 1;
 let IMG_W = 2264, IMG_H = 1517;
