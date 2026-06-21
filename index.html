@@ -5,6 +5,39 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Lotus Valley – Ecostar Infra</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDVECaT_Y9I0TGzskNgz07vq3x5tGIiRdk",
+    authDomain: "lotusvalley-e56b8.firebaseapp.com",
+    projectId: "lotusvalley-e56b8",
+    storageBucket: "lotusvalley-e56b8.firebasestorage.app",
+    messagingSenderId: "361482497260",
+    appId: "1:361482497260:web:8cd6a6b62359ba5bb909c9",
+    measurementId: "G-9X0XZ62Q1J"
+  };
+
+  const ADMIN_EMAILS = ["ecostarinfra2024@gmail.com"];
+
+  const fbApp = initializeApp(firebaseConfig);
+  const fbAuth = getAuth(fbApp);
+  const fbDb = getFirestore(fbApp);
+  const googleProvider = new GoogleAuthProvider();
+
+  window.__firebase = {
+    auth: fbAuth, db: fbDb, doc, getDoc, setDoc,
+    signInWithPopup: ()=>signInWithPopup(fbAuth, googleProvider),
+    signOut: ()=>signOut(fbAuth),
+    isAdminEmail: (email)=> ADMIN_EMAILS.includes((email||'').toLowerCase()),
+  };
+
+  onAuthStateChanged(fbAuth, (user)=>{
+    window.dispatchEvent(new CustomEvent('lv-auth-changed', {detail:{user}}));
+  });
+</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',sans-serif;background:#f5f5f0;color:#2d2d2d}
@@ -295,13 +328,19 @@ footer a{color:#a8e6c2;text-decoration:none}
   <div class="admin-box">
     <div class="admin-header">
       <h3>🔐 Admin Panel – Lotus Valley</h3>
-      <button onclick="closeAdmin()">×</button>
+      <div style="display:flex;align-items:center;gap:.8rem">
+        <span id="adminUserBadge" style="font-size:.78rem;color:#cce8d8;display:none"></span>
+        <button onclick="closeAdmin()">×</button>
+      </div>
     </div>
     <div class="admin-body" id="adminBody">
       <div class="admin-login" id="adminLogin">
         <h4>Admin Login</h4>
-        <input type="password" id="adminPass" placeholder="Enter password" onkeydown="if(event.key==='Enter')checkAdmin()"/>
-        <button onclick="checkAdmin()" class="action-btn">Login</button>
+        <p style="font-size:.82rem;color:#666">Sign in with your authorized Google account to access the admin panel.</p>
+        <button onclick="signInWithGoogle()" class="action-btn" style="display:flex;align-items:center;justify-content:center;gap:.5rem">
+          <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.13-.84 2.08-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.81.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33C2.44 15.98 5.48 18 9 18z"/><path fill="#FBBC05" d="M3.97 10.72c-.18-.54-.28-1.12-.28-1.72s.1-1.18.28-1.72V4.95H.96C.35 6.17 0 7.55 0 9s.35 2.83.96 4.05l3.01-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.59-2.59C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/></svg>
+          Sign in with Google
+        </button>
         <div class="err" id="adminErr"></div>
       </div>
       <div style="display:none" id="adminPanel">
@@ -319,9 +358,13 @@ footer a{color:#a8e6c2;text-decoration:none}
             <option value="not-available">Not Available</option>
           </select>
         </div>
+        <div style="font-size:.78rem;color:#666;margin-bottom:.6rem;display:flex;gap:1rem">
+          <span><span style="color:#2d7a4f;font-weight:700">●</span> Public Status — shown to website visitors</span>
+          <span><span style="color:#888;font-weight:700">●</span> Private Status — admin-only, never shown publicly</span>
+        </div>
         <div style="overflow-x:auto;max-height:260px;overflow-y:auto">
           <table class="admin-table">
-            <thead><tr><th>Plot #</th><th>Type</th><th>Dimensions (ft)</th><th>Area (sq ft)</th><th>Status</th></tr></thead>
+            <thead><tr><th>Plot #</th><th>Type</th><th>Dimensions (ft)</th><th>Area (sq ft)</th><th>Public Status</th><th>Private Status</th></tr></thead>
             <tbody id="adminTableBody"></tbody>
           </table>
         </div>
@@ -334,7 +377,8 @@ footer a{color:#a8e6c2;text-decoration:none}
             <button class="action-btn" onclick="importPinJSON()">Preview imported positions</button>
             <button class="action-btn secondary" onclick="exportPinJSON()">Show current positions as JSON</button>
             <button class="action-btn secondary" onclick="downloadPinPositionsFile()">⬇ Download pin-positions.json</button>
-            <button class="action-btn secondary" onclick="downloadPlotStatusFile()">⬇ Download plot-status.json</button>
+            <button class="action-btn secondary" onclick="downloadPublicStatusFile()">⬇ Download plot-status-public.json</button>
+            <button class="action-btn secondary" onclick="downloadPrivateStatusFile()">⬇ Download plot-status-private.json</button>
             <button class="action-btn danger" onclick="clearPinOverrides()">Clear overrides (preview only)</button>
             <span class="save-msg" id="pinImportMsg">✅ Done!</span>
           </div>
@@ -441,10 +485,25 @@ let reserveConfig = {
   paymentLink:'' // e.g. https://rzp.io/l/yourlink123
 };
 
-const ADMIN_PASS = 'lotus2024';
 let currentFilter = {status:'all', type:'all'};
 let currentPlot = null;
 let plots = [];
+
+const PRIVATE_STATUSES = {
+  'available':'Available',
+  'booked':'Booked',
+  'reserved-self':'Reserved for Self',
+  'not-available':'Not Available',
+  'mortgaged':'Mortgaged',
+  'landowner-reserved':'Land-Owner Reserved',
+  'agency-lot':'Agency Lot'
+};
+const PUBLIC_STATUSES = {
+  'available':'Available',
+  'booked':'Booked',
+  'reserved':'Reserved',
+  'not-available':'Not Available'
+};
 
 function assignType(n){
   if(n<=3)return 1;
@@ -458,17 +517,23 @@ function assignType(n){
 }
 for(let i=1;i<=369;i++){
   if(i===248)continue; // split into 248A and 248B due to duplicate label in source layout
-  plots.push({id:i, type:assignType(i), status:'available'});
+  plots.push({id:i, type:assignType(i), status:'available', privateStatus:'available'});
 }
-plots.push({id:'248A', type:assignType(248), status:'available'});
-plots.push({id:'248B', type:assignType(248), status:'available'});
-for(let i=1;i<=32;i++) plots.push({id:'E'+i, type:'E', status:'available'});
-for(let i=1;i<=19;i++) plots.push({id:'L'+i, type:'L', status:'available'});
-for(let i=1;i<=28;i++) plots.push({id:'M'+i, type:'M', status:'available'});
+plots.push({id:'248A', type:assignType(248), status:'available', privateStatus:'available'});
+plots.push({id:'248B', type:assignType(248), status:'available', privateStatus:'available'});
+for(let i=1;i<=32;i++) plots.push({id:'E'+i, type:'E', status:'available', privateStatus:'available'});
+for(let i=1;i<=19;i++) plots.push({id:'L'+i, type:'L', status:'available', privateStatus:'available'});
+for(let i=1;i<=28;i++) plots.push({id:'M'+i, type:'M', status:'available', privateStatus:'available'});
 
+// PUBLIC status demo data (Available / Booked / Reserved / Not Available)
 [12,34,56,78,90,110,145,178,200,222,245,280,310,340].forEach(n=>{const p=plots.find(pl=>pl.id===n);if(p)p.status='booked'});
 [15,40,67,100,133,160,190,215,250,275,305,335].forEach(n=>{const p=plots.find(pl=>pl.id===n);if(p)p.status='reserved'});
 [3,7,219,250].forEach(n=>{const p=plots.find(pl=>pl.id===n);if(p)p.status='not-available'});
+
+// PRIVATE status demo data (independent internal tracker - admin only)
+[12,34,56].forEach(n=>{const p=plots.find(pl=>pl.id===n);if(p)p.privateStatus='booked'});
+[78,90].forEach(n=>{const p=plots.find(pl=>pl.id===n);if(p)p.privateStatus='reserved-self'});
+[3,7].forEach(n=>{const p=plots.find(pl=>pl.id===n);if(p)p.privateStatus='not-available'});
 
 // ─── BLOCK DEFINITIONS (4-corner quad mapping) ────────────────────────────
 const BLOCKS = [
@@ -795,26 +860,93 @@ function submitEnquiry(){
 }
 
 // ─── ADMIN ────────────────────────────────────────────────────────────────
-function openAdmin(){
-  document.getElementById('adminModal').classList.add('open');
-  document.getElementById('adminLogin').style.display='flex';
-  document.getElementById('adminPanel').style.display='none';
-  document.getElementById('adminPass').value='';
-  document.getElementById('adminErr').textContent='';
-  loadContactInputs();
+// ─── FIRESTORE PERSISTENCE ─────────────────────────────────────────────────
+async function saveToFirestore(){
+  try{
+    const fb = window.__firebase;
+    const data = {
+      plotStatuses: Object.fromEntries(plots.map(p=>[String(p.id), p.status])),
+      plotPrivateStatuses: Object.fromEntries(plots.map(p=>[String(p.id), p.privateStatus])),
+      pinOverrides: pinOverrides,
+      contactInfo: contactInfo,
+      reserveConfig: reserveConfig,
+      updatedAt: new Date().toISOString()
+    };
+    await fb.setDoc(fb.doc(fb.db,'lotusValley','siteData'), data);
+    return true;
+  }catch(e){
+    console.error('Firestore save failed:', e);
+    return false;
+  }
 }
-function closeAdmin(){document.getElementById('adminModal').classList.remove('open')}
-function checkAdmin(){
-  const p=document.getElementById('adminPass').value;
-  if(p===ADMIN_PASS){
+async function loadFromFirestore(){
+  try{
+    const fb = window.__firebase;
+    const snap = await fb.getDoc(fb.doc(fb.db,'lotusValley','siteData'));
+    if(!snap.exists())return false;
+    const data = snap.data();
+    if(data.plotStatuses){
+      Object.entries(data.plotStatuses).forEach(([id,status])=>{
+        const p=plots.find(pl=>String(pl.id)===id);
+        if(p && PUBLIC_STATUSES[status]) p.status=status;
+      });
+    }
+    if(data.plotPrivateStatuses){
+      Object.entries(data.plotPrivateStatuses).forEach(([id,status])=>{
+        const p=plots.find(pl=>String(pl.id)===id);
+        if(p && PRIVATE_STATUSES[status]) p.privateStatus=status;
+      });
+    }
+    if(data.pinOverrides) Object.assign(pinOverrides, data.pinOverrides);
+    if(data.contactInfo) Object.assign(contactInfo, data.contactInfo);
+    if(data.reserveConfig) Object.assign(reserveConfig, data.reserveConfig);
+    return true;
+  }catch(e){
+    console.warn('Firestore load failed (may not have data yet):', e.message);
+    return false;
+  }
+}
+let currentUser = null;
+
+window.addEventListener('lv-auth-changed', (e)=>{
+  currentUser = e.detail.user;
+  const isAdmin = currentUser && window.__firebase.isAdminEmail(currentUser.email);
+  if(isAdmin){
     document.getElementById('adminLogin').style.display='none';
     document.getElementById('adminPanel').style.display='block';
+    const badge = document.getElementById('adminUserBadge');
+    badge.style.display='inline';
+    badge.innerHTML = `Signed in: ${currentUser.email} <a href="#" onclick="adminSignOut();return false;" style="color:#fff;text-decoration:underline;margin-left:.5rem">Sign out</a>`;
     renderAdminTable();
     loadContactInputs();
     loadBlockValues();
-  }else{
-    document.getElementById('adminErr').textContent='Incorrect password.';
+  } else if(currentUser && !isAdmin){
+    document.getElementById('adminErr').textContent = `Signed in as ${currentUser.email}, but this account is not authorized for admin access.`;
+    document.getElementById('adminLogin').style.display='flex';
+    document.getElementById('adminPanel').style.display='none';
+  } else {
+    document.getElementById('adminLogin').style.display='flex';
+    document.getElementById('adminPanel').style.display='none';
+    document.getElementById('adminUserBadge').style.display='none';
   }
+});
+
+function openAdmin(){
+  document.getElementById('adminModal').classList.add('open');
+  document.getElementById('adminErr').textContent='';
+}
+function closeAdmin(){document.getElementById('adminModal').classList.remove('open')}
+async function signInWithGoogle(){
+  try{
+    document.getElementById('adminErr').textContent='';
+    await window.__firebase.signInWithPopup();
+  }catch(e){
+    document.getElementById('adminErr').textContent = 'Sign-in failed: '+e.message;
+  }
+}
+async function adminSignOut(){
+  await window.__firebase.signOut();
+  closeAdmin();
 }
 function renderAdminTable(){
   const search=document.getElementById('adminSearch').value.toLowerCase();
@@ -827,30 +959,32 @@ function renderAdminTable(){
     return sm&&qm;
   }).forEach(p=>{
     const pt=PLOT_TYPES[p.type];
+    const publicOpts = Object.entries(PUBLIC_STATUSES).map(([k,v])=>`<option value="${k}"${p.status===k?' selected':''}>${v}</option>`).join('');
+    const privateOpts = Object.entries(PRIVATE_STATUSES).map(([k,v])=>`<option value="${k}"${p.privateStatus===k?' selected':''}>${v}</option>`).join('');
     tbody.innerHTML+=`<tr>
       <td><strong>#${p.id}</strong></td>
       <td>${pt.label}</td>
       <td>${pt.dim}</td>
       <td>${pt.area?pt.area.toLocaleString()+' sq ft':'—'}</td>
-      <td><select onchange="changePlotStatus('${p.id}',this.value)">
-        <option value="available"${p.status==='available'?' selected':''}>Available</option>
-        <option value="booked"${p.status==='booked'?' selected':''}>Booked</option>
-        <option value="reserved"${p.status==='reserved'?' selected':''}>Reserved</option>
-        <option value="not-available"${p.status==='not-available'?' selected':''}>Not Available</option>
-      </select></td>
+      <td><select onchange="changePublicStatus('${p.id}',this.value)" style="border-color:#2d7a4f">${publicOpts}</select></td>
+      <td><select onchange="changePrivateStatus('${p.id}',this.value)" style="border-color:#888">${privateOpts}</select></td>
     </tr>`;
   });
 }
-function changePlotStatus(id,status){
+function changePublicStatus(id,status){
   const p=plots.find(pl=>String(pl.id)===String(id));
-  if(p){p.status=status;refreshPinClasses();populatePlotSelect();}
+  if(p){p.status=status;refreshPinClasses();populatePlotSelect();renderAdminTable();saveToFirestore();}
+}
+function changePrivateStatus(id,status){
+  const p=plots.find(pl=>String(pl.id)===String(id));
+  if(p){p.privateStatus=status;renderAdminTable();saveToFirestore();}
 }
 
 // ─── EXCEL EXPORT/IMPORT ──────────────────────────────────────────────────
 function exportExcel(){
   const data=plots.map(p=>{
     const pt=PLOT_TYPES[p.type];
-    return {'Plot Number':p.id,'Plot Type':pt.label,'Dimensions (ft)':pt.dim,'Area (sq ft)':pt.area||'N/A','Status':p.status};
+    return {'Plot Number':p.id,'Plot Type':pt.label,'Dimensions (ft)':pt.dim,'Area (sq ft)':pt.area||'N/A','Public Status':PUBLIC_STATUSES[p.status]||p.status,'Private Status':PRIVATE_STATUSES[p.privateStatus]||p.privateStatus};
   });
   const ws=XLSX.utils.json_to_sheet(data);
   const wb=XLSX.utils.book_new();
@@ -861,23 +995,32 @@ function importExcel(input){
   const file=input.files[0];
   if(!file)return;
   const reader=new FileReader();
-  reader.onload=e=>{
+  reader.onload=async e=>{
     const wb=XLSX.read(e.target.result,{type:'binary'});
     const ws=wb.Sheets[wb.SheetNames[0]];
     const rows=XLSX.utils.sheet_to_json(ws);
     let updated=0;
+    const publicLabelToKey = Object.fromEntries(Object.entries(PUBLIC_STATUSES).map(([k,v])=>[v.toLowerCase(),k]));
+    const privateLabelToKey = Object.fromEntries(Object.entries(PRIVATE_STATUSES).map(([k,v])=>[v.toLowerCase(),k]));
     rows.forEach(row=>{
       const idRaw = row['Plot Number']||row['plot_number']||row['Plot #']||row['id'];
       const id = String(idRaw).trim();
-      const status=(row['Status']||row['status']||'').toLowerCase().trim().replace(' ','-');
-      const valid=['available','booked','reserved','not-available'];
-      if(id&&valid.includes(status)){
-        const p=plots.find(pl=>String(pl.id)===id);
-        if(p){p.status=status;updated++;}
+      const p=plots.find(pl=>String(pl.id)===id);
+      if(!p)return;
+      const pubRaw = (row['Public Status']||'').toString().toLowerCase().trim();
+      const privRaw = (row['Private Status']||'').toString().toLowerCase().trim();
+      if(pubRaw && (PUBLIC_STATUSES[pubRaw] || publicLabelToKey[pubRaw])){
+        p.status = PUBLIC_STATUSES[pubRaw] ? pubRaw : publicLabelToKey[pubRaw];
+        updated++;
+      }
+      if(privRaw && (PRIVATE_STATUSES[privRaw] || privateLabelToKey[privRaw])){
+        p.privateStatus = PRIVATE_STATUSES[privRaw] ? privRaw : privateLabelToKey[privRaw];
+        updated++;
       }
     });
     refreshPinClasses();populatePlotSelect();renderAdminTable();
-    alert(`✅ Import complete! ${updated} plot(s) updated.`);
+    const saved = await saveToFirestore();
+    alert(`✅ Import complete! ${updated} field(s) updated${saved?' and saved live.':' (live save failed - check console).'}`);
   };
   reader.readAsBinaryString(file);
   input.value='';
@@ -897,7 +1040,8 @@ async function importPinJSON(){
       }
     });
     renderOverlays();
-    document.getElementById('pinImportStatus').textContent = `✅ Previewing ${count} pin positions. Click "Download pin-positions.json" to make this permanent on the live site.`;
+    const saved = await saveToFirestore();
+    document.getElementById('pinImportStatus').textContent = `✅ Applied ${count} pin positions${saved?' and saved live':' (save failed - check console)'}.`;
     const msg=document.getElementById('pinImportMsg');
     msg.style.display='inline';
     setTimeout(()=>msg.style.display='none',2000);
@@ -921,13 +1065,23 @@ function downloadPinPositionsFile(){
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
-function downloadPlotStatusFile(){
+function downloadPublicStatusFile(){
   const data = {};
   plots.forEach(p=>{ data[String(p.id)] = p.status; });
   const blob = new Blob([JSON.stringify(data,null,1)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href=url; a.download='plot-status.json';
+  a.href=url; a.download='plot-status-public.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+function downloadPrivateStatusFile(){
+  const data = {};
+  plots.forEach(p=>{ data[String(p.id)] = p.privateStatus; });
+  const blob = new Blob([JSON.stringify(data,null,1)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download='plot-status-private.json';
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
@@ -940,76 +1094,24 @@ function downloadSiteConfigFile(){
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
-function clearPinOverrides(){
-  if(!confirm('Clear preview overrides? (This only affects this preview session - your pin-positions.json file on the server is unchanged)'))return;
+async function clearPinOverrides(){
+  if(!confirm('Clear all manually-placed pin positions for everyone (live)? This reverts to computed positions.'))return;
   pinOverrides = {};
   renderOverlays();
-  document.getElementById('pinImportStatus').textContent = 'Preview overrides cleared.';
+  await saveToFirestore();
+  document.getElementById('pinImportStatus').textContent = 'Overrides cleared and saved live.';
 }
 async function loadStoredOverrides(){
-  // Try loading pin positions from a JSON file hosted alongside the site
-  try{
-    const res = await fetch('./pin-positions.json', {cache:'no-store'});
-    if(res.ok){
-      const data = await res.json();
-      Object.entries(data).forEach(([id,pos])=>{
-        if(pos && typeof pos.x==='number' && typeof pos.y==='number'){
-          pinOverrides[id]={x:pos.x,y:pos.y};
-        }
-      });
-      renderOverlays();
-      console.log('Lotus Valley: loaded', Object.keys(data).length, 'pin positions from pin-positions.json');
-    }
-  }catch(e){
-    console.warn('Lotus Valley: pin-positions.json not found or invalid:', e.message);
+  const loaded = await loadFromFirestore();
+  if(loaded){
+    refreshPinClasses();
+    populatePlotSelect();
+    applyContactInfoToDOM();
+    renderOverlays();
+    console.log('Lotus Valley: loaded live data from Firestore');
+  } else {
+    console.log('Lotus Valley: no Firestore data yet, using defaults');
   }
-
-  // Try loading plot statuses from a JSON file hosted alongside the site
-  try{
-    const res = await fetch('./plot-status.json', {cache:'no-store'});
-    if(res.ok){
-      const data = await res.json();
-      let count=0;
-      Object.entries(data).forEach(([id,status])=>{
-        const valid=['available','booked','reserved','not-available'];
-        if(valid.includes(status)){
-          const p=plots.find(pl=>String(pl.id)===String(id));
-          if(p){p.status=status;count++;}
-        }
-      });
-      refreshPinClasses();
-      populatePlotSelect();
-      console.log('Lotus Valley: loaded', count, 'plot statuses from plot-status.json');
-    }
-  }catch(e){
-    console.warn('Lotus Valley: plot-status.json not found or invalid:', e.message);
-  }
-
-  // Try loading site config (contact info + reservation settings) from a JSON file
-  try{
-    const res = await fetch('./site-config.json', {cache:'no-store'});
-    if(res.ok){
-      const data = await res.json();
-      if(data.contactInfo) Object.assign(contactInfo, data.contactInfo);
-      if(data.reserveConfig) Object.assign(reserveConfig, data.reserveConfig);
-      applyContactInfoToDOM();
-      console.log('Lotus Valley: loaded site-config.json');
-    }
-  }catch(e){
-    console.warn('Lotus Valley: site-config.json not found or invalid:', e.message);
-  }
-
-  // Also check in-session storage (works in Claude.ai preview) as a fallback/override
-  try{
-    if(window.storage && typeof window.storage.get==='function'){
-      const result = await window.storage.get('pinOverrides', true);
-      if(result && result.value){
-        const stored = JSON.parse(result.value);
-        Object.assign(pinOverrides, stored);
-        renderOverlays();
-      }
-    }
-  }catch(e){}
 }
 
 // ─── BLOCK CALIBRATION ─────────────────────────────────────────────────────
@@ -1075,6 +1177,7 @@ function saveReserveConfig(){
   reserveConfig.enabled = document.getElementById('rcEnabled').value==='1';
   reserveConfig.feeAmount = parseFloat(document.getElementById('rcFee').value)||0;
   reserveConfig.paymentLink = document.getElementById('rcLink').value.trim();
+  saveToFirestore();
   const msg=document.getElementById('reserveMsg');
   msg.style.display='inline';
   setTimeout(()=>msg.style.display='none',2000);
@@ -1103,6 +1206,7 @@ function saveContactInfo(){
   contactInfo.email=document.getElementById('aemail').value.trim()||contactInfo.email;
   contactInfo.web=document.getElementById('aweb').value.trim()||contactInfo.web;
   applyContactInfoToDOM();
+  saveToFirestore();
   const msg=document.getElementById('saveMsg');
   msg.style.display='inline';
   setTimeout(()=>msg.style.display='none',2500);
