@@ -610,11 +610,18 @@ let mapZoom = 1;
 let IMG_W = 2264, IMG_H = 1517;
 
 function getEffectiveRects(){
-  return plotRects.map(pr=>{
+  const fromBlocks = plotRects.map(pr=>{
     const ov = pinOverrides[String(pr.id)];
     if(ov) return {id:pr.id, cx:ov.x, cy:ov.y};
     return pr;
   });
+  // Include any override-only IDs that have no computed block position
+  // (e.g. 248A/248B which were manually split from the original plot 248)
+  const blockIds = new Set(fromBlocks.map(pr=>String(pr.id)));
+  const extras = Object.entries(pinOverrides)
+    .filter(([id])=>!blockIds.has(String(id)))
+    .map(([id,pos])=>({id, cx:pos.x, cy:pos.y}));
+  return fromBlocks.concat(extras);
 }
 
 // ─── MAP / OVERLAY RENDERING ───────────────────────────────────────────────
