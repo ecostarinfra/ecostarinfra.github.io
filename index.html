@@ -89,6 +89,17 @@ nav .admin-btn{background:var(--gold);color:#fff;border:none;padding:.4rem 1rem;
 .plot-pin.booked circle{fill:rgba(192,57,43,.9)}
 .plot-pin.reserved circle{fill:rgba(230,126,34,.9)}
 .plot-pin.not-available circle{fill:rgba(100,100,100,.85)}
+/* Private status pin colors (admin view only) */
+.plot-pin.priv-available circle{fill:rgba(46,160,90,.85)}
+.plot-pin.priv-booked circle{fill:rgba(192,57,43,.9)}
+.plot-pin.priv-reserved-self circle{fill:rgba(155,89,182,.9)}
+.plot-pin.priv-not-available circle{fill:rgba(100,100,100,.85)}
+.plot-pin.priv-mortgaged circle{fill:rgba(231,76,60,.85)}
+.plot-pin.priv-landowner-reserved circle{fill:rgba(41,128,185,.9)}
+.plot-pin.priv-agency-lot circle{fill:rgba(243,156,18,.9)}
+
+#privateMapBanner{display:none;position:sticky;top:120px;z-index:80;background:#6c3483;color:#fff;text-align:center;padding:.5rem 1rem;font-size:.85rem;font-weight:600;letter-spacing:.5px}
+#privateMapBanner button{margin-left:1rem;padding:.2rem .7rem;background:#fff;color:#6c3483;border:none;border-radius:5px;cursor:pointer;font-size:.8rem;font-weight:700}
 .plot-pin:hover circle{stroke:#fff;stroke-width:2}
 .plot-pin.highlighted circle{stroke:#fff200;stroke-width:3}
 .plot-pin text{font-weight:700;fill:#fff;pointer-events:none}
@@ -258,7 +269,21 @@ footer a{color:#a8e6c2;text-decoration:none}
   <span>E/L/M: Special (size on request)</span>
 </div>
 
-<div class="map-section" id="map">
+<div id="privateMapBanner">
+  🔒 PRIVATE/ADMIN VIEW — showing internal status only. Not visible to public.
+  <button onclick="setMapViewMode('public')">Switch to Public View</button>
+</div>
+
+<div id="privateLegend" style="display:none;flex-wrap:wrap;gap:1rem;padding:.6rem 1.5rem;background:#f3e5f5;border-bottom:1px solid #ce93d8;align-items:center;font-size:.78rem;color:#444">
+  <strong style="color:#6c3483">🔒 Private Status:</strong>
+  <span><span class="leg-dot" style="background:rgba(46,160,90,.85)"></span>Available</span>
+  <span><span class="leg-dot" style="background:rgba(192,57,43,.9)"></span>Booked</span>
+  <span><span class="leg-dot" style="background:rgba(155,89,182,.9)"></span>Reserved for Self</span>
+  <span><span class="leg-dot" style="background:rgba(100,100,100,.85)"></span>Not Available</span>
+  <span><span class="leg-dot" style="background:rgba(231,76,60,.85)"></span>Mortgaged</span>
+  <span><span class="leg-dot" style="background:rgba(41,128,185,.9)"></span>Land-Owner Reserved</span>
+  <span><span class="leg-dot" style="background:rgba(243,156,18,.9)"></span>Agency Lot</span>
+</div>
   <h2>🗺️ Interactive Plot Layout – Lotus Valley</h2>
   <div class="map-wrapper" id="mapWrapper">
     <div id="mapContainer">
@@ -358,9 +383,10 @@ footer a{color:#a8e6c2;text-decoration:none}
             <option value="not-available">Not Available</option>
           </select>
         </div>
-        <div style="font-size:.78rem;color:#666;margin-bottom:.6rem;display:flex;gap:1rem">
+        <div style="font-size:.78rem;color:#666;margin-bottom:.6rem;display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
           <span><span style="color:#2d7a4f;font-weight:700">●</span> Public Status — shown to website visitors</span>
           <span><span style="color:#888;font-weight:700">●</span> Private Status — admin-only, never shown publicly</span>
+          <button class="action-btn" style="padding:.3rem .8rem;font-size:.8rem;background:#6c3483" onclick="showPrivateOnMap()">🔒 Show Private Status on Map</button>
         </div>
         <div style="overflow-x:auto;max-height:260px;overflow-y:auto">
           <table class="admin-table">
@@ -671,11 +697,15 @@ function renderOverlays(){
   while(svg.firstChild) svg.removeChild(svg.firstChild);
   const r = pinBaseSize / mapZoom;
   const fontSize = (pinBaseSize*0.77) / mapZoom;
+  const isPrivate = mapViewMode === 'private';
+
   getEffectiveRects().forEach(pr=>{
     const p = plots.find(pl=>String(pl.id)===String(pr.id));
     if(!p)return;
+
+    const statusClass = isPrivate ? 'priv-'+p.privateStatus : p.status;
     const g = document.createElementNS('http://www.w3.org/2000/svg','g');
-    g.setAttribute('class','plot-pin '+p.status);
+    g.setAttribute('class','plot-pin '+statusClass);
     g.setAttribute('data-id', pr.id);
     g.addEventListener('click',()=>openPlotPopup(p));
 
@@ -713,12 +743,14 @@ function applyFilterVisibility(){
 }
 
 function refreshPinClasses(){
+  const isPrivate = mapViewMode === 'private';
   document.querySelectorAll('.plot-pin').forEach(pin=>{
     const id=pin.dataset.id;
     const p=plots.find(pl=>String(pl.id)===id);
     if(!p)return;
     const wasHighlighted=pin.classList.contains('highlighted');
-    pin.setAttribute('class','plot-pin '+p.status+(wasHighlighted?' highlighted':''));
+    const statusClass = isPrivate ? 'priv-'+p.privateStatus : p.status;
+    pin.setAttribute('class','plot-pin '+statusClass+(wasHighlighted?' highlighted':''));
   });
   applyFilterVisibility();
   updateStats();
@@ -867,7 +899,30 @@ function submitEnquiry(){
 }
 
 // ─── ADMIN ────────────────────────────────────────────────────────────────
-// ─── FIRESTORE PERSISTENCE ─────────────────────────────────────────────────
+// ─── MAP VIEW MODE (public / private) ────────────────────────────────────
+let mapViewMode = 'public'; // 'public' or 'private'
+
+function showPrivateOnMap(){
+  setMapViewMode('private');
+  closeAdmin();
+  document.getElementById('map').scrollIntoView({behavior:'smooth'});
+}
+function setMapViewMode(mode){
+  mapViewMode = mode;
+  const banner = document.getElementById('privateMapBanner');
+  const privLegend = document.getElementById('privateLegend');
+  const pubLegend = document.querySelector('.legend');
+  if(mode==='private'){
+    banner.style.display='block';
+    privLegend.style.display='flex';
+    if(pubLegend) pubLegend.style.display='none';
+  } else {
+    banner.style.display='none';
+    privLegend.style.display='none';
+    if(pubLegend) pubLegend.style.display='flex';
+  }
+  renderOverlays();
+}
 async function saveToFirestore(){
   try{
     const fb = window.__firebase;
