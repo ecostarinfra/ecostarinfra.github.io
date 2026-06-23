@@ -8,7 +8,7 @@
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
   import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getFirestore, doc, getDoc, setDoc, collection, addDoc, getDocs, updateDoc, orderBy, query } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyDVECaT_Y9I0TGzskNgz07vq3x5tGIiRdk",
@@ -29,6 +29,7 @@
 
   window.__firebase = {
     auth: fbAuth, db: fbDb, doc, getDoc, setDoc,
+    collection, addDoc, getDocs, updateDoc, orderBy, query,
     signInWithPopup: ()=>signInWithPopup(fbAuth, googleProvider),
     signOut: ()=>signOut(fbAuth),
     isAdminEmail: (email)=> ADMIN_EMAILS.includes((email||'').toLowerCase()),
@@ -192,7 +193,7 @@ footer a{color:#a8e6c2;text-decoration:none}
     <li><a href="#map">Plot Map</a></li>
     <li><a href="#enquiry">Enquire</a></li>
   </ul>
-  <button class="admin-btn" onclick="openAdmin()">Admin Panel</button>
+  <button class="admin-btn" onclick="openAdmin()">Admin Panel <span id="enquiryBadge" style="display:none;background:#c0392b;color:#fff;border-radius:50%;padding:1px 6px;font-size:.75rem;margin-left:.3rem">0</span></button>
 </nav>
 
 <div class="hero">
@@ -986,6 +987,7 @@ async function loadFromFirestore(){
     if(data.pinOverrides) Object.assign(pinOverrides, data.pinOverrides);
     if(data.contactInfo) Object.assign(contactInfo, data.contactInfo);
     if(data.reserveConfig) Object.assign(reserveConfig, data.reserveConfig);
+    if(data.notifEmails) notifEmails = data.notifEmails;
     return true;
   }catch(e){
     console.warn('Firestore load failed (may not have data yet):', e.message);
@@ -1006,6 +1008,8 @@ window.addEventListener('lv-auth-changed', (e)=>{
     renderAdminTable();
     loadContactInputs();
     loadBlockValues();
+    loadEnquiries();
+    renderNotifEmailList();
   } else if(currentUser && !isAdmin){
     document.getElementById('adminErr').textContent = `Signed in as ${currentUser.email}, but this account is not authorized for admin access.`;
     document.getElementById('adminLogin').style.display='flex';
@@ -1304,6 +1308,7 @@ window.addEventListener('load',()=>{
   populatePlotSelect();
   loadStoredOverrides();
   setupPan();
+  updateEnquiryBadge();
 });
 window.addEventListener('resize',()=>{ fitMapToWidth(); });
 </script>
