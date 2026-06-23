@@ -860,8 +860,27 @@ function openPlotPopup(p){
 function closePopup(){document.getElementById('popupOverlay').classList.remove('open')}
 function enquireFromPopup(){
   closePopup();
-  document.getElementById('fplot').value=currentPlot?currentPlot.id:'';
+  const id = currentPlot ? String(currentPlot.id) : '';
+  // Scroll to enquiry section first
   document.getElementById('enquiry').scrollIntoView({behavior:'smooth'});
+  // Set value after a short delay to ensure the section is visible
+  setTimeout(()=>{
+    const sel = document.getElementById('fplot');
+    // Try to find the option matching this plot ID
+    const opt = Array.from(sel.options).find(o=>String(o.value)===id);
+    if(opt){
+      sel.value = opt.value;
+    } else {
+      // Plot may be booked/reserved — add a temporary disabled option for it
+      const pt = PLOT_TYPES[currentPlot.type];
+      const tempOpt = document.createElement('option');
+      tempOpt.value = id;
+      tempOpt.textContent = `Plot #${id} – ${pt.label} (${pt.dim})`;
+      tempOpt.dataset.temp = '1';
+      sel.insertBefore(tempOpt, sel.options[1]);
+      sel.value = id;
+    }
+  }, 300);
 }
 function openReserveForm(){
   const form = document.getElementById('reserveForm');
@@ -884,10 +903,15 @@ function proceedToPayment(){
 // ─── ENQUIRY FORM ────────────────────────────────────────────────────────
 function populatePlotSelect(){
   const sel=document.getElementById('fplot');
+  // Remove any temp options added from enquireFromPopup
+  Array.from(sel.options).forEach(o=>{ if(o.dataset.temp) o.remove(); });
   sel.innerHTML='<option value="">— Select a plot —</option>';
   plots.filter(p=>p.status==='available').forEach(p=>{
     const pt=PLOT_TYPES[p.type];
-    sel.innerHTML+=`<option value="${p.id}">Plot #${p.id} – ${pt.label} (${pt.dim})</option>`;
+    const opt = document.createElement('option');
+    opt.value = String(p.id);
+    opt.textContent = `Plot #${p.id} – ${pt.label} (${pt.dim})`;
+    sel.appendChild(opt);
   });
 }
 function submitEnquiry(){
