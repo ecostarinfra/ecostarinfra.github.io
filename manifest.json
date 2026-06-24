@@ -1,0 +1,26 @@
+{
+  "name": "Lotus Valley – Ecostar Infra",
+  "short_name": "Lotus Valley",
+  "description": "Plot booking for Lotus Valley by Ecostar Infra, Bhopal",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#1a5c38",
+  "theme_color": "#1a5c38",
+  "icons": [
+    {
+      "src": "web-app-manifest-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "web-app-manifest-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["business"],
+  "lang": "en-IN"
+}
