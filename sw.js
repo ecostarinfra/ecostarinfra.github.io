@@ -1,4 +1,4 @@
-const CACHE = 'lotus-valley-v1';
+const CACHE = 'lotus-valley-v2';
 const ASSETS = [
   '/',
   '/index.html',
