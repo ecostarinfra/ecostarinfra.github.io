@@ -1064,14 +1064,21 @@ onAuthStateChanged(auth,user=>{
 });
 
 // ─── EVENT WIRING ──────────────────────────────────────────────────────────
-document.getElementById('adminBtn').addEventListener('click',()=>document.getElementById('adminModal').classList.add('open'));
-document.getElementById('closeAdminBtn').addEventListener('click',()=>{document.getElementById('adminModal').classList.remove('open');if(mapViewMode==='private')setMapViewMode('public');});
-document.getElementById('googleSignInBtn').addEventListener('click',async()=>{try{document.getElementById('adminErr').textContent='';await signInWithPopup(auth,provider);}catch(e){document.getElementById('adminErr').textContent='Sign-in failed: '+e.message;}});
-document.getElementById('closePopupBtn').addEventListener('click',closePopup);
-document.getElementById('popupOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('popupOverlay'))closePopup();});
-document.getElementById('enquireFromPopupBtn').addEventListener('click',enquireFromPopup);
-document.getElementById('reserveBtn').addEventListener('click',()=>{const f=document.getElementById('reserveForm');f.style.display=f.style.display==='none'?'block':'none';});
-document.getElementById('proceedPayBtn').addEventListener('click',()=>{
+// Wrap in try/catch so one bad wire doesn't break all others
+function wire(id, evt, fn){
+  const el = document.getElementById(id);
+  if(el) el.addEventListener(evt, fn);
+  else console.warn('Missing element:', id);
+}
+
+wire('adminBtn','click',()=>document.getElementById('adminModal').classList.add('open'));
+wire('closeAdminBtn','click',()=>{document.getElementById('adminModal').classList.remove('open');if(mapViewMode==='private')setMapViewMode('public');});
+wire('googleSignInBtn','click',async()=>{try{document.getElementById('adminErr').textContent='';await signInWithPopup(auth,provider);}catch(e){document.getElementById('adminErr').textContent='Sign-in failed: '+e.message;}});
+wire('closePopupBtn','click',closePopup);
+wire('popupOverlay','click',e=>{if(e.target===document.getElementById('popupOverlay'))closePopup();});
+wire('enquireFromPopupBtn','click',enquireFromPopup);
+wire('reserveBtn','click',()=>{const f=document.getElementById('reserveForm');f.style.display=f.style.display==='none'?'block':'none';});
+wire('proceedPayBtn','click',()=>{
   const n=document.getElementById('rname').value.trim(),ph=document.getElementById('rphone').value.trim();
   if(!n||!ph){alert('Please enter name and phone.');return;}
   if(!reserveConfig.paymentLink){alert('Payment not configured. Please contact us directly.');return;}
@@ -1079,67 +1086,67 @@ document.getElementById('proceedPayBtn').addEventListener('click',()=>{
   alert(`Thank you, ${n}! A payment page has opened for Plot #${currentPlot.id} (₹${reserveConfig.feeAmount.toLocaleString('en-IN')} reservation fee). After payment, contact us at ${contactInfo.ph1} with your reference number.`);
   closePopup();
 });
-document.getElementById('submitEnquiryBtn').addEventListener('click',submitEnquiry);
-document.getElementById('zoomIn').addEventListener('click',()=>{mapZoom=Math.min(mapZoom*1.25,4);applyMapZoom();});
-document.getElementById('zoomOut').addEventListener('click',()=>{mapZoom=Math.max(mapZoom*0.8,0.15);applyMapZoom();});
-document.getElementById('zoomReset').addEventListener('click',fitMapToWidth);
-document.getElementById('pinSizeSlider').addEventListener('input',e=>{pinBaseSize=parseFloat(e.target.value)||13;document.getElementById('pinSizeLabel').textContent=Math.round(pinBaseSize);renderOverlays();});
-document.getElementById('searchInput').addEventListener('input',e=>{
+wire('submitEnquiryBtn','click',submitEnquiry);
+wire('zoomIn','click',()=>{mapZoom=Math.min(mapZoom*1.25,4);applyMapZoom();});
+wire('zoomOut','click',()=>{mapZoom=Math.max(mapZoom*0.8,0.15);applyMapZoom();});
+wire('zoomReset','click',fitMapToWidth);
+wire('pinSizeSlider','input',e=>{pinBaseSize=parseFloat(e.target.value)||13;document.getElementById('pinSizeLabel').textContent=Math.round(pinBaseSize);renderOverlays();});
+wire('searchInput','input',e=>{
   document.querySelectorAll('.plot-pin').forEach(d=>d.classList.remove('highlighted'));
   const v=e.target.value.trim();if(!v)return;
   const pin=document.querySelector(`.plot-pin[data-id="${v}"]`);
   if(pin){pin.classList.add('highlighted');pin.scrollIntoView({behavior:'smooth',block:'center',inline:'center'});}
 });
-document.getElementById('typeFilter').addEventListener('change',e=>{currentFilter.type=e.target.value;applyFilterVisibility();});
+wire('typeFilter','change',e=>{currentFilter.type=e.target.value;applyFilterVisibility();});
 ['filterAll','filterAvail','filterBooked','filterReserved','filterNA'].forEach((id,i)=>{
   const vals=['all','available','booked','reserved','not-available'];
-  document.getElementById(id).addEventListener('click',e=>{
+  wire(id,'click',e=>{
     currentFilter.status=vals[i];
     document.querySelectorAll('.filter-bar button').forEach(b=>b.classList.remove('active'));
     e.target.classList.add('active');
     applyFilterVisibility();
   });
 });
-document.getElementById('adminSearch').addEventListener('input',renderAdminTable);
-document.getElementById('adminStatusFilter').addEventListener('change',renderAdminTable);
-document.getElementById('exportExcelBtn').addEventListener('click',exportExcel);
-document.getElementById('importExcelInput').addEventListener('change',e=>importExcel(e.target));
-document.getElementById('showPrivateMapBtn').addEventListener('click',()=>{setMapViewMode('private');document.getElementById('adminModal').classList.remove('open');document.getElementById('map').scrollIntoView({behavior:'smooth'});});
-document.getElementById('switchPublicBtn').addEventListener('click',()=>setMapViewMode('public'));
-document.getElementById('applyPinsBtn').addEventListener('click',applyPinJSON);
-document.getElementById('exportPinsBtn').addEventListener('click',exportPinJSON);
-document.getElementById('dlPinsBtn').addEventListener('click',downloadPinJSON);
-document.getElementById('clearPinsBtn').addEventListener('click',clearPins);
-document.getElementById('blockSelect').addEventListener('change',loadBlockValues);
-document.getElementById('applyBlockBtn').addEventListener('click',applyBlock);
-document.getElementById('showCoordsBtn').addEventListener('click',()=>{
+wire('adminSearch','input',renderAdminTable);
+wire('adminStatusFilter','change',renderAdminTable);
+wire('exportExcelBtn','click',exportExcel);
+wire('importExcelInput','change',e=>importExcel(e.target));
+wire('showPrivateMapBtn','click',()=>{setMapViewMode('private');document.getElementById('adminModal').classList.remove('open');document.getElementById('map').scrollIntoView({behavior:'smooth'});});
+wire('switchPublicBtn','click',()=>setMapViewMode('public'));
+wire('applyPinsBtn','click',applyPinJSON);
+wire('exportPinsBtn','click',exportPinJSON);
+wire('dlPinsBtn','click',downloadPinJSON);
+wire('clearPinsBtn','click',clearPins);
+wire('blockSelect','change',loadBlockValues);
+wire('applyBlockBtn','click',applyBlock);
+wire('showCoordsBtn','click',()=>{
   coordModeOn=true;document.getElementById('adminModal').classList.remove('open');
   document.getElementById('coordFloater').style.display='block';
   document.getElementById('coordFloaterReadout').textContent='x: —, y: —';
 });
-document.getElementById('exitCoordBtn').addEventListener('click',()=>{
+wire('exitCoordBtn','click',()=>{
   coordModeOn=false;document.getElementById('coordFloater').style.display='none';
   document.getElementById('adminModal').classList.add('open');
 });
-document.getElementById('plotsLayerSvg').addEventListener('click',e=>{
+wire('plotsLayerSvg','click',e=>{
   if(!coordModeOn)return;
   const rect=document.getElementById('plotsLayerSvg').getBoundingClientRect();
   const x=(e.clientX-rect.left)/rect.width*IMG_W;
   const y=(e.clientY-rect.top)/rect.height*IMG_H;
   document.getElementById('coordFloaterReadout').textContent=`x: ${Math.round(x)}, y: ${Math.round(y)}`;
 });
-document.getElementById('saveContactBtn').addEventListener('click',saveContactInfo);
-document.getElementById('saveReserveBtn').addEventListener('click',saveReserveConfig);
-document.getElementById('addNotifEmailBtn').addEventListener('click',()=>{
+wire('saveContactBtn','click',saveContactInfo);
+wire('saveReserveBtn','click',saveReserveConfig);
+wire('addNotifEmailBtn','click',()=>{
   const input=document.getElementById('newNotifEmail');
   const val=input.value.trim().toLowerCase();
   if(!val||!val.includes('@')){alert('Please enter a valid email address.');return;}
   if(notifEmails.includes(val)){alert('Already in list.');return;}
   notifEmails.push(val);input.value='';renderNotifEmailList();
 });
-document.getElementById('saveNotifEmailsBtn').addEventListener('click',saveNotifEmails);
-document.getElementById('refreshEnquiriesBtn').addEventListener('click',loadEnquiries);
-document.getElementById('exportEnquiriesBtn').addEventListener('click',exportEnquiriesExcel);
+wire('saveNotifEmailsBtn','click',saveNotifEmails);
+wire('refreshEnquiriesBtn','click',loadEnquiries);
+wire('exportEnquiriesBtn','click',exportEnquiriesExcel);
 
 // ─── INIT ──────────────────────────────────────────────────────────────────
 buildMap();
