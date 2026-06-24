@@ -4,7 +4,15 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Lotus Valley – Ecostar Infra</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<meta name="description" content="Lotus Valley plotted development by Ecostar Infra — Live Life River Side. Bhopal Bypass, Hoshangabad Road."/>
+<meta name="theme-color" content="#1a5c38"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="web-app-manifest-192x192.png"/>
+<!-- Preconnect to speed up Firebase & image load -->
+<link rel="preconnect" href="https://www.gstatic.com"/>
+<link rel="preconnect" href="https://firestore.googleapis.com"/>
+<link rel="preload" as="image" href="https://ecostarinfra.github.io/lotus-valley-map.webp" type="image/webp"/>
+<!-- XLSX loaded lazily on demand -->
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',sans-serif;background:#f5f5f0;color:#2d2d2d}
@@ -236,7 +244,10 @@ footer a{color:#a8e6c2;text-decoration:none}
   <h2>🗺️ Interactive Plot Layout – Lotus Valley</h2>
   <div class="map-wrapper" id="mapWrapper">
     <div id="mapContainer">
-      <img id="layoutImg" src="https://ecostarinfra.github.io/lotus-valley-map.jpeg" alt="Lotus Valley Layout"/>
+      <picture>
+        <source srcset="https://ecostarinfra.github.io/lotus-valley-map.webp" type="image/webp"/>
+        <img id="layoutImg" src="https://ecostarinfra.github.io/lotus-valley-map.jpeg" alt="Lotus Valley Layout"/>
+      </picture>
       <svg id="plotsLayerSvg"></svg>
     </div>
   </div>
@@ -461,7 +472,20 @@ footer a{color:#a8e6c2;text-decoration:none}
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+// ─── LAZY XLSX LOADER ──────────────────────────────────────────────────────
+let xlsxLoaded = false;
+function loadXLSX(){
+  return new Promise((resolve,reject)=>{
+    if(xlsxLoaded){ resolve(window.XLSX); return; }
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload = ()=>{ xlsxLoaded=true; resolve(window.XLSX); };
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+// ─── LAZY FIREBASE LOADER ──────────────────────────────────────────────────
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import { getFirestore, doc, getDoc, setDoc, collection, addDoc, getDocs, updateDoc, orderBy, query } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
@@ -1127,6 +1151,15 @@ loadFromFirestore().then(loaded=>{
   updateEnquiryBadge();
 });
 window.addEventListener('resize',fitMapToWidth);
+
+// ─── PWA SERVICE WORKER REGISTRATION ──────────────────────────────────────
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('./sw.js')
+      .then(()=>console.log('Service Worker registered'))
+      .catch(e=>console.warn('SW registration failed:',e));
+  });
+}
 </script>
 </body>
 </html>
