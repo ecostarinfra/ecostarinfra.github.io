@@ -5,44 +5,10 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Lotus Valley – Ecostar Infra</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-  import { getFirestore, doc, getDoc, setDoc, collection, addDoc, getDocs, updateDoc, orderBy, query } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyDVECaT_Y9I0TGzskNgz07vq3x5tGIiRdk",
-    authDomain: "lotusvalley-e56b8.firebaseapp.com",
-    projectId: "lotusvalley-e56b8",
-    storageBucket: "lotusvalley-e56b8.firebasestorage.app",
-    messagingSenderId: "361482497260",
-    appId: "1:361482497260:web:8cd6a6b62359ba5bb909c9",
-    measurementId: "G-9X0XZ62Q1J"
-  };
-
-  const ADMIN_EMAILS = ["ecostarinfra2024@gmail.com"];
-
-  const fbApp = initializeApp(firebaseConfig);
-  const fbAuth = getAuth(fbApp);
-  const fbDb = getFirestore(fbApp);
-  const googleProvider = new GoogleAuthProvider();
-
-  window.__firebase = {
-    auth: fbAuth, db: fbDb, doc, getDoc, setDoc,
-    collection, addDoc, getDocs, updateDoc, orderBy, query,
-    signInWithPopup: ()=>signInWithPopup(fbAuth, googleProvider),
-    signOut: ()=>signOut(fbAuth),
-    isAdminEmail: (email)=> ADMIN_EMAILS.includes((email||'').toLowerCase()),
-  };
-
-  onAuthStateChanged(fbAuth, (user)=>{
-    window.dispatchEvent(new CustomEvent('lv-auth-changed', {detail:{user}}));
-  });
-</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',sans-serif;background:#f5f5f0;color:#2d2d2d}
-:root{--green:#2d7a4f;--green2:#1a5c38;--gold:#c8960c;--red:#c0392b;--orange:#e67e22;--gray:#7f8c8d}
+:root{--green:#2d7a4f;--green2:#1a5c38;--gold:#c8960c;--red:#c0392b;--orange:#e67e22}
 
 nav{background:var(--green2);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100}
 nav .logo{color:#fff;font-size:1.3rem;font-weight:700;letter-spacing:1px}
@@ -50,47 +16,55 @@ nav .logo span{color:var(--gold)}
 nav ul{list-style:none;display:flex;gap:1.5rem}
 nav ul li a{color:#cce8d8;text-decoration:none;font-size:.9rem}
 nav ul li a:hover{color:#fff}
-nav .admin-btn{background:var(--gold);color:#fff;border:none;padding:.4rem 1rem;border-radius:6px;cursor:pointer;font-size:.85rem;font-weight:600}
+.admin-btn{background:var(--gold);color:#fff;border:none;padding:.4rem 1rem;border-radius:6px;cursor:pointer;font-size:.85rem;font-weight:600}
 
-.hero{background:linear-gradient(135deg,#1a5c38 0%,#2d7a4f 60%,#3a9960 100%);color:#fff;text-align:center;padding:3.5rem 1rem 2.5rem}
+.hero{background:linear-gradient(135deg,#1a5c38,#2d7a4f 60%,#3a9960);color:#fff;text-align:center;padding:3.5rem 1rem 2.5rem}
 .hero h1{font-size:3rem;font-weight:800;letter-spacing:2px;text-shadow:0 2px 8px rgba(0,0,0,.3)}
 .hero .tagline{font-size:1.2rem;color:#a8e6c2;margin:.5rem 0 1.5rem;font-style:italic}
 .hero-stats{display:flex;justify-content:center;gap:2rem;flex-wrap:wrap;margin-top:1.5rem}
-.hero-stat{background:rgba(255,255,255,.12);border-radius:10px;padding:.8rem 1.5rem;min-width:110px}
+.hero-stat{background:rgba(255,255,255,.12);border-radius:10px;padding:.8rem 1.5rem;min-width:110px;text-align:center}
 .hero-stat .num{font-size:1.6rem;font-weight:700;color:#fff}
 .hero-stat .lbl{font-size:.78rem;color:#a8e6c2}
 
 .contact-bar{background:var(--green2);color:#cce8d8;text-align:center;padding:.5rem 1rem;font-size:.85rem;display:flex;justify-content:center;gap:2rem;flex-wrap:wrap}
 .contact-bar a{color:#cce8d8;text-decoration:none}
-.contact-bar a:hover{color:#fff}
 
 .filter-bar{background:#fff;padding:.8rem 1.5rem;display:flex;gap:.6rem;flex-wrap:wrap;align-items:center;border-bottom:1px solid #ddd;position:sticky;top:60px;z-index:90}
-.filter-bar label{font-size:.8rem;color:#555;margin-right:.2rem}
-.filter-bar select,.filter-bar input{padding:.3rem .6rem;border:1px solid #ccc;border-radius:5px;font-size:.82rem}
+.filter-bar label{font-size:.8rem;color:#555}
+.filter-bar select,.filter-bar input[type=text]{padding:.3rem .6rem;border:1px solid #ccc;border-radius:5px;font-size:.82rem}
 .filter-bar button{padding:.3rem .8rem;border:1px solid #ccc;border-radius:5px;background:#fff;cursor:pointer;font-size:.82rem;font-weight:600}
-.filter-bar button:hover{background:var(--green);color:#fff;border-color:var(--green)}
-.filter-bar button.active{background:var(--green);color:#fff;border-color:var(--green)}
+.filter-bar button:hover,.filter-bar button.active{background:var(--green);color:#fff;border-color:var(--green)}
+.sep{margin-left:.5rem;border-left:1px solid #ccc;padding-left:.5rem}
 
 .legend{display:flex;gap:1rem;flex-wrap:wrap;padding:.6rem 1.5rem;background:#f9f9f6;border-bottom:1px solid #e0e0d8;align-items:center;font-size:.78rem;color:#444}
-.leg-dot{width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.15);display:inline-block;vertical-align:middle;margin-right:4px}
+.leg-dot{width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.15);display:inline-block;vertical-align:middle;margin-right:3px}
+
+#privateMapBanner{display:none;position:sticky;top:120px;z-index:80;background:#6c3483;color:#fff;text-align:center;padding:.5rem 1rem;font-size:.85rem;font-weight:600}
+#privateMapBanner button{margin-left:1rem;padding:.2rem .7rem;background:#fff;color:#6c3483;border:none;border-radius:5px;cursor:pointer;font-size:.8rem;font-weight:700}
+#privateLegend{display:none;flex-wrap:wrap;gap:1rem;padding:.6rem 1.5rem;background:#f3e5f5;border-bottom:1px solid #ce93d8;align-items:center;font-size:.78rem}
 
 .map-section{padding:1.2rem 1.5rem}
 .map-section h2{font-size:1.1rem;color:var(--green2);margin-bottom:.8rem;font-weight:600}
-.map-wrapper{position:relative;width:100%;background:#e8ede5;border-radius:12px;overflow:auto;border:2px solid #c5d5c0;max-height:75vh;cursor:grab}
+.map-wrapper{width:100%;background:#e8ede5;border-radius:12px;overflow:auto;border:2px solid #c5d5c0;max-height:75vh;cursor:grab}
 .map-wrapper.dragging{cursor:grabbing;user-select:none}
-#mapContainer{position:relative;display:inline-block;line-height:0}
+#mapContainer{position:relative;display:inline-block}
 #layoutImg{display:block;pointer-events:none}
 #plotsLayerSvg{position:absolute;top:0;left:0;display:block}
 .zoom-controls{position:sticky;bottom:12px;float:right;margin-right:12px;display:flex;gap:6px;z-index:50;background:rgba(255,255,255,.92);padding:4px;border-radius:8px}
 .zoom-controls button{width:36px;height:36px;border:1.5px solid var(--green);border-radius:6px;background:#fff;color:var(--green);font-size:1.1rem;font-weight:700;cursor:pointer}
 
 .plot-pin{cursor:pointer}
-.plot-pin circle{stroke:rgba(0,0,0,.3);stroke-width:1;vector-effect:non-scaling-stroke}
+.plot-pin circle{stroke:rgba(0,0,0,.3);stroke-width:1}
+.plot-pin:hover circle{stroke:#fff;stroke-width:2}
+.plot-pin.highlighted circle{stroke:#fff200;stroke-width:3}
+.plot-pin text{font-weight:700;fill:#fff;pointer-events:none}
+.plot-pin.dimmed{opacity:.08}
+/* Public status colors */
 .plot-pin.available circle{fill:rgba(46,160,90,.85)}
 .plot-pin.booked circle{fill:rgba(192,57,43,.9)}
 .plot-pin.reserved circle{fill:rgba(230,126,34,.9)}
 .plot-pin.not-available circle{fill:rgba(100,100,100,.85)}
-/* Private status pin colors (admin view only) */
+/* Private status colors */
 .plot-pin.priv-available circle{fill:rgba(46,160,90,.85)}
 .plot-pin.priv-booked circle{fill:rgba(192,57,43,.9)}
 .plot-pin.priv-reserved-self circle{fill:rgba(155,89,182,.9)}
@@ -99,13 +73,6 @@ nav .admin-btn{background:var(--gold);color:#fff;border:none;padding:.4rem 1rem;
 .plot-pin.priv-landowner-reserved circle{fill:rgba(41,128,185,.9)}
 .plot-pin.priv-agency-lot circle{fill:rgba(243,156,18,.9)}
 
-#privateMapBanner{display:none;position:sticky;top:120px;z-index:80;background:#6c3483;color:#fff;text-align:center;padding:.5rem 1rem;font-size:.85rem;font-weight:600;letter-spacing:.5px}
-#privateMapBanner button{margin-left:1rem;padding:.2rem .7rem;background:#fff;color:#6c3483;border:none;border-radius:5px;cursor:pointer;font-size:.8rem;font-weight:700}
-.plot-pin:hover circle{stroke:#fff;stroke-width:2}
-.plot-pin.highlighted circle{stroke:#fff200;stroke-width:3}
-.plot-pin text{font-weight:700;fill:#fff;pointer-events:none}
-.plot-pin.dimmed{opacity:.08}
-
 .popup-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;align-items:center;justify-content:center}
 .popup-overlay.open{display:flex}
 .popup{background:#fff;border-radius:14px;padding:1.5rem;width:340px;max-width:95vw;position:relative;box-shadow:0 8px 40px rgba(0,0,0,.18)}
@@ -113,14 +80,14 @@ nav .admin-btn{background:var(--gold);color:#fff;border:none;padding:.4rem 1rem;
 .popup .close-btn{position:absolute;top:10px;right:12px;background:none;border:none;font-size:1.4rem;cursor:pointer;color:#888}
 .popup-row{display:flex;justify-content:space-between;margin:.4rem 0;font-size:.88rem}
 .popup-row .pk{color:#666;font-weight:500}
-.popup-row .pv{font-weight:600;color:#2d2d2d}
+.popup-row .pv{font-weight:600}
 .status-badge{display:inline-block;padding:.2rem .7rem;border-radius:20px;font-size:.8rem;font-weight:700}
 .status-available{background:#d4edda;color:#155724}
 .status-booked{background:#f8d7da;color:#721c24}
 .status-reserved{background:#fff3cd;color:#856404}
 .status-not-available{background:#e2e3e5;color:#383d41}
-.popup .enquire-btn{width:100%;margin-top:1rem;padding:.7rem;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:.95rem;font-weight:700;cursor:pointer}
-.popup .enquire-btn:hover{background:var(--green2)}
+.enquire-btn{width:100%;margin-top:.6rem;padding:.7rem;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:.95rem;font-weight:700;cursor:pointer}
+.enquire-btn:hover{background:var(--green2)}
 
 .enquiry-section{background:#fff;padding:2rem 1.5rem;border-top:4px solid var(--green)}
 .enquiry-section h2{color:var(--green2);font-size:1.4rem;margin-bottom:1.2rem}
@@ -131,7 +98,6 @@ nav .admin-btn{background:var(--gold);color:#fff;border:none;padding:.4rem 1rem;
 .form-group input:focus,.form-group select:focus,.form-group textarea:focus{border-color:var(--green)}
 .form-group.full{grid-column:1/-1}
 .submit-btn{margin-top:.5rem;padding:.75rem 2rem;background:var(--green);color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer}
-.submit-btn:hover{background:var(--green2)}
 .form-success{display:none;background:#d4edda;color:#155724;padding:1rem;border-radius:8px;margin-top:1rem;text-align:center;font-weight:600}
 
 footer{background:var(--green2);color:#cce8d8;text-align:center;padding:1.5rem 1rem;font-size:.85rem}
@@ -139,48 +105,47 @@ footer a{color:#a8e6c2;text-decoration:none}
 
 .admin-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center}
 .admin-modal.open{display:flex}
-.admin-box{background:#fff;border-radius:14px;width:95vw;max-width:900px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column}
+.admin-box{background:#fff;border-radius:14px;width:95vw;max-width:960px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column}
 .admin-header{background:var(--green2);color:#fff;padding:1rem 1.5rem;display:flex;align-items:center;justify-content:space-between}
 .admin-header h3{font-size:1.1rem}
 .admin-header button{background:none;border:none;color:#fff;font-size:1.4rem;cursor:pointer}
 .admin-body{padding:1rem 1.5rem;overflow-y:auto;flex:1}
 .admin-login{display:flex;flex-direction:column;gap:.8rem;max-width:300px;margin:2rem auto;text-align:center}
 .admin-login h4{color:var(--green2);font-size:1.1rem}
-.admin-login input{padding:.6rem;border:1.5px solid #ddd;border-radius:7px;font-size:.9rem}
-.admin-login button{padding:.65rem;background:var(--green);color:#fff;border:none;border-radius:7px;cursor:pointer;font-weight:700}
-.admin-login .err{color:var(--red);font-size:.82rem}
-.admin-tools{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem}
-.admin-tools button{padding:.4rem .9rem;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer;font-size:.82rem;font-weight:600}
-.admin-tools button:hover{background:var(--green);color:#fff;border-color:var(--green)}
-.admin-search{padding:.4rem .8rem;border:1px solid #ccc;border-radius:6px;font-size:.82rem;width:180px}
-.admin-table{width:100%;border-collapse:collapse;font-size:.85rem}
-.admin-table th{background:var(--green2);color:#fff;padding:.5rem .8rem;text-align:left}
-.admin-table td{padding:.45rem .8rem;border-bottom:1px solid #eee}
+.admin-login p{font-size:.82rem;color:#666}
+.err{color:var(--red);font-size:.82rem}
+.admin-tools{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:.8rem}
+.admin-tools button,.admin-tools label{padding:.4rem .9rem;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer;font-size:.82rem;font-weight:600}
+.admin-tools button:hover,.admin-tools label:hover{background:var(--green);color:#fff;border-color:var(--green)}
+.admin-search{padding:.4rem .8rem;border:1px solid #ccc;border-radius:6px;font-size:.82rem;width:160px}
+.admin-table{width:100%;border-collapse:collapse;font-size:.82rem}
+.admin-table th{background:var(--green2);color:#fff;padding:.5rem .8rem;text-align:left;white-space:nowrap}
+.admin-table td{padding:.4rem .8rem;border-bottom:1px solid #eee;vertical-align:middle}
 .admin-table tr:hover td{background:#f0f7f3}
-.admin-table select{padding:.25rem .4rem;border:1px solid #ccc;border-radius:4px;font-size:.82rem;background:#fff}
-.admin-section{margin-top:1.5rem;border-top:2px solid #e0e0d8;padding-top:1rem}
-.admin-section h4{color:var(--green2);font-size:1rem;margin-bottom:.5rem;font-weight:600}
-.admin-section p{font-size:.8rem;color:#666;margin-bottom:.6rem}
-.calib-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;align-items:end}
-.calib-grid label{font-size:.75rem;color:#555;font-weight:600;display:block;margin-bottom:.2rem}
-.calib-grid input,.calib-grid select{width:100%;padding:.4rem;border:1.5px solid #ddd;border-radius:6px;font-size:.82rem}
-.contact-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
-.contact-form-group{display:flex;flex-direction:column;gap:.25rem}
-.contact-form-group label{font-size:.78rem;color:#555;font-weight:600}
-.contact-form-group input{padding:.45rem .6rem;border:1.5px solid #ddd;border-radius:6px;font-size:.85rem}
-.contact-form-group input:focus{outline:none;border-color:var(--green)}
-.action-btn{margin-top:.5rem;padding:.5rem 1.2rem;background:var(--green);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:.85rem}
-.action-btn:hover{background:var(--green2)}
-.action-btn.secondary{background:#888}
-.action-btn.danger{background:#c0392b}
-.save-msg{font-size:.8rem;color:#155724;margin-left:.5rem;display:none}
+.admin-table select{padding:.2rem .4rem;border:1px solid #ccc;border-radius:4px;font-size:.78rem;background:#fff}
+.admin-section{margin-top:1.2rem;border-top:2px solid #e0e0d8;padding-top:.8rem}
+.admin-section h4{color:var(--green2);font-size:.95rem;margin-bottom:.4rem;font-weight:600}
+.admin-section p{font-size:.78rem;color:#666;margin-bottom:.5rem}
+.calib-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem}
+.calib-grid label{font-size:.72rem;color:#555;font-weight:600;display:block;margin-bottom:.15rem}
+.calib-grid input{width:100%;padding:.35rem;border:1.5px solid #ddd;border-radius:6px;font-size:.8rem}
+.cf-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.cf-group{display:flex;flex-direction:column;gap:.2rem}
+.cf-group label{font-size:.75rem;color:#555;font-weight:600}
+.cf-group input,.cf-group select{padding:.4rem .6rem;border:1.5px solid #ddd;border-radius:6px;font-size:.82rem}
+.cf-group input:focus{outline:none;border-color:var(--green)}
+.abtn{margin-top:.4rem;padding:.45rem 1rem;background:var(--green);color:#fff;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:.82rem}
+.abtn:hover{background:var(--green2)}
+.abtn.sec{background:#888}.abtn.sec:hover{background:#555}
+.abtn.dan{background:var(--red)}.abtn.dan:hover{background:#922b21}
+.abtn.pur{background:#6c3483}.abtn.pur:hover{background:#512e76}
+.save-msg{font-size:.78rem;color:#155724;margin-left:.5rem;display:none}
 
-#coordFloater{display:none;position:fixed;bottom:16px;left:16px;background:rgba(26,92,56,.95);color:#fff;padding:.8rem 1rem;border-radius:10px;z-index:400;font-size:.85rem;box-shadow:0 4px 20px rgba(0,0,0,.25);max-width:280px}
+#coordFloater{display:none;position:fixed;bottom:16px;left:16px;background:rgba(26,92,56,.95);color:#fff;padding:.8rem 1rem;border-radius:10px;z-index:400;font-size:.85rem;max-width:280px}
 
 @media(max-width:600px){
-  .form-grid{grid-template-columns:1fr}
+  .form-grid,.cf-grid{grid-template-columns:1fr}
   .hero h1{font-size:2rem}
-  .contact-form-grid{grid-template-columns:1fr}
   .calib-grid{grid-template-columns:repeat(2,1fr)}
 }
 </style>
@@ -189,11 +154,8 @@ footer a{color:#a8e6c2;text-decoration:none}
 
 <nav>
   <div class="logo">🌸 Lotus <span>Valley</span></div>
-  <ul>
-    <li><a href="#map">Plot Map</a></li>
-    <li><a href="#enquiry">Enquire</a></li>
-  </ul>
-  <button class="admin-btn" onclick="openAdmin()">Admin Panel <span id="enquiryBadge" style="display:none;background:#c0392b;color:#fff;border-radius:50%;padding:1px 6px;font-size:.75rem;margin-left:.3rem">0</span></button>
+  <ul><li><a href="#map">Plot Map</a></li><li><a href="#enquiry">Enquire</a></li></ul>
+  <button class="admin-btn" id="adminBtn">Admin Panel <span id="enquiryBadge" style="display:none;background:#c0392b;color:#fff;border-radius:50%;padding:1px 6px;font-size:.72rem;margin-left:.3rem">0</span></button>
 </nav>
 
 <div class="hero">
@@ -208,7 +170,7 @@ footer a{color:#a8e6c2;text-decoration:none}
   </div>
 </div>
 
-<div class="contact-bar" id="contactBar">
+<div class="contact-bar">
   <span>📞 <a id="ph1Link" href="tel:7777800508"><span id="ph1Disp">77778 00508</span></a></span>
   <span>📞 <a id="ph2Link" href="tel:7777800576"><span id="ph2Disp">7777800576</span></a></span>
   <span>✉️ <a id="emailLink" href="mailto:info@ecostarinfra.com"><span id="emailDisp">info@ecostarinfra.com</span></a></span>
@@ -217,36 +179,27 @@ footer a{color:#a8e6c2;text-decoration:none}
 
 <div class="filter-bar">
   <label>Status:</label>
-  <button class="active" onclick="setFilter('status','all',this)">All</button>
-  <button onclick="setFilter('status','available',this)">Available</button>
-  <button onclick="setFilter('status','booked',this)">Booked</button>
-  <button onclick="setFilter('status','reserved',this)">Reserved</button>
-  <button onclick="setFilter('status','not-available',this)">Not Available</button>
-  <span style="margin-left:.5rem;border-left:1px solid #ccc;padding-left:.5rem">
-    <label>Type:</label>
-    <select id="typeFilter" onchange="filterPlots()">
+  <button class="active" id="filterAll">All</button>
+  <button id="filterAvail">Available</button>
+  <button id="filterBooked">Booked</button>
+  <button id="filterReserved">Reserved</button>
+  <button id="filterNA">Not Available</button>
+  <span class="sep"><label>Type:</label>
+    <select id="typeFilter">
       <option value="all">All Types</option>
-      <option value="1">Type 1</option>
-      <option value="2">Type 2</option>
-      <option value="3">Type 3</option>
-      <option value="4">Type 4</option>
-      <option value="5">Type 5</option>
-      <option value="6">Type 6</option>
-      <option value="7">Type 7</option>
-      <option value="8">Type 8</option>
+      <option value="1">Type 1</option><option value="2">Type 2</option>
+      <option value="3">Type 3</option><option value="4">Type 4</option>
+      <option value="5">Type 5</option><option value="6">Type 6</option>
+      <option value="7">Type 7</option><option value="8">Type 8</option>
       <option value="9">Type 9</option>
-      <option value="E">Type E (Special)</option>
-      <option value="L">Type L (Special)</option>
-      <option value="M">Type M (Special)</option>
+      <option value="E">Type E</option><option value="L">Type L</option><option value="M">Type M</option>
     </select>
   </span>
-  <span style="margin-left:.5rem">
-    <label>Search plot:</label>
-    <input id="searchInput" type="text" placeholder="e.g. 101 or E5" style="width:90px" oninput="searchPlot()"/>
+  <span class="sep"><label>Search:</label>
+    <input type="text" id="searchInput" placeholder="e.g. 101 or E5" style="width:90px"/>
   </span>
-  <span style="margin-left:.5rem;border-left:1px solid #ccc;padding-left:.5rem">
-    <label for="pinSizeSlider">Pin size:</label>
-    <input type="range" id="pinSizeSlider" min="6" max="30" value="20" step="1" oninput="updatePinSize(this.value)"/>
+  <span class="sep"><label for="pinSizeSlider">Pin size:</label>
+    <input type="range" id="pinSizeSlider" min="6" max="30" value="20" step="1"/>
     <span id="pinSizeLabel" style="font-size:.78rem;color:#666">20</span>
   </span>
 </div>
@@ -257,26 +210,19 @@ footer a{color:#a8e6c2;text-decoration:none}
   <span><span class="leg-dot" style="background:rgba(192,57,43,.9)"></span>Booked</span>
   <span><span class="leg-dot" style="background:rgba(230,126,34,.9)"></span>Reserved</span>
   <span><span class="leg-dot" style="background:rgba(100,100,100,.85)"></span>Not Available</span>
-  <span style="margin-left:1rem;border-left:1px solid #ccc;padding-left:1rem"><strong>Plot Types:</strong></span>
-  <span>T1: 26.2×76.5ft</span>
-  <span>T2: 24.6×39.4ft</span>
-  <span>T3: 32.8×50ft</span>
-  <span>T4: 24.6×50ft</span>
-  <span>T5: 32.8×65.6ft</span>
-  <span>T6: 24.6×65.6ft</span>
-  <span>T7: 22×45ft</span>
-  <span>T8: Irregular</span>
-  <span>T9: Mixed Use</span>
-  <span>E/L/M: Special (size on request)</span>
+  <span class="sep"><strong>Types:</strong></span>
+  <span>T1:26.2×76.5ft</span><span>T2:24.6×39.4ft</span><span>T3:32.8×50ft</span>
+  <span>T4:24.6×50ft</span><span>T5:32.8×65.6ft</span><span>T6:24.6×65.6ft</span>
+  <span>T7:22×45ft</span><span>T8:Irregular</span><span>T9:Mixed Use</span>
+  <span>E/L/M:Special</span>
 </div>
 
 <div id="privateMapBanner">
-  🔒 PRIVATE/ADMIN VIEW — showing internal status only. Not visible to public.
-  <button onclick="setMapViewMode('public')">Switch to Public View</button>
+  🔒 PRIVATE/ADMIN VIEW — internal status only, not visible to public.
+  <button id="switchPublicBtn">Switch to Public View</button>
 </div>
-
-<div id="privateLegend" style="display:none;flex-wrap:wrap;gap:1rem;padding:.6rem 1.5rem;background:#f3e5f5;border-bottom:1px solid #ce93d8;align-items:center;font-size:.78rem;color:#444">
-  <strong style="color:#6c3483">🔒 Private Status:</strong>
+<div id="privateLegend">
+  <strong style="color:#6c3483">🔒 Private:</strong>
   <span><span class="leg-dot" style="background:rgba(46,160,90,.85)"></span>Available</span>
   <span><span class="leg-dot" style="background:rgba(192,57,43,.9)"></span>Booked</span>
   <span><span class="leg-dot" style="background:rgba(155,89,182,.9)"></span>Reserved for Self</span>
@@ -285,39 +231,41 @@ footer a{color:#a8e6c2;text-decoration:none}
   <span><span class="leg-dot" style="background:rgba(41,128,185,.9)"></span>Land-Owner Reserved</span>
   <span><span class="leg-dot" style="background:rgba(243,156,18,.9)"></span>Agency Lot</span>
 </div>
+
+<div class="map-section" id="map">
   <h2>🗺️ Interactive Plot Layout – Lotus Valley</h2>
   <div class="map-wrapper" id="mapWrapper">
     <div id="mapContainer">
-      <img id="layoutImg" src="https://ecostarinfra.github.io/lotus-valley-map.jpeg" alt="Lotus Valley Layout Map"/>
-      <svg id="plotsLayerSvg" viewBox="0 0 2264 1517"></svg>
+      <img id="layoutImg" src="https://ecostarinfra.github.io/lotus-valley-map.jpeg" alt="Lotus Valley Layout"/>
+      <svg id="plotsLayerSvg"></svg>
     </div>
   </div>
   <div class="zoom-controls">
-    <button onclick="zoomMap(1.25)">+</button>
-    <button onclick="zoomMap(0.8)">−</button>
-    <button onclick="resetMapZoom()" style="font-size:.65rem">Reset</button>
+    <button id="zoomIn">+</button>
+    <button id="zoomOut">−</button>
+    <button id="zoomReset" style="font-size:.65rem">Reset</button>
   </div>
-  <div style="margin-top:.5rem;font-size:.78rem;color:#888;clear:both">💡 Click and drag to pan, use +/− to zoom, click a pin to view plot details.</div>
+  <div style="margin-top:.5rem;font-size:.78rem;color:#888;clear:both">💡 Drag to pan · +/− to zoom · click a pin to view details</div>
 </div>
 
-<div class="popup-overlay" id="popupOverlay" onclick="if(event.target===this)closePopup()">
+<div class="popup-overlay" id="popupOverlay">
   <div class="popup">
-    <button class="close-btn" onclick="closePopup()">×</button>
+    <button class="close-btn" id="closePopupBtn">×</button>
     <h3 id="ppTitle">Plot Details</h3>
     <div class="popup-row"><span class="pk">Plot Number</span><span class="pv" id="ppNum">—</span></div>
     <div class="popup-row"><span class="pk">Plot Type</span><span class="pv" id="ppType">—</span></div>
     <div class="popup-row"><span class="pk">Dimensions</span><span class="pv" id="ppDim">—</span></div>
     <div class="popup-row"><span class="pk">Area</span><span class="pv" id="ppArea">—</span></div>
     <div class="popup-row"><span class="pk">Status</span><span class="pv"><span class="status-badge" id="ppStatus">—</span></span></div>
-    <button class="enquire-btn" onclick="enquireFromPopup()">📩 Enquire About This Plot</button>
-    <button class="enquire-btn" id="reserveBtn" style="background:var(--gold);margin-top:.6rem" onclick="openReserveForm()">💳 Reserve Online</button>
+    <button class="enquire-btn" id="enquireFromPopupBtn">📩 Enquire About This Plot</button>
+    <button class="enquire-btn" id="reserveBtn" style="background:var(--gold);display:none">💳 Reserve Online</button>
     <div id="reserveForm" style="display:none;margin-top:1rem;border-top:1px solid #eee;padding-top:1rem">
-      <div style="font-size:.85rem;color:#555;margin-bottom:.6rem" id="reserveFeeNote">Reservation fee: ₹<span id="reserveFeeAmt">10,000</span></div>
+      <div style="font-size:.85rem;color:#555;margin-bottom:.6rem">Reservation fee: ₹<span id="reserveFeeAmt">10,000</span></div>
       <div class="form-group" style="margin-bottom:.5rem"><label>Full Name *</label><input id="rname" type="text" placeholder="Your full name"/></div>
-      <div class="form-group" style="margin-bottom:.5rem"><label>Phone Number *</label><input id="rphone" type="tel" placeholder="e.g. 98765 43210"/></div>
-      <div class="form-group" style="margin-bottom:.5rem"><label>Email Address</label><input id="remail" type="email" placeholder="your@email.com"/></div>
-      <button class="enquire-btn" style="background:var(--gold)" onclick="proceedToPayment()">Proceed to Payment →</button>
-      <div style="font-size:.75rem;color:#888;margin-top:.5rem">You'll be redirected to a secure payment page in a new tab. After payment, please share your payment reference with us via phone/WhatsApp so we can confirm your reservation.</div>
+      <div class="form-group" style="margin-bottom:.5rem"><label>Phone *</label><input id="rphone" type="tel" placeholder="e.g. 98765 43210"/></div>
+      <div class="form-group" style="margin-bottom:.5rem"><label>Email</label><input id="remail" type="email" placeholder="your@email.com"/></div>
+      <button class="enquire-btn" id="proceedPayBtn" style="background:var(--gold)">Proceed to Payment →</button>
+      <div style="font-size:.75rem;color:#888;margin-top:.5rem">You'll be redirected to a secure payment page. After payment, contact us with your reference and plot number to confirm reservation.</div>
     </div>
   </div>
 </div>
@@ -328,26 +276,26 @@ footer a{color:#a8e6c2;text-decoration:none}
     <div class="form-group"><label>Full Name *</label><input id="fname" type="text" placeholder="Your full name"/></div>
     <div class="form-group"><label>Phone Number *</label><input id="fphone" type="tel" placeholder="e.g. 98765 43210"/></div>
     <div class="form-group"><label>Email Address</label><input id="femail" type="email" placeholder="your@email.com"/></div>
-    <div class="form-group">
-      <label>Plot of Interest</label>
-      <select id="fplot"><option value="">— Select a plot —</option></select>
-    </div>
+    <div class="form-group"><label>Plot of Interest</label><select id="fplot"><option value="">— Select a plot —</option></select></div>
     <div class="form-group full"><label>Message</label><textarea id="fmsg" rows="3" placeholder="Any specific requirements or questions..."></textarea></div>
-    <div class="form-group full"><button class="submit-btn" onclick="submitEnquiry()">Submit Enquiry →</button></div>
+    <div class="form-group full"><button class="submit-btn" id="submitEnquiryBtn">Submit Enquiry →</button></div>
   </div>
   <div class="form-success" id="formSuccess">✅ Thank you! Your enquiry has been submitted. Our team will contact you shortly.</div>
 </div>
 
-<footer id="footer">
+<footer>
   <div style="font-size:1.1rem;font-weight:700;color:#fff;margin-bottom:.3rem">🌸 LOTUS VALLEY by Ecostar Infra</div>
-  <div id="footerContact">📞 <span id="fph1">77778 00508</span> / <span id="fph2">7777800576</span> &nbsp;|&nbsp; ✉️ <a id="femlLink" href="mailto:info@ecostarinfra.com" style="color:#a8e6c2"><span id="femailF">info@ecostarinfra.com</span></a> &nbsp;|&nbsp; 🌐 <a id="fwebLink" href="https://ecostarinfra.com" target="_blank" style="color:#a8e6c2"><span id="fwebF">ecostarinfra.com</span></a></div>
+  <div>📞 <span id="fph1">77778 00508</span> / <span id="fph2">7777800576</span> &nbsp;|&nbsp;
+    ✉️ <a id="femlLink" href="mailto:info@ecostarinfra.com" style="color:#a8e6c2"><span id="femailF">info@ecostarinfra.com</span></a> &nbsp;|&nbsp;
+    🌐 <a id="fwebLink" href="https://ecostarinfra.com" target="_blank" style="color:#a8e6c2"><span id="fwebF">ecostarinfra.com</span></a>
+  </div>
   <div style="margin-top:.5rem;font-size:.75rem;color:#7aaa8a">Near Bhopal Bypass, Hoshangabad Road, Bhopal</div>
 </footer>
 
 <div id="coordFloater">
-  <div style="font-weight:700;margin-bottom:.3rem">📐 Click on the map to get coordinates</div>
+  <div style="font-weight:700;margin-bottom:.3rem">📐 Click map to get coordinates</div>
   <div id="coordFloaterReadout" style="font-family:monospace;margin-bottom:.5rem">x: —, y: —</div>
-  <button class="action-btn" onclick="exitCoordMode()" style="background:#fff;color:#1a5c38">Done – Back to Admin</button>
+  <button id="exitCoordBtn" style="padding:.4rem .9rem;background:#fff;color:#1a5c38;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:.8rem">Done – Back to Admin</button>
 </div>
 
 <div class="admin-modal" id="adminModal">
@@ -355,74 +303,105 @@ footer a{color:#a8e6c2;text-decoration:none}
     <div class="admin-header">
       <h3>🔐 Admin Panel – Lotus Valley</h3>
       <div style="display:flex;align-items:center;gap:.8rem">
-        <span id="adminUserBadge" style="font-size:.78rem;color:#cce8d8;display:none"></span>
-        <button onclick="closeAdmin()">×</button>
+        <span id="adminUserBadge" style="font-size:.75rem;color:#cce8d8;display:none"></span>
+        <button id="closeAdminBtn">×</button>
       </div>
     </div>
-    <div class="admin-body" id="adminBody">
+    <div class="admin-body">
+      <!-- LOGIN -->
       <div class="admin-login" id="adminLogin">
         <h4>Admin Login</h4>
-        <p style="font-size:.82rem;color:#666">Sign in with your authorized Google account to access the admin panel.</p>
-        <button onclick="signInWithGoogle()" class="action-btn" style="display:flex;align-items:center;justify-content:center;gap:.5rem">
+        <p>Sign in with your authorized Google account.</p>
+        <button id="googleSignInBtn" class="abtn" style="display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;padding:.65rem">
           <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.13-.84 2.08-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.81.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33C2.44 15.98 5.48 18 9 18z"/><path fill="#FBBC05" d="M3.97 10.72c-.18-.54-.28-1.12-.28-1.72s.1-1.18.28-1.72V4.95H.96C.35 6.17 0 7.55 0 9s.35 2.83.96 4.05l3.01-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.51.45 3.44 1.35l2.59-2.59C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/></svg>
           Sign in with Google
         </button>
         <div class="err" id="adminErr"></div>
       </div>
-      <div style="display:none" id="adminPanel">
+
+      <!-- PANEL -->
+      <div id="adminPanel" style="display:none">
+        <!-- PLOT TABLE -->
         <div class="admin-tools">
-          <button onclick="exportExcel()">⬇ Export to Excel</button>
-          <label style="padding:.4rem .9rem;border:1px solid #ccc;border-radius:6px;cursor:pointer;font-size:.82rem;font-weight:600">
-            ⬆ Import from Excel <input type="file" accept=".xlsx,.xls" style="display:none" onchange="importExcel(this)"/>
-          </label>
-          <input class="admin-search" id="adminSearch" type="text" placeholder="Search plot #..." oninput="renderAdminTable()"/>
-          <select id="adminStatusFilter" onchange="renderAdminTable()" style="padding:.4rem .6rem;border:1px solid #ccc;border-radius:6px;font-size:.82rem">
-            <option value="all">All Statuses</option>
+          <button id="exportExcelBtn">⬇ Export Excel</button>
+          <label>⬆ Import Excel<input type="file" id="importExcelInput" accept=".xlsx,.xls" style="display:none"/></label>
+          <input class="admin-search" id="adminSearch" type="text" placeholder="Search plot #..."/>
+          <select id="adminStatusFilter" style="padding:.4rem .6rem;border:1px solid #ccc;border-radius:6px;font-size:.82rem">
+            <option value="all">All</option>
             <option value="available">Available</option>
             <option value="booked">Booked</option>
             <option value="reserved">Reserved</option>
             <option value="not-available">Not Available</option>
           </select>
+          <button id="showPrivateMapBtn" class="abtn pur" style="margin:0">🔒 Private Map View</button>
         </div>
-        <div style="font-size:.78rem;color:#666;margin-bottom:.6rem;display:flex;gap:1rem;align-items:center;flex-wrap:wrap">
-          <span><span style="color:#2d7a4f;font-weight:700">●</span> Public Status — shown to website visitors</span>
-          <span><span style="color:#888;font-weight:700">●</span> Private Status — admin-only, never shown publicly</span>
-          <button class="action-btn" style="padding:.3rem .8rem;font-size:.8rem;background:#6c3483" onclick="showPrivateOnMap()">🔒 Show Private Status on Map</button>
+        <div style="font-size:.75rem;color:#666;margin-bottom:.5rem;display:flex;gap:1rem">
+          <span><span style="color:var(--green);font-weight:700">●</span> Public Status — visible to all</span>
+          <span><span style="color:#888;font-weight:700">●</span> Private Status — admin only</span>
         </div>
-        <div style="overflow-x:auto;max-height:260px;overflow-y:auto">
+        <div style="overflow-x:auto;max-height:240px;overflow-y:auto">
           <table class="admin-table">
-            <thead><tr><th>Plot #</th><th>Type</th><th>Dimensions (ft)</th><th>Area (sq ft)</th><th>Public Status</th><th>Private Status</th></tr></thead>
+            <thead><tr><th>Plot #</th><th>Type</th><th>Dimensions</th><th>Area</th><th>Public Status</th><th>Private Status</th></tr></thead>
             <tbody id="adminTableBody"></tbody>
           </table>
         </div>
 
+        <!-- ENQUIRIES INBOX -->
         <div class="admin-section">
-          <h4>📍 Pin Positions & Plot Statuses (file-based persistence)</h4>
-          <p>Since this site is hosted statically, live edits don't auto-save. Use the Pin Placement Tool to set positions, import below to preview, then <strong>download the JSON files and upload them to your GitHub repo</strong> (same folder as <code>index.html</code>) — the site will load them automatically on every visit.</p>
-          <textarea id="pinJsonInput" placeholder='{"22": {"x": 600, "y": 310}, "E1": {"x": 200, "y": 700}}' style="width:100%;height:110px;font-family:monospace;font-size:.8rem;padding:.6rem;border:1.5px solid #ddd;border-radius:6px"></textarea>
-          <div style="margin-top:.6rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
-            <button class="action-btn" onclick="importPinJSON()">Preview imported positions</button>
-            <button class="action-btn secondary" onclick="exportPinJSON()">Show current positions as JSON</button>
-            <button class="action-btn secondary" onclick="downloadPinPositionsFile()">⬇ Download pin-positions.json</button>
-            <button class="action-btn secondary" onclick="downloadPublicStatusFile()">⬇ Download plot-status-public.json</button>
-            <button class="action-btn secondary" onclick="downloadPrivateStatusFile()">⬇ Download plot-status-private.json</button>
-            <button class="action-btn danger" onclick="clearPinOverrides()">Clear overrides (preview only)</button>
-            <span class="save-msg" id="pinImportMsg">✅ Done!</span>
+          <h4>📬 Enquiries Inbox <span id="unreadCount" style="background:var(--red);color:#fff;border-radius:10px;padding:1px 8px;font-size:.72rem;margin-left:.4rem;display:none">0 unread</span></h4>
+          <p>All plot enquiries submitted via the website.</p>
+          <div style="overflow-x:auto;max-height:280px;overflow-y:auto">
+            <table class="admin-table">
+              <thead><tr><th>Date</th><th>Name</th><th>Phone</th><th>Email</th><th>Plot</th><th>Message</th><th>Status</th></tr></thead>
+              <tbody id="enquiriesTableBody"><tr><td colspan="7" style="text-align:center;color:#888;padding:.8rem">Loading...</td></tr></tbody>
+            </table>
           </div>
-          <div id="pinImportStatus" style="font-size:.78rem;color:#666;margin-top:.4rem"></div>
+          <div style="margin-top:.5rem;display:flex;gap:.5rem">
+            <button id="refreshEnquiriesBtn" class="abtn sec">🔄 Refresh</button>
+            <button id="exportEnquiriesBtn" class="abtn sec">⬇ Export Excel</button>
+          </div>
         </div>
 
+        <!-- NOTIFICATION EMAILS -->
         <div class="admin-section">
-          <h4>📐 Plot Pin Calibration (4-corner mapping, fallback)</h4>
-          <p>Used for any plots NOT covered by the JSON import above. Click "Show coords" to find corner positions on the map.</p>
+          <h4>🔔 Notification Emails</h4>
+          <p>Email addresses to notify on new enquiries (requires EmailJS setup). Saved to Firebase, changeable anytime.</p>
+          <div id="notifEmailList" style="margin-bottom:.6rem"></div>
+          <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+            <input id="newNotifEmail" type="email" placeholder="email@example.com" style="padding:.4rem .6rem;border:1.5px solid #ddd;border-radius:6px;font-size:.82rem;width:220px"/>
+            <button id="addNotifEmailBtn" class="abtn">+ Add Email</button>
+          </div>
+          <div style="margin-top:.5rem">
+            <button id="saveNotifEmailsBtn" class="abtn sec">Save Email List</button>
+            <span class="save-msg" id="notifMsg">✅ Saved!</span>
+          </div>
+        </div>
+
+        <!-- PIN POSITIONS -->
+        <div class="admin-section">
+          <h4>📍 Pin Positions</h4>
+          <p>Paste JSON from the Pin Placement Tool and click Apply to save positions live.</p>
+          <textarea id="pinJsonInput" placeholder='{"22":{"x":600,"y":310},"E1":{"x":200,"y":700}}' style="width:100%;height:90px;font-family:monospace;font-size:.78rem;padding:.5rem;border:1.5px solid #ddd;border-radius:6px"></textarea>
+          <div style="margin-top:.5rem;display:flex;gap:.4rem;flex-wrap:wrap">
+            <button id="applyPinsBtn" class="abtn">Apply & Save Live</button>
+            <button id="exportPinsBtn" class="abtn sec">Show as JSON</button>
+            <button id="dlPinsBtn" class="abtn sec">⬇ Backup JSON</button>
+            <button id="clearPinsBtn" class="abtn dan">Clear All</button>
+            <span class="save-msg" id="pinImportMsg">✅ Applied!</span>
+          </div>
+          <div id="pinImportStatus" style="font-size:.75rem;color:#666;margin-top:.3rem"></div>
+        </div>
+
+        <!-- BLOCK CALIBRATION -->
+        <div class="admin-section">
+          <h4>📐 Block Calibration (fallback for unplaced pins)</h4>
           <div style="margin-bottom:.5rem">
-            <label style="font-size:.78rem;font-weight:600;color:#555">Block:</label>
-            <select id="blockSelect" onchange="loadBlockValues()">
+            <select id="blockSelect" style="padding:.35rem .6rem;border:1px solid #ccc;border-radius:6px;font-size:.82rem">
               <option value="0">A: Plots 1-3</option>
               <option value="1">B: Plots 4-21</option>
-              <option value="2">C: Plots 22-263 (main grid)</option>
+              <option value="2">C: Plots 22-263</option>
               <option value="3">D: Plots 264-274</option>
-              <option value="4">E: Plots 275-357 (Type7)</option>
+              <option value="4">E: Plots 275-357</option>
               <option value="5">F: Plots 358-369</option>
               <option value="6">G: E1-E32</option>
               <option value="7">H: L1-L19</option>
@@ -439,397 +418,290 @@ footer a{color:#a8e6c2;text-decoration:none}
             <div><label>BL x</label><input type="number" id="bBLx" step="1"/></div>
             <div><label>BL y</label><input type="number" id="bBLy" step="1"/></div>
           </div>
-          <div style="margin-top:.6rem;display:flex;align-items:center">
-            <button class="action-btn" onclick="applyBlock()">Apply Block</button>
-            <button class="action-btn secondary" onclick="showCoords()">Show image coords on click</button>
+          <div style="margin-top:.5rem;display:flex;align-items:center;gap:.5rem">
+            <button id="applyBlockBtn" class="abtn">Apply Block</button>
+            <button id="showCoordsBtn" class="abtn sec">Show coords on click</button>
             <span class="save-msg" id="calibMsg">✅ Applied!</span>
           </div>
         </div>
 
+        <!-- RESERVATION SETTINGS -->
         <div class="admin-section">
           <h4>💳 Online Reservation Settings</h4>
-          <p>Configure a payment link (from Razorpay, Instamojo, PayU, etc.) for online plot reservations. When set, an available plot's popup will show a "Reserve Online" button leading to this link.</p>
-          <div class="contact-form-grid">
-            <div class="contact-form-group"><label>Enable Reserve Online?</label>
-              <select id="rcEnabled">
-                <option value="1">Yes</option>
-                <option value="0">No</option>
-              </select>
+          <div class="cf-grid">
+            <div class="cf-group"><label>Enable Reserve Online?</label>
+              <select id="rcEnabled"><option value="1">Yes</option><option value="0">No</option></select>
             </div>
-            <div class="contact-form-group"><label>Reservation Fee (₹)</label><input id="rcFee" type="number" min="0" step="500" placeholder="10000"/></div>
-            <div class="contact-form-group" style="grid-column:1/-1"><label>Payment Link URL</label><input id="rcLink" type="text" placeholder="https://rzp.io/l/yourlink123"/></div>
+            <div class="cf-group"><label>Reservation Fee (₹)</label><input id="rcFee" type="number" min="0" step="500" placeholder="10000"/></div>
+            <div class="cf-group" style="grid-column:1/-1"><label>Payment Link URL</label><input id="rcLink" type="text" placeholder="https://rzp.io/l/yourlink123"/></div>
           </div>
-          <div style="margin-top:.6rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
-            <button class="action-btn" onclick="saveReserveConfig()">Save Reservation Settings</button>
-            <button class="action-btn secondary" onclick="downloadSiteConfigFile()">⬇ Download site-config.json</button>
+          <div style="margin-top:.5rem;display:flex;align-items:center;gap:.5rem">
+            <button id="saveReserveBtn" class="abtn">Save</button>
             <span class="save-msg" id="reserveMsg">✅ Saved!</span>
           </div>
         </div>
 
+        <!-- CONTACT INFO -->
         <div class="admin-section">
-          <h4>📞 Edit Contact Information</h4>
-          <div class="contact-form-grid">
-            <div class="contact-form-group"><label>Phone 1</label><input id="aph1" type="text" placeholder="77778 00508"/></div>
-            <div class="contact-form-group"><label>Phone 2</label><input id="aph2" type="text" placeholder="7777800576"/></div>
-            <div class="contact-form-group"><label>Email</label><input id="aemail" type="email" placeholder="info@ecostarinfra.com"/></div>
-            <div class="contact-form-group"><label>Website</label><input id="aweb" type="text" placeholder="ecostarinfra.com"/></div>
+          <h4>📞 Contact Information</h4>
+          <div class="cf-grid">
+            <div class="cf-group"><label>Phone 1</label><input id="aph1" type="text" placeholder="77778 00508"/></div>
+            <div class="cf-group"><label>Phone 2</label><input id="aph2" type="text" placeholder="7777800576"/></div>
+            <div class="cf-group"><label>Email</label><input id="aemail" type="email" placeholder="info@ecostarinfra.com"/></div>
+            <div class="cf-group"><label>Website</label><input id="aweb" type="text" placeholder="ecostarinfra.com"/></div>
           </div>
-          <div style="margin-top:.6rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
-            <button class="action-btn" onclick="saveContactInfo()">Save Contact Info</button>
-            <button class="action-btn secondary" onclick="downloadSiteConfigFile()">⬇ Download site-config.json</button>
+          <div style="margin-top:.5rem;display:flex;align-items:center;gap:.5rem">
+            <button id="saveContactBtn" class="abtn">Save Contact Info</button>
             <span class="save-msg" id="saveMsg">✅ Saved!</span>
           </div>
         </div>
-      </div>
+      </div><!-- end adminPanel -->
     </div>
   </div>
 </div>
 
-<script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, collection, addDoc, getDocs, updateDoc, orderBy, query } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// ─── FIREBASE SETUP ────────────────────────────────────────────────────────
+const firebaseConfig = {
+  apiKey:"AIzaSyDVECaT_Y9I0TGzskNgz07vq3x5tGIiRdk",
+  authDomain:"lotusvalley-e56b8.firebaseapp.com",
+  projectId:"lotusvalley-e56b8",
+  storageBucket:"lotusvalley-e56b8.firebasestorage.app",
+  messagingSenderId:"361482497260",
+  appId:"1:361482497260:web:8cd6a6b62359ba5bb909c9"
+};
+const ADMIN_EMAIL = "ecostarinfra2024@gmail.com";
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const provider = new GoogleAuthProvider();
+
+// ─── PLOT DATA ─────────────────────────────────────────────────────────────
 const PLOT_TYPES = {
-  1:{label:'Type 1',dim:'26.2 × 76.5 ft',area:2004},
-  2:{label:'Type 2',dim:'24.6 × 39.4 ft',area:969},
-  3:{label:'Type 3',dim:'32.8 × 50 ft',area:1640},
-  4:{label:'Type 4',dim:'24.6 × 50 ft',area:1230},
-  5:{label:'Type 5',dim:'32.8 × 65.6 ft',area:2152},
-  6:{label:'Type 6',dim:'24.6 × 65.6 ft',area:1614},
-  7:{label:'Type 7',dim:'22 × 45 ft',area:990},
+  1:{label:'Type 1',dim:'26.2×76.5 ft',area:2004},
+  2:{label:'Type 2',dim:'24.6×39.4 ft',area:969},
+  3:{label:'Type 3',dim:'32.8×50 ft',area:1640},
+  4:{label:'Type 4',dim:'24.6×50 ft',area:1230},
+  5:{label:'Type 5',dim:'32.8×65.6 ft',area:2152},
+  6:{label:'Type 6',dim:'24.6×65.6 ft',area:1614},
+  7:{label:'Type 7',dim:'22×45 ft',area:990},
   8:{label:'Type 8 (Irregular)',dim:'Irregular',area:null},
   9:{label:'Type 9 (Mixed Use)',dim:'Mixed Use',area:null},
   'E':{label:'Type E (Special)',dim:'Contact for details',area:null},
   'L':{label:'Type L (Special)',dim:'Contact for details',area:null},
   'M':{label:'Type M (Special)',dim:'Contact for details',area:null},
 };
-
-let contactInfo = {
-  ph1:'77778 00508', ph2:'7777800576',
-  email:'info@ecostarinfra.com', web:'ecostarinfra.com'
-};
-
-let reserveConfig = {
-  enabled:true,
-  feeAmount:10000,
-  paymentLink:'' // e.g. https://rzp.io/l/yourlink123
-};
-
-let currentFilter = {status:'all', type:'all'};
-let currentPlot = null;
-let plots = [];
-
-const PRIVATE_STATUSES = {
-  'available':'Available',
-  'booked':'Booked',
-  'reserved-self':'Reserved for Self',
-  'not-available':'Not Available',
-  'mortgaged':'Mortgaged',
-  'landowner-reserved':'Land-Owner Reserved',
-  'agency-lot':'Agency Lot'
-};
-const PUBLIC_STATUSES = {
-  'available':'Available',
-  'booked':'Booked',
-  'reserved':'Reserved',
-  'not-available':'Not Available'
-};
+const PUBLIC_STATUSES = {available:'Available',booked:'Booked',reserved:'Reserved','not-available':'Not Available'};
+const PRIVATE_STATUSES = {available:'Available',booked:'Booked','reserved-self':'Reserved for Self','not-available':'Not Available',mortgaged:'Mortgaged','landowner-reserved':'Land-Owner Reserved','agency-lot':'Agency Lot'};
 
 function assignType(n){
   if(n<=3)return 1;
   if(n>=4&&n<=21)return 8;
-  if(n>=22&&n<=109&&[22,65,66,109,110,153,154,197,198,238,239,263].includes(n))return 3;
+  if([22,65,66,109,110,153,154,197,198,238,239,263].includes(n))return 3;
   if(n>=22&&n<=263)return 4;
   if(n>=264&&n<=274)return 9;
   if(n>=275&&n<=357)return 7;
   if(n>=358&&n<=369)return 8;
   return 4;
 }
+
+const plots = [];
 for(let i=1;i<=369;i++){
-  if(i===248)continue; // split into 248A and 248B due to duplicate label in source layout
-  plots.push({id:i, type:assignType(i), status:'available', privateStatus:'available'});
+  if(i===248)continue;
+  plots.push({id:i,type:assignType(i),status:'available',privateStatus:'available'});
 }
-plots.push({id:'248A', type:assignType(248), status:'available', privateStatus:'available'});
-plots.push({id:'248B', type:assignType(248), status:'available', privateStatus:'available'});
-for(let i=1;i<=32;i++) plots.push({id:'E'+i, type:'E', status:'available', privateStatus:'available'});
-for(let i=1;i<=19;i++) plots.push({id:'L'+i, type:'L', status:'available', privateStatus:'available'});
-for(let i=1;i<=28;i++) plots.push({id:'M'+i, type:'M', status:'available', privateStatus:'available'});
+plots.push({id:'248A',type:assignType(248),status:'available',privateStatus:'available'});
+plots.push({id:'248B',type:assignType(248),status:'available',privateStatus:'available'});
+for(let i=1;i<=32;i++) plots.push({id:'E'+i,type:'E',status:'available',privateStatus:'available'});
+for(let i=1;i<=19;i++) plots.push({id:'L'+i,type:'L',status:'available',privateStatus:'available'});
+for(let i=1;i<=28;i++) plots.push({id:'M'+i,type:'M',status:'available',privateStatus:'available'});
 
-// PUBLIC status demo data (Available / Booked / Reserved / Not Available)
-[12,34,56,78,90,110,145,178,200,222,245,280,310,340].forEach(n=>{const p=plots.find(pl=>pl.id===n);if(p)p.status='booked'});
-[15,40,67,100,133,160,190,215,250,275,305,335].forEach(n=>{const p=plots.find(pl=>pl.id===n);if(p)p.status='reserved'});
-[3,7,219,250].forEach(n=>{const p=plots.find(pl=>pl.id===n);if(p)p.status='not-available'});
-
-// PRIVATE status demo data (independent internal tracker - admin only)
-[12,34,56].forEach(n=>{const p=plots.find(pl=>pl.id===n);if(p)p.privateStatus='booked'});
-[78,90].forEach(n=>{const p=plots.find(pl=>pl.id===n);if(p)p.privateStatus='reserved-self'});
-[3,7].forEach(n=>{const p=plots.find(pl=>pl.id===n);if(p)p.privateStatus='not-available'});
-
-// ─── BLOCK DEFINITIONS (4-corner quad mapping) ────────────────────────────
+// ─── BLOCKS (4-corner quad mapping) ───────────────────────────────────────
 const BLOCKS = [
-  {start:1, end:3, cols:1, rows:3, TL:[455,290], TR:[505,270], BR:[545,430], BL:[495,450]},
-  {start:4, end:21, cols:2, rows:9, TL:[330,395], TR:[430,365], BR:[510,640], BL:[410,670]},
-  {start:22, end:263, pattern:'snake-2band', slots:11, bandRows:11,
-   TL:[599,308], TR:[1290,470], BR:[1180,790], BL:[500,620]},
-  {start:264, end:274, cols:6, rows:2, TL:[1380,720], TR:[1620,790], BR:[1580,920], BL:[1340,850]},
-  {start:275, end:357, cols:7, rows:12, TL:[1180,140], TR:[1650,290], BR:[1550,600], BL:[1100,460]},
-  {start:358, end:369, cols:5, rows:3, TL:[1080,40], TR:[1310,30], BR:[1340,170], BL:[1110,180]},
-  {start:1, end:32, cols:2, rows:16, prefix:'E', TL:[170,690], TR:[300,650], BR:[420,1040], BL:[290,1080]},
-  {start:1, end:19, cols:1, rows:19, prefix:'L', TL:[290,660], TR:[340,650], BR:[460,1050], BL:[410,1060]},
-  {start:1, end:28, cols:4, rows:7, prefix:'M', TL:[90,1100], TR:[480,1050], BR:[560,1330], BL:[170,1380]},
+  {start:1,end:3,cols:1,rows:3,TL:[455,290],TR:[505,270],BR:[545,430],BL:[495,450]},
+  {start:4,end:21,cols:2,rows:9,TL:[330,395],TR:[430,365],BR:[510,640],BL:[410,670]},
+  {start:22,end:263,pattern:'snake-2band',slots:11,bandRows:11,TL:[599,308],TR:[1290,470],BR:[1180,790],BL:[500,620]},
+  {start:264,end:274,cols:6,rows:2,TL:[1380,720],TR:[1620,790],BR:[1580,920],BL:[1340,850]},
+  {start:275,end:357,cols:7,rows:12,TL:[1180,140],TR:[1650,290],BR:[1550,600],BL:[1100,460]},
+  {start:358,end:369,cols:5,rows:3,TL:[1080,40],TR:[1310,30],BR:[1340,170],BL:[1110,180]},
+  {start:1,end:32,cols:2,rows:16,prefix:'E',TL:[170,690],TR:[300,650],BR:[420,1040],BL:[290,1080]},
+  {start:1,end:19,cols:1,rows:19,prefix:'L',TL:[290,660],TR:[340,650],BR:[460,1050],BL:[410,1060]},
+  {start:1,end:28,cols:4,rows:7,prefix:'M',TL:[90,1100],TR:[480,1050],BR:[560,1330],BL:[170,1380]},
 ];
 
 function bilerp(quad,u,v){
-  const [TL,TR,BR,BL] = quad;
-  const top = [TL[0]+(TR[0]-TL[0])*u, TL[1]+(TR[1]-TL[1])*u];
-  const bot = [BL[0]+(BR[0]-BL[0])*u, BL[1]+(BR[1]-BL[1])*u];
-  return [top[0]+(bot[0]-top[0])*v, top[1]+(bot[1]-top[1])*v];
+  const[TL,TR,BR,BL]=quad;
+  const top=[TL[0]+(TR[0]-TL[0])*u,TL[1]+(TR[1]-TL[1])*u];
+  const bot=[BL[0]+(BR[0]-BL[0])*u,BL[1]+(BR[1]-BL[1])*u];
+  return[top[0]+(bot[0]-top[0])*v,top[1]+(bot[1]-top[1])*v];
 }
 
 function generatePlotRects(){
   const rects=[];
   BLOCKS.forEach(b=>{
-    const quad = [b.TL,b.TR,b.BR,b.BL];
-
+    const quad=[b.TL,b.TR,b.BR,b.BL];
     if(b.pattern==='snake-2band'){
-      const slots = b.slots, bandRows = b.bandRows;
-      const totalCols = slots, totalRows = bandRows*2;
-      let n = b.start;
-      for(let slot=0; slot<slots; slot++){
-        const odd = (slot%2===0);
-        let rowsOrder=[];
-        if(odd){
-          for(let r=0;r<bandRows;r++)rowsOrder.push(r);
-          for(let r=bandRows;r<2*bandRows;r++)rowsOrder.push(r);
-        } else {
-          for(let r=2*bandRows-1;r>=bandRows;r--)rowsOrder.push(r);
-          for(let r=bandRows-1;r>=0;r--)rowsOrder.push(r);
-        }
-        rowsOrder.forEach(r=>{
-          const u=(slot+0.5)/totalCols, v=(r+0.5)/totalRows;
-          const center = bilerp(quad,u,v);
-          const id = b.prefix ? b.prefix+n : n;
-          rects.push({id:id, cx:center[0], cy:center[1]});
-          n++;
+      let n=b.start;
+      for(let slot=0;slot<b.slots;slot++){
+        const odd=(slot%2===0);
+        const rows=[];
+        if(odd){for(let r=0;r<b.bandRows;r++)rows.push(r);for(let r=b.bandRows;r<2*b.bandRows;r++)rows.push(r);}
+        else{for(let r=2*b.bandRows-1;r>=b.bandRows;r--)rows.push(r);for(let r=b.bandRows-1;r>=0;r--)rows.push(r);}
+        rows.forEach(r=>{
+          const u=(slot+0.5)/b.slots,v=(r+0.5)/(b.bandRows*2);
+          const c=bilerp(quad,u,v);
+          rects.push({id:n,cx:c[0],cy:c[1]});n++;
         });
       }
       return;
     }
-
-    let n = b.start;
-    let row=0, col=0;
+    let n=b.start,row=0,col=0;
     while(n<=b.end){
-      const u=(col+0.5)/b.cols, v=(row+0.5)/b.rows;
-      const center = bilerp(quad,u,v);
-      const id = b.prefix ? b.prefix+n : n;
-      rects.push({id:id, cx:center[0], cy:center[1]});
-      n++;
-      col++;
-      if(col>=b.cols){col=0; row++;}
+      const u=(col+0.5)/b.cols,v=(row+0.5)/b.rows;
+      const c=bilerp(quad,u,v);
+      rects.push({id:b.prefix?b.prefix+n:n,cx:c[0],cy:c[1]});
+      n++;col++;if(col>=b.cols){col=0;row++;}
     }
   });
   return rects;
 }
 
-let plotRects = generatePlotRects();
-let pinOverrides = {
-  '248B': {x:3115, y:2445}
-};
-let pinBaseSize = 20;
-let mapZoom = 1;
-let IMG_W = 2264, IMG_H = 1517;
+let plotRects=generatePlotRects();
+let pinOverrides={'248B':{x:3115,y:2445}};
+let pinBaseSize=20;
+let mapZoom=1;
+let IMG_W=2264,IMG_H=1517;
+let mapViewMode='public';
+let currentFilter={status:'all',type:'all'};
+let currentPlot=null;
+let contactInfo={ph1:'77778 00508',ph2:'7777800576',email:'info@ecostarinfra.com',web:'ecostarinfra.com'};
+let reserveConfig={enabled:true,feeAmount:10000,paymentLink:''};
+let notifEmails=[];
+let enquiriesCache=[];
+let coordModeOn=false;
 
+// ─── EFFECTIVE RECTS ──────────────────────────────────────────────────────
 function getEffectiveRects(){
-  const fromBlocks = plotRects.map(pr=>{
-    const ov = pinOverrides[String(pr.id)];
-    if(ov) return {id:pr.id, cx:ov.x, cy:ov.y};
-    return pr;
+  const fromBlocks=plotRects.map(pr=>{
+    const ov=pinOverrides[String(pr.id)];
+    return ov?{id:pr.id,cx:ov.x,cy:ov.y}:pr;
   });
-  // Include any override-only IDs that have no computed block position
-  // (e.g. 248A/248B which were manually split from the original plot 248)
-  const blockIds = new Set(fromBlocks.map(pr=>String(pr.id)));
-  const extras = Object.entries(pinOverrides)
-    .filter(([id])=>!blockIds.has(String(id)))
-    .map(([id,pos])=>({id, cx:pos.x, cy:pos.y}));
+  const blockIds=new Set(fromBlocks.map(pr=>String(pr.id)));
+  const extras=Object.entries(pinOverrides)
+    .filter(([id])=>!blockIds.has(id))
+    .map(([id,pos])=>({id,cx:pos.x,cy:pos.y}));
   return fromBlocks.concat(extras);
 }
 
-// ─── MAP / OVERLAY RENDERING ───────────────────────────────────────────────
+// ─── MAP ──────────────────────────────────────────────────────────────────
 function buildMap(){
-  const img = document.getElementById('layoutImg');
-  function setup(){
-    IMG_W = img.naturalWidth || IMG_W;
-    IMG_H = img.naturalHeight || IMG_H;
+  const img=document.getElementById('layoutImg');
+  const setup=()=>{
+    IMG_W=img.naturalWidth||IMG_W;
+    IMG_H=img.naturalHeight||IMG_H;
     document.getElementById('plotsLayerSvg').setAttribute('viewBox',`0 0 ${IMG_W} ${IMG_H}`);
     fitMapToWidth();
-  }
-  if(img.complete && img.naturalWidth>0){ setup(); }
-  else { img.addEventListener('load', setup); img.addEventListener('error', renderOverlays); }
+  };
+  if(img.complete&&img.naturalWidth>0)setup();
+  else img.addEventListener('load',setup);
 }
-
 function fitMapToWidth(){
-  const wrapper = document.getElementById('mapWrapper');
-  const availW = wrapper.clientWidth - 4;
-  mapZoom = Math.min(1, availW/IMG_W);
+  const avail=document.getElementById('mapWrapper').clientWidth-4;
+  mapZoom=Math.min(1,avail/IMG_W);
   applyMapZoom();
 }
-function zoomMap(factor){
-  mapZoom = Math.min(Math.max(mapZoom*factor, 0.15), 4);
-  applyMapZoom();
-}
-function resetMapZoom(){ fitMapToWidth(); }
 function applyMapZoom(){
-  const img = document.getElementById('layoutImg');
-  const container = document.getElementById('mapContainer');
-  const svg = document.getElementById('plotsLayerSvg');
-  const w = IMG_W*mapZoom, h = IMG_H*mapZoom;
-  img.style.width = w+'px'; img.style.height = h+'px';
-  container.style.width = w+'px'; container.style.height = h+'px';
-  svg.style.width = w+'px'; svg.style.height = h+'px';
-  renderOverlays();
-}
-
-function updatePinSize(val){
-  pinBaseSize = parseFloat(val)||13;
-  const lbl = document.getElementById('pinSizeLabel');
-  if(lbl) lbl.textContent = Math.round(pinBaseSize);
+  const img=document.getElementById('layoutImg');
+  const con=document.getElementById('mapContainer');
+  const svg=document.getElementById('plotsLayerSvg');
+  const w=IMG_W*mapZoom,h=IMG_H*mapZoom;
+  img.style.width=w+'px';img.style.height=h+'px';
+  con.style.width=w+'px';con.style.height=h+'px';
+  svg.style.width=w+'px';svg.style.height=h+'px';
   renderOverlays();
 }
 
 function renderOverlays(){
-  const svg = document.getElementById('plotsLayerSvg');
-  while(svg.firstChild) svg.removeChild(svg.firstChild);
-  const r = pinBaseSize / mapZoom;
-  const fontSize = (pinBaseSize*0.77) / mapZoom;
-  const isPrivate = mapViewMode === 'private';
-
+  const svg=document.getElementById('plotsLayerSvg');
+  while(svg.firstChild)svg.removeChild(svg.firstChild);
+  const r=pinBaseSize/mapZoom;
+  const fs=(pinBaseSize*0.77)/mapZoom;
+  const isPriv=mapViewMode==='private';
   getEffectiveRects().forEach(pr=>{
-    const p = plots.find(pl=>String(pl.id)===String(pr.id));
+    const p=plots.find(pl=>String(pl.id)===String(pr.id));
     if(!p)return;
-
-    const statusClass = isPrivate ? 'priv-'+p.privateStatus : p.status;
-    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
-    g.setAttribute('class','plot-pin '+statusClass);
-    g.setAttribute('data-id', pr.id);
+    const cls=isPriv?'priv-'+p.privateStatus:p.status;
+    const g=document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.setAttribute('class','plot-pin '+cls);
+    g.setAttribute('data-id',pr.id);
     g.addEventListener('click',()=>openPlotPopup(p));
-
-    const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
-    circle.setAttribute('cx',pr.cx);
-    circle.setAttribute('cy',pr.cy);
-    circle.setAttribute('r',r);
-    g.appendChild(circle);
-
-    const label = document.createElementNS('http://www.w3.org/2000/svg','text');
-    label.setAttribute('x',pr.cx);
-    label.setAttribute('y',pr.cy);
-    label.setAttribute('text-anchor','middle');
-    label.setAttribute('dominant-baseline','central');
-    label.setAttribute('font-size',fontSize);
-    label.textContent = pr.id;
-    g.appendChild(label);
-
+    const circle=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    circle.setAttribute('cx',pr.cx);circle.setAttribute('cy',pr.cy);circle.setAttribute('r',r);
+    const label=document.createElementNS('http://www.w3.org/2000/svg','text');
+    label.setAttribute('x',pr.cx);label.setAttribute('y',pr.cy);
+    label.setAttribute('text-anchor','middle');label.setAttribute('dominant-baseline','central');
+    label.setAttribute('font-size',fs);label.textContent=pr.id;
+    g.appendChild(circle);g.appendChild(label);
     svg.appendChild(g);
   });
   applyFilterVisibility();
   updateStats();
 }
-
-function applyFilterVisibility(){
-  const sf=currentFilter.status, tf=currentFilter.type;
-  document.querySelectorAll('.plot-pin').forEach(pin=>{
-    const id=pin.dataset.id;
-    const p=plots.find(pl=>String(pl.id)===id);
-    if(!p)return;
-    const typeMatch=tf==='all'||String(p.type)===tf;
-    const statusMatch=sf==='all'||p.status===sf;
-    pin.classList.toggle('dimmed', !(typeMatch&&statusMatch));
-  });
-}
-
 function refreshPinClasses(){
-  const isPrivate = mapViewMode === 'private';
+  const isPriv=mapViewMode==='private';
   document.querySelectorAll('.plot-pin').forEach(pin=>{
-    const id=pin.dataset.id;
-    const p=plots.find(pl=>String(pl.id)===id);
+    const p=plots.find(pl=>String(pl.id)===pin.dataset.id);
     if(!p)return;
-    const wasHighlighted=pin.classList.contains('highlighted');
-    const statusClass = isPrivate ? 'priv-'+p.privateStatus : p.status;
-    pin.setAttribute('class','plot-pin '+statusClass+(wasHighlighted?' highlighted':''));
+    const wasHL=pin.classList.contains('highlighted');
+    const cls=isPriv?'priv-'+p.privateStatus:p.status;
+    pin.setAttribute('class','plot-pin '+cls+(wasHL?' highlighted':''));
   });
   applyFilterVisibility();
   updateStats();
 }
-
+function applyFilterVisibility(){
+  const sf=currentFilter.status,tf=currentFilter.type;
+  document.querySelectorAll('.plot-pin').forEach(pin=>{
+    const p=plots.find(pl=>String(pl.id)===pin.dataset.id);
+    if(!p)return;
+    const tm=tf==='all'||String(p.type)===tf;
+    const sm=sf==='all'||p.status===sf;
+    pin.classList.toggle('dimmed',!(tm&&sm));
+  });
+}
 function updateStats(){
-  const a=plots.filter(p=>p.status==='available').length;
-  const b=plots.filter(p=>p.status==='booked').length;
-  const r=plots.filter(p=>p.status==='reserved').length;
   document.getElementById('statTotal').textContent=plots.length;
-  document.getElementById('statAvail').textContent=a;
-  document.getElementById('statBooked').textContent=b;
-  document.getElementById('statReserved').textContent=r;
+  document.getElementById('statAvail').textContent=plots.filter(p=>p.status==='available').length;
+  document.getElementById('statBooked').textContent=plots.filter(p=>p.status==='booked').length;
+  document.getElementById('statReserved').textContent=plots.filter(p=>p.status==='reserved').length;
+}
+function setMapViewMode(mode){
+  mapViewMode=mode;
+  document.getElementById('privateMapBanner').style.display=mode==='private'?'block':'none';
+  document.getElementById('privateLegend').style.display=mode==='private'?'flex':'none';
+  const pubLeg=document.querySelector('.legend');
+  if(pubLeg)pubLeg.style.display=mode==='private'?'none':'flex';
+  renderOverlays();
 }
 
-// ─── PAN ────────────────────────────────────────────────────────────────
+// ─── PAN ──────────────────────────────────────────────────────────────────
 function setupPan(){
-  const wrapper = document.getElementById('mapWrapper');
-  let isDown=false, startX=0, startY=0, scrollL=0, scrollT=0, moved=false;
-
-  wrapper.addEventListener('mousedown', e=>{
-    if(e.button!==0)return;
-    isDown=true; moved=false;
-    startX=e.pageX; startY=e.pageY;
-    scrollL=wrapper.scrollLeft; scrollT=wrapper.scrollTop;
-    wrapper.classList.add('dragging');
-  });
-  window.addEventListener('mouseup', ()=>{ isDown=false; wrapper.classList.remove('dragging'); });
-  window.addEventListener('mousemove', e=>{
-    if(!isDown)return;
-    const dx=e.pageX-startX, dy=e.pageY-startY;
-    if(Math.abs(dx)>3||Math.abs(dy)>3)moved=true;
-    wrapper.scrollLeft = scrollL - dx;
-    wrapper.scrollTop = scrollT - dy;
-  });
-  wrapper.addEventListener('click', e=>{
-    if(moved){ e.stopPropagation(); moved=false; }
-  }, true);
-
-  let tStartX=0, tStartY=0, tScrollL=0, tScrollT=0;
-  wrapper.addEventListener('touchstart', e=>{
-    if(e.touches.length!==1)return;
-    tStartX=e.touches[0].pageX; tStartY=e.touches[0].pageY;
-    tScrollL=wrapper.scrollLeft; tScrollT=wrapper.scrollTop;
-  }, {passive:true});
-  wrapper.addEventListener('touchmove', e=>{
-    if(e.touches.length!==1)return;
-    const dx=e.touches[0].pageX-tStartX, dy=e.touches[0].pageY-tStartY;
-    wrapper.scrollLeft = tScrollL - dx;
-    wrapper.scrollTop = tScrollT - dy;
-  }, {passive:true});
+  const wrap=document.getElementById('mapWrapper');
+  let down=false,moved=false,sx=0,sy=0,sl=0,st=0;
+  wrap.addEventListener('mousedown',e=>{if(e.button!==0)return;down=true;moved=false;sx=e.pageX;sy=e.pageY;sl=wrap.scrollLeft;st=wrap.scrollTop;wrap.classList.add('dragging');});
+  window.addEventListener('mouseup',()=>{down=false;wrap.classList.remove('dragging');});
+  window.addEventListener('mousemove',e=>{if(!down)return;const dx=e.pageX-sx,dy=e.pageY-sy;if(Math.abs(dx)>3||Math.abs(dy)>3)moved=true;wrap.scrollLeft=sl-dx;wrap.scrollTop=st-dy;});
+  wrap.addEventListener('click',e=>{if(moved){e.stopPropagation();moved=false;}},true);
+  let tx=0,ty=0,tl=0,tt=0;
+  wrap.addEventListener('touchstart',e=>{if(e.touches.length!==1)return;tx=e.touches[0].pageX;ty=e.touches[0].pageY;tl=wrap.scrollLeft;tt=wrap.scrollTop;},{passive:true});
+  wrap.addEventListener('touchmove',e=>{if(e.touches.length!==1)return;wrap.scrollLeft=tl-(e.touches[0].pageX-tx);wrap.scrollTop=tt-(e.touches[0].pageY-ty);},{passive:true});
 }
 
-// ─── FILTER / SEARCH ───────────────────────────────────────────────────────
-function setFilter(key,val,btn){
-  currentFilter[key]=val;
-  if(key==='status'){
-    document.querySelectorAll('.filter-bar button').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-  }
-  applyFilterVisibility();
-}
-function filterPlots(){
-  currentFilter.type=document.getElementById('typeFilter').value;
-  applyFilterVisibility();
-}
-function searchPlot(){
-  document.querySelectorAll('.plot-pin').forEach(d=>d.classList.remove('highlighted'));
-  const v=document.getElementById('searchInput').value.trim();
-  if(!v)return;
-  const pin=document.querySelector(`.plot-pin[data-id="${v}"]`);
-  if(pin){
-    pin.classList.add('highlighted');
-    pin.scrollIntoView({behavior:'smooth',block:'center',inline:'center'});
-  }
-}
-
-// ─── POPUP ───────────────────────────────────────────────────────────────
+// ─── POPUP ────────────────────────────────────────────────────────────────
 function openPlotPopup(p){
   currentPlot=p;
   const pt=PLOT_TYPES[p.type];
@@ -839,205 +711,172 @@ function openPlotPopup(p){
   document.getElementById('ppDim').textContent=pt.dim;
   document.getElementById('ppArea').textContent=pt.area?pt.area.toLocaleString()+' sq ft':'—';
   const sb=document.getElementById('ppStatus');
-  sb.textContent=p.status.replace('-',' ').replace(/\b\w/g,c=>c.toUpperCase());
-  sb.className='status-badge status-'+p.status;
-
-  // Reserve button only for available plots, and only if configured
-  const reserveBtn = document.getElementById('reserveBtn');
-  const reserveForm = document.getElementById('reserveForm');
-  reserveForm.style.display='none';
-  document.getElementById('rname').value='';
-  document.getElementById('rphone').value='';
-  document.getElementById('remail').value='';
-  if(reserveConfig.enabled && reserveConfig.paymentLink && p.status==='available'){
-    reserveBtn.style.display='block';
-    document.getElementById('reserveFeeAmt').textContent = reserveConfig.feeAmount.toLocaleString('en-IN');
+  if(mapViewMode==='private'){
+    sb.textContent=PRIVATE_STATUSES[p.privateStatus]||p.privateStatus;
+    sb.className='status-badge';sb.style.background='#e1bee7';sb.style.color='#6c3483';
   } else {
-    reserveBtn.style.display='none';
+    sb.textContent=PUBLIC_STATUSES[p.status]||p.status;
+    sb.className='status-badge status-'+p.status;sb.style.background='';sb.style.color='';
   }
-
+  const reserveBtn=document.getElementById('reserveBtn');
+  document.getElementById('reserveForm').style.display='none';
+  ['rname','rphone','remail'].forEach(id=>document.getElementById(id).value='');
+  reserveBtn.style.display=(reserveConfig.enabled&&reserveConfig.paymentLink&&p.status==='available'&&mapViewMode==='public')?'block':'none';
+  if(reserveBtn.style.display!=='none') document.getElementById('reserveFeeAmt').textContent=reserveConfig.feeAmount.toLocaleString('en-IN');
   document.getElementById('popupOverlay').classList.add('open');
 }
-function closePopup(){document.getElementById('popupOverlay').classList.remove('open')}
+function closePopup(){document.getElementById('popupOverlay').classList.remove('open');}
 function enquireFromPopup(){
   closePopup();
-  const id = currentPlot ? String(currentPlot.id) : '';
-  // Scroll to enquiry section first
   document.getElementById('enquiry').scrollIntoView({behavior:'smooth'});
-  // Set value after a short delay to ensure the section is visible
   setTimeout(()=>{
-    const sel = document.getElementById('fplot');
-    // Try to find the option matching this plot ID
-    const opt = Array.from(sel.options).find(o=>String(o.value)===id);
-    if(opt){
-      sel.value = opt.value;
-    } else {
-      // Plot may be booked/reserved — add a temporary disabled option for it
-      const pt = PLOT_TYPES[currentPlot.type];
-      const tempOpt = document.createElement('option');
-      tempOpt.value = id;
-      tempOpt.textContent = `Plot #${id} – ${pt.label} (${pt.dim})`;
-      tempOpt.dataset.temp = '1';
-      sel.insertBefore(tempOpt, sel.options[1]);
-      sel.value = id;
+    const sel=document.getElementById('fplot');
+    const id=String(currentPlot.id);
+    const opt=Array.from(sel.options).find(o=>String(o.value)===id);
+    if(opt){sel.value=opt.value;}
+    else{
+      const pt=PLOT_TYPES[currentPlot.type];
+      const tmp=document.createElement('option');
+      tmp.value=id;tmp.textContent=`Plot #${id} – ${pt.label}`;tmp.dataset.temp='1';
+      sel.insertBefore(tmp,sel.options[1]);sel.value=id;
     }
-  }, 300);
-}
-function openReserveForm(){
-  const form = document.getElementById('reserveForm');
-  form.style.display = form.style.display==='none' ? 'block' : 'none';
-}
-function proceedToPayment(){
-  const n=document.getElementById('rname').value.trim();
-  const ph=document.getElementById('rphone').value.trim();
-  if(!n||!ph){alert('Please enter your name and phone number before proceeding.');return;}
-  if(!reserveConfig.paymentLink){
-    alert('Online payment is not configured yet. Please contact us directly to reserve this plot.');
-    return;
-  }
-  // Open payment link in new tab. Some providers support prefill via URL params (varies by provider).
-  window.open(reserveConfig.paymentLink, '_blank');
-  alert(`Thank you, ${n}! A payment page has opened in a new tab for Plot #${currentPlot.id} (₹${reserveConfig.feeAmount.toLocaleString('en-IN')} reservation fee). After completing payment, please contact us at ${contactInfo.ph1} with your payment reference and Plot #${currentPlot.id} so we can confirm your reservation.`);
-  closePopup();
+  },300);
 }
 
-// ─── ENQUIRY FORM ────────────────────────────────────────────────────────
+// ─── ENQUIRY FORM ─────────────────────────────────────────────────────────
 function populatePlotSelect(){
   const sel=document.getElementById('fplot');
-  // Remove any temp options added from enquireFromPopup
-  Array.from(sel.options).forEach(o=>{ if(o.dataset.temp) o.remove(); });
+  Array.from(sel.options).forEach(o=>{if(o.dataset.temp)o.remove();});
   sel.innerHTML='<option value="">— Select a plot —</option>';
   plots.filter(p=>p.status==='available').forEach(p=>{
     const pt=PLOT_TYPES[p.type];
-    const opt = document.createElement('option');
-    opt.value = String(p.id);
-    opt.textContent = `Plot #${p.id} – ${pt.label} (${pt.dim})`;
+    const opt=document.createElement('option');
+    opt.value=String(p.id);opt.textContent=`Plot #${p.id} – ${pt.label} (${pt.dim})`;
     sel.appendChild(opt);
   });
 }
-function submitEnquiry(){
+async function submitEnquiry(){
   const n=document.getElementById('fname').value.trim();
   const ph=document.getElementById('fphone').value.trim();
-  if(!n||!ph){alert('Please fill in your name and phone number.');return;}
+  if(!n||!ph){alert('Please fill in name and phone number.');return;}
+  try{
+    await addDoc(collection(db,'enquiries'),{
+      name:n,phone:ph,email:document.getElementById('femail').value.trim(),
+      plotId:document.getElementById('fplot').value,
+      message:document.getElementById('fmsg').value.trim(),
+      status:'unread',submittedAt:new Date().toISOString()
+    });
+    updateEnquiryBadge();
+  }catch(e){console.error('Enquiry save failed:',e);}
   document.getElementById('enquiryForm').style.display='none';
   document.getElementById('formSuccess').style.display='block';
 }
 
-// ─── ADMIN ────────────────────────────────────────────────────────────────
-// ─── MAP VIEW MODE (public / private) ────────────────────────────────────
-let mapViewMode = 'public'; // 'public' or 'private'
-
-function showPrivateOnMap(){
-  setMapViewMode('private');
-  closeAdmin();
-  document.getElementById('map').scrollIntoView({behavior:'smooth'});
-}
-function setMapViewMode(mode){
-  mapViewMode = mode;
-  const banner = document.getElementById('privateMapBanner');
-  const privLegend = document.getElementById('privateLegend');
-  const pubLegend = document.querySelector('.legend');
-  if(mode==='private'){
-    banner.style.display='block';
-    privLegend.style.display='flex';
-    if(pubLegend) pubLegend.style.display='none';
-  } else {
-    banner.style.display='none';
-    privLegend.style.display='none';
-    if(pubLegend) pubLegend.style.display='flex';
-  }
-  renderOverlays();
-}
+// ─── FIRESTORE PERSISTENCE ─────────────────────────────────────────────────
 async function saveToFirestore(){
   try{
-    const fb = window.__firebase;
-    const data = {
-      plotStatuses: Object.fromEntries(plots.map(p=>[String(p.id), p.status])),
-      plotPrivateStatuses: Object.fromEntries(plots.map(p=>[String(p.id), p.privateStatus])),
-      pinOverrides: pinOverrides,
-      contactInfo: contactInfo,
-      reserveConfig: reserveConfig,
-      updatedAt: new Date().toISOString()
-    };
-    await fb.setDoc(fb.doc(fb.db,'lotusValley','siteData'), data);
+    await setDoc(doc(db,'lotusValley','siteData'),{
+      plotStatuses:Object.fromEntries(plots.map(p=>[String(p.id),p.status])),
+      plotPrivateStatuses:Object.fromEntries(plots.map(p=>[String(p.id),p.privateStatus])),
+      pinOverrides,contactInfo,reserveConfig,notifEmails,
+      updatedAt:new Date().toISOString()
+    });
     return true;
-  }catch(e){
-    console.error('Firestore save failed:', e);
-    return false;
-  }
+  }catch(e){console.error('Firestore save failed:',e);return false;}
 }
 async function loadFromFirestore(){
   try{
-    const fb = window.__firebase;
-    const snap = await fb.getDoc(fb.doc(fb.db,'lotusValley','siteData'));
+    const snap=await getDoc(doc(db,'lotusValley','siteData'));
     if(!snap.exists())return false;
-    const data = snap.data();
-    if(data.plotStatuses){
-      Object.entries(data.plotStatuses).forEach(([id,status])=>{
-        const p=plots.find(pl=>String(pl.id)===id);
-        if(p && PUBLIC_STATUSES[status]) p.status=status;
-      });
-    }
-    if(data.plotPrivateStatuses){
-      Object.entries(data.plotPrivateStatuses).forEach(([id,status])=>{
-        const p=plots.find(pl=>String(pl.id)===id);
-        if(p && PRIVATE_STATUSES[status]) p.privateStatus=status;
-      });
-    }
-    if(data.pinOverrides) Object.assign(pinOverrides, data.pinOverrides);
-    if(data.contactInfo) Object.assign(contactInfo, data.contactInfo);
-    if(data.reserveConfig) Object.assign(reserveConfig, data.reserveConfig);
-    if(data.notifEmails) notifEmails = data.notifEmails;
+    const d=snap.data();
+    if(d.plotStatuses) Object.entries(d.plotStatuses).forEach(([id,s])=>{const p=plots.find(pl=>String(pl.id)===id);if(p&&PUBLIC_STATUSES[s])p.status=s;});
+    if(d.plotPrivateStatuses) Object.entries(d.plotPrivateStatuses).forEach(([id,s])=>{const p=plots.find(pl=>String(pl.id)===id);if(p&&PRIVATE_STATUSES[s])p.privateStatus=s;});
+    if(d.pinOverrides) Object.assign(pinOverrides,d.pinOverrides);
+    if(d.contactInfo) Object.assign(contactInfo,d.contactInfo);
+    if(d.reserveConfig) Object.assign(reserveConfig,d.reserveConfig);
+    if(d.notifEmails) notifEmails=d.notifEmails;
     return true;
-  }catch(e){
-    console.warn('Firestore load failed (may not have data yet):', e.message);
-    return false;
-  }
+  }catch(e){console.warn('Firestore load failed:',e.message);return false;}
 }
-let currentUser = null;
 
-window.addEventListener('lv-auth-changed', (e)=>{
-  currentUser = e.detail.user;
-  const isAdmin = currentUser && window.__firebase.isAdminEmail(currentUser.email);
-  if(isAdmin){
-    document.getElementById('adminLogin').style.display='none';
-    document.getElementById('adminPanel').style.display='block';
-    const badge = document.getElementById('adminUserBadge');
-    badge.style.display='inline';
-    badge.innerHTML = `Signed in: ${currentUser.email} <a href="#" onclick="adminSignOut();return false;" style="color:#fff;text-decoration:underline;margin-left:.5rem">Sign out</a>`;
-    renderAdminTable();
-    loadContactInputs();
-    loadBlockValues();
-    loadEnquiries();
-    renderNotifEmailList();
-  } else if(currentUser && !isAdmin){
-    document.getElementById('adminErr').textContent = `Signed in as ${currentUser.email}, but this account is not authorized for admin access.`;
-    document.getElementById('adminLogin').style.display='flex';
-    document.getElementById('adminPanel').style.display='none';
-  } else {
-    document.getElementById('adminLogin').style.display='flex';
-    document.getElementById('adminPanel').style.display='none';
-    document.getElementById('adminUserBadge').style.display='none';
-  }
-});
-
-function openAdmin(){
-  document.getElementById('adminModal').classList.add('open');
-  document.getElementById('adminErr').textContent='';
-}
-function closeAdmin(){document.getElementById('adminModal').classList.remove('open')}
-async function signInWithGoogle(){
+// ─── ENQUIRIES ─────────────────────────────────────────────────────────────
+async function loadEnquiries(){
   try{
-    document.getElementById('adminErr').textContent='';
-    await window.__firebase.signInWithPopup();
+    const q=query(collection(db,'enquiries'),orderBy('submittedAt','desc'));
+    const snap=await getDocs(q);
+    enquiriesCache=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderEnquiriesTable();
+    updateEnquiryBadge();
   }catch(e){
-    document.getElementById('adminErr').textContent = 'Sign-in failed: '+e.message;
+    document.getElementById('enquiriesTableBody').innerHTML=`<tr><td colspan="7" style="color:var(--red);text-align:center;padding:.8rem">Failed: ${e.message}</td></tr>`;
   }
 }
-async function adminSignOut(){
-  await window.__firebase.signOut();
-  closeAdmin();
+function renderEnquiriesTable(){
+  const tbody=document.getElementById('enquiriesTableBody');
+  if(!enquiriesCache.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:#888;padding:.8rem">No enquiries yet.</td></tr>';return;}
+  tbody.innerHTML=enquiriesCache.map(e=>{
+    const d=new Date(e.submittedAt).toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    return `<tr style="${e.status==='unread'?'background:#fff8e1;font-weight:600':''}">
+      <td style="font-size:.72rem;white-space:nowrap">${d}</td>
+      <td>${e.name||'—'}</td>
+      <td><a href="tel:${e.phone}" style="color:var(--green)">${e.phone||'—'}</a></td>
+      <td style="font-size:.78rem">${e.email||'—'}</td>
+      <td>${e.plotId?'#'+e.plotId:'—'}</td>
+      <td style="font-size:.78rem;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${e.message||''}">${e.message||'—'}</td>
+      <td><select data-eid="${e.id}" class="enq-status-sel" style="font-size:.75rem;padding:.2rem .3rem;border:1px solid #ccc;border-radius:4px">
+        <option value="unread"${e.status==='unread'?' selected':''}>Unread</option>
+        <option value="read"${e.status==='read'?' selected':''}>Read</option>
+        <option value="contacted"${e.status==='contacted'?' selected':''}>Contacted</option>
+        <option value="closed"${e.status==='closed'?' selected':''}>Closed</option>
+      </select></td>
+    </tr>`;
+  }).join('');
+  document.querySelectorAll('.enq-status-sel').forEach(sel=>{
+    sel.addEventListener('change',async()=>{
+      try{
+        await updateDoc(doc(db,'enquiries',sel.dataset.eid),{status:sel.value});
+        const e=enquiriesCache.find(e=>e.id===sel.dataset.eid);
+        if(e){e.status=sel.value;renderEnquiriesTable();updateEnquiryBadge();}
+      }catch(err){console.error(err);}
+    });
+  });
 }
+async function updateEnquiryBadge(){
+  try{
+    const q=query(collection(db,'enquiries'),orderBy('submittedAt','desc'));
+    const snap=await getDocs(q);
+    const unread=snap.docs.filter(d=>d.data().status==='unread').length;
+    const badge=document.getElementById('enquiryBadge');
+    const unreadEl=document.getElementById('unreadCount');
+    badge.style.display=unread>0?'inline':'none';
+    badge.textContent=unread;
+    if(unreadEl){unreadEl.style.display=unread>0?'inline':'none';unreadEl.textContent=unread+' unread';}
+  }catch(e){}
+}
+function exportEnquiriesExcel(){
+  if(!enquiriesCache.length){alert('No enquiries to export.');return;}
+  const ws=XLSX.utils.json_to_sheet(enquiriesCache.map(e=>({'Date':new Date(e.submittedAt).toLocaleString('en-IN'),'Name':e.name||'','Phone':e.phone||'','Email':e.email||'','Plot':'#'+(e.plotId||''),'Message':e.message||'','Status':e.status||''})));
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Enquiries');
+  XLSX.writeFile(wb,'LotusValley_Enquiries.xlsx');
+}
+
+// ─── NOTIFICATION EMAILS ───────────────────────────────────────────────────
+function renderNotifEmailList(){
+  const c=document.getElementById('notifEmailList');
+  c.innerHTML=notifEmails.length?notifEmails.map((em,i)=>`<div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem"><span style="font-size:.82rem;background:#e8f5e9;padding:.2rem .6rem;border-radius:4px">${em}</span><button data-i="${i}" class="rem-email-btn" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.9rem">×</button></div>`).join(''):'<div style="font-size:.78rem;color:#888">No notification emails added yet.</div>';
+  document.querySelectorAll('.rem-email-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{notifEmails.splice(parseInt(btn.dataset.i),1);renderNotifEmailList();});
+  });
+}
+async function saveNotifEmails(){
+  try{
+    const snap=await getDoc(doc(db,'lotusValley','siteData'));
+    await setDoc(doc(db,'lotusValley','siteData'),{...(snap.exists()?snap.data():{}),notifEmails},{merge:true});
+    const msg=document.getElementById('notifMsg');msg.style.display='inline';setTimeout(()=>msg.style.display='none',2000);
+  }catch(e){alert('Save failed: '+e.message);}
+}
+
+// ─── ADMIN TABLE ───────────────────────────────────────────────────────────
 function renderAdminTable(){
   const search=document.getElementById('adminSearch').value.toLowerCase();
   const sf=document.getElementById('adminStatusFilter').value;
@@ -1049,238 +888,103 @@ function renderAdminTable(){
     return sm&&qm;
   }).forEach(p=>{
     const pt=PLOT_TYPES[p.type];
-    const publicOpts = Object.entries(PUBLIC_STATUSES).map(([k,v])=>`<option value="${k}"${p.status===k?' selected':''}>${v}</option>`).join('');
-    const privateOpts = Object.entries(PRIVATE_STATUSES).map(([k,v])=>`<option value="${k}"${p.privateStatus===k?' selected':''}>${v}</option>`).join('');
-    tbody.innerHTML+=`<tr>
-      <td><strong>#${p.id}</strong></td>
-      <td>${pt.label}</td>
-      <td>${pt.dim}</td>
-      <td>${pt.area?pt.area.toLocaleString()+' sq ft':'—'}</td>
-      <td><select onchange="changePublicStatus('${p.id}',this.value)" style="border-color:#2d7a4f">${publicOpts}</select></td>
-      <td><select onchange="changePrivateStatus('${p.id}',this.value)" style="border-color:#888">${privateOpts}</select></td>
-    </tr>`;
+    const pubOpts=Object.entries(PUBLIC_STATUSES).map(([k,v])=>`<option value="${k}"${p.status===k?' selected':''}>${v}</option>`).join('');
+    const privOpts=Object.entries(PRIVATE_STATUSES).map(([k,v])=>`<option value="${k}"${p.privateStatus===k?' selected':''}>${v}</option>`).join('');
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td><strong>#${p.id}</strong></td><td>${pt.label}</td><td>${pt.dim}</td><td>${pt.area?pt.area.toLocaleString()+' sqft':'—'}</td>
+      <td><select class="pub-sel" data-pid="${p.id}" style="border-color:var(--green)">${pubOpts}</select></td>
+      <td><select class="priv-sel" data-pid="${p.id}" style="border-color:#888">${privOpts}</select></td>`;
+    tbody.appendChild(tr);
   });
-}
-function changePublicStatus(id,status){
-  const p=plots.find(pl=>String(pl.id)===String(id));
-  if(p){p.status=status;refreshPinClasses();populatePlotSelect();renderAdminTable();saveToFirestore();}
-}
-function changePrivateStatus(id,status){
-  const p=plots.find(pl=>String(pl.id)===String(id));
-  if(p){p.privateStatus=status;renderAdminTable();saveToFirestore();}
+  document.querySelectorAll('.pub-sel').forEach(sel=>{
+    sel.addEventListener('change',()=>{
+      const p=plots.find(pl=>String(pl.id)===sel.dataset.pid);
+      if(p){p.status=sel.value;refreshPinClasses();populatePlotSelect();saveToFirestore();}
+    });
+  });
+  document.querySelectorAll('.priv-sel').forEach(sel=>{
+    sel.addEventListener('change',()=>{
+      const p=plots.find(pl=>String(pl.id)===sel.dataset.pid);
+      if(p){p.privateStatus=sel.value;saveToFirestore();}
+    });
+  });
 }
 
-// ─── EXCEL EXPORT/IMPORT ──────────────────────────────────────────────────
+// ─── EXCEL ─────────────────────────────────────────────────────────────────
 function exportExcel(){
-  const data=plots.map(p=>{
-    const pt=PLOT_TYPES[p.type];
-    return {'Plot Number':p.id,'Plot Type':pt.label,'Dimensions (ft)':pt.dim,'Area (sq ft)':pt.area||'N/A','Public Status':PUBLIC_STATUSES[p.status]||p.status,'Private Status':PRIVATE_STATUSES[p.privateStatus]||p.privateStatus};
-  });
-  const ws=XLSX.utils.json_to_sheet(data);
-  const wb=XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb,ws,'Plots');
-  XLSX.writeFile(wb,'LotusValley_Plots.xlsx');
+  const ws=XLSX.utils.json_to_sheet(plots.map(p=>{const pt=PLOT_TYPES[p.type];return{'Plot Number':p.id,'Plot Type':pt.label,'Dimensions':pt.dim,'Area (sqft)':pt.area||'N/A','Public Status':PUBLIC_STATUSES[p.status]||p.status,'Private Status':PRIVATE_STATUSES[p.privateStatus]||p.privateStatus};}));
+  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Plots');XLSX.writeFile(wb,'LotusValley_Plots.xlsx');
 }
 function importExcel(input){
-  const file=input.files[0];
-  if(!file)return;
+  const file=input.files[0];if(!file)return;
   const reader=new FileReader();
   reader.onload=async e=>{
     const wb=XLSX.read(e.target.result,{type:'binary'});
-    const ws=wb.Sheets[wb.SheetNames[0]];
-    const rows=XLSX.utils.sheet_to_json(ws);
-    let updated=0;
-    const publicLabelToKey = Object.fromEntries(Object.entries(PUBLIC_STATUSES).map(([k,v])=>[v.toLowerCase(),k]));
-    const privateLabelToKey = Object.fromEntries(Object.entries(PRIVATE_STATUSES).map(([k,v])=>[v.toLowerCase(),k]));
+    const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+    const pubMap=Object.fromEntries(Object.entries(PUBLIC_STATUSES).map(([k,v])=>[v.toLowerCase(),k]));
+    const privMap=Object.fromEntries(Object.entries(PRIVATE_STATUSES).map(([k,v])=>[v.toLowerCase(),k]));
+    let upd=0;
     rows.forEach(row=>{
-      const idRaw = row['Plot Number']||row['plot_number']||row['Plot #']||row['id'];
-      const id = String(idRaw).trim();
-      const p=plots.find(pl=>String(pl.id)===id);
-      if(!p)return;
-      const pubRaw = (row['Public Status']||'').toString().toLowerCase().trim();
-      const privRaw = (row['Private Status']||'').toString().toLowerCase().trim();
-      if(pubRaw && (PUBLIC_STATUSES[pubRaw] || publicLabelToKey[pubRaw])){
-        p.status = PUBLIC_STATUSES[pubRaw] ? pubRaw : publicLabelToKey[pubRaw];
-        updated++;
-      }
-      if(privRaw && (PRIVATE_STATUSES[privRaw] || privateLabelToKey[privRaw])){
-        p.privateStatus = PRIVATE_STATUSES[privRaw] ? privRaw : privateLabelToKey[privRaw];
-        updated++;
-      }
+      const id=String(row['Plot Number']||row['id']||'').trim();
+      const p=plots.find(pl=>String(pl.id)===id);if(!p)return;
+      const pub=(row['Public Status']||'').toString().toLowerCase().trim();
+      const priv=(row['Private Status']||'').toString().toLowerCase().trim();
+      if(pub&&(PUBLIC_STATUSES[pub]||pubMap[pub])){p.status=PUBLIC_STATUSES[pub]?pub:pubMap[pub];upd++;}
+      if(priv&&(PRIVATE_STATUSES[priv]||privMap[priv])){p.privateStatus=PRIVATE_STATUSES[priv]?priv:privMap[priv];upd++;}
     });
     refreshPinClasses();populatePlotSelect();renderAdminTable();
-    const saved = await saveToFirestore();
-    alert(`✅ Import complete! ${updated} field(s) updated${saved?' and saved live.':' (live save failed - check console).'}`);
+    const saved=await saveToFirestore();
+    alert(`✅ ${upd} field(s) updated${saved?' and saved live.':' (save failed).'}`);
   };
-  reader.readAsBinaryString(file);
-  input.value='';
+  reader.readAsBinaryString(file);input.value='';
 }
 
-// ─── PIN POSITION JSON IMPORT/EXPORT ──────────────────────────────────────
-async function importPinJSON(){
-  const raw = document.getElementById('pinJsonInput').value.trim();
-  if(!raw){ document.getElementById('pinImportStatus').textContent = 'Paste JSON first.'; return; }
+// ─── PIN POSITIONS ─────────────────────────────────────────────────────────
+async function applyPinJSON(){
+  const raw=document.getElementById('pinJsonInput').value.trim();
+  if(!raw){document.getElementById('pinImportStatus').textContent='Paste JSON first.';return;}
   try{
-    const data = JSON.parse(raw);
-    let count=0;
-    Object.entries(data).forEach(([id,pos])=>{
-      if(pos && typeof pos.x==='number' && typeof pos.y==='number'){
-        pinOverrides[id] = {x:pos.x, y:pos.y};
-        count++;
-      }
-    });
+    const data=JSON.parse(raw);let count=0;
+    Object.entries(data).forEach(([id,pos])=>{if(pos&&typeof pos.x==='number'&&typeof pos.y==='number'){pinOverrides[id]={x:pos.x,y:pos.y};count++;}});
     renderOverlays();
-    const saved = await saveToFirestore();
-    document.getElementById('pinImportStatus').textContent = `✅ Applied ${count} pin positions${saved?' and saved live':' (save failed - check console)'}.`;
-    const msg=document.getElementById('pinImportMsg');
-    msg.style.display='inline';
-    setTimeout(()=>msg.style.display='none',2000);
-  }catch(e){
-    document.getElementById('pinImportStatus').textContent = '❌ Invalid JSON: '+e.message;
-  }
+    const saved=await saveToFirestore();
+    document.getElementById('pinImportStatus').textContent=`✅ Applied ${count} positions${saved?' — saved live.':' (save failed).'}`;
+    const msg=document.getElementById('pinImportMsg');msg.style.display='inline';setTimeout(()=>msg.style.display='none',2000);
+  }catch(e){document.getElementById('pinImportStatus').textContent='❌ Invalid JSON: '+e.message;}
 }
 function exportPinJSON(){
-  const data = {};
-  getEffectiveRects().forEach(pr=>{ data[String(pr.id)] = {x:Math.round(pr.cx), y:Math.round(pr.cy)}; });
-  document.getElementById('pinJsonInput').value = JSON.stringify(data, null, 1);
-  document.getElementById('pinImportStatus').textContent = `Exported ${Object.keys(data).length} positions. Click "Download pin-positions.json" to save the file, then upload it to your GitHub repo (same folder as index.html).`;
+  document.getElementById('pinJsonInput').value=JSON.stringify(Object.fromEntries(getEffectiveRects().map(pr=>[String(pr.id),{x:Math.round(pr.cx),y:Math.round(pr.cy)}])),null,1);
 }
-function downloadPinPositionsFile(){
-  const data = {};
-  getEffectiveRects().forEach(pr=>{ data[String(pr.id)] = {x:Math.round(pr.cx), y:Math.round(pr.cy)}; });
-  const blob = new Blob([JSON.stringify(data,null,1)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href=url; a.download='pin-positions.json';
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  URL.revokeObjectURL(url);
+function downloadPinJSON(){
+  const blob=new Blob([JSON.stringify(Object.fromEntries(getEffectiveRects().map(pr=>[String(pr.id),{x:Math.round(pr.cx),y:Math.round(pr.cy)}])),null,1)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='pin-positions.json';document.body.appendChild(a);a.click();document.body.removeChild(a);
 }
-function downloadPublicStatusFile(){
-  const data = {};
-  plots.forEach(p=>{ data[String(p.id)] = p.status; });
-  const blob = new Blob([JSON.stringify(data,null,1)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href=url; a.download='plot-status-public.json';
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-}
-function downloadPrivateStatusFile(){
-  const data = {};
-  plots.forEach(p=>{ data[String(p.id)] = p.privateStatus; });
-  const blob = new Blob([JSON.stringify(data,null,1)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href=url; a.download='plot-status-private.json';
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-}
-function downloadSiteConfigFile(){
-  const data = { contactInfo: contactInfo, reserveConfig: reserveConfig };
-  const blob = new Blob([JSON.stringify(data,null,1)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href=url; a.download='site-config.json';
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-}
-async function clearPinOverrides(){
-  if(!confirm('Clear all manually-placed pin positions for everyone (live)? This reverts to computed positions.'))return;
-  pinOverrides = {};
-  renderOverlays();
-  await saveToFirestore();
-  document.getElementById('pinImportStatus').textContent = 'Overrides cleared and saved live.';
-}
-async function loadStoredOverrides(){
-  const loaded = await loadFromFirestore();
-  if(loaded){
-    refreshPinClasses();
-    populatePlotSelect();
-    applyContactInfoToDOM();
-    renderOverlays();
-    console.log('Lotus Valley: loaded live data from Firestore');
-  } else {
-    console.log('Lotus Valley: no Firestore data yet, using defaults');
-  }
+async function clearPins(){
+  if(!confirm('Clear all pin positions? This affects the live site.'))return;
+  pinOverrides={};renderOverlays();await saveToFirestore();
+  document.getElementById('pinImportStatus').textContent='Overrides cleared and saved.';
 }
 
 // ─── BLOCK CALIBRATION ─────────────────────────────────────────────────────
 function loadBlockValues(){
-  const i = parseInt(document.getElementById('blockSelect').value);
-  const b = BLOCKS[i];
-  document.getElementById('bTLx').value = b.TL[0];
-  document.getElementById('bTLy').value = b.TL[1];
-  document.getElementById('bTRx').value = b.TR[0];
-  document.getElementById('bTRy').value = b.TR[1];
-  document.getElementById('bBRx').value = b.BR[0];
-  document.getElementById('bBRy').value = b.BR[1];
-  document.getElementById('bBLx').value = b.BL[0];
-  document.getElementById('bBLy').value = b.BL[1];
+  const b=BLOCKS[parseInt(document.getElementById('blockSelect').value)];
+  ['TL','TR','BR','BL'].forEach(k=>{document.getElementById('b'+k+'x').value=b[k][0];document.getElementById('b'+k+'y').value=b[k][1];});
 }
 function applyBlock(){
-  const i = parseInt(document.getElementById('blockSelect').value);
-  const b = BLOCKS[i];
-  b.TL = [parseFloat(document.getElementById('bTLx').value)||0, parseFloat(document.getElementById('bTLy').value)||0];
-  b.TR = [parseFloat(document.getElementById('bTRx').value)||0, parseFloat(document.getElementById('bTRy').value)||0];
-  b.BR = [parseFloat(document.getElementById('bBRx').value)||0, parseFloat(document.getElementById('bBRy').value)||0];
-  b.BL = [parseFloat(document.getElementById('bBLx').value)||0, parseFloat(document.getElementById('bBLy').value)||0];
-  plotRects = generatePlotRects();
-  renderOverlays();
-  const msg=document.getElementById('calibMsg');
-  msg.style.display='inline';
-  setTimeout(()=>msg.style.display='none',1500);
+  const b=BLOCKS[parseInt(document.getElementById('blockSelect').value)];
+  ['TL','TR','BR','BL'].forEach(k=>{b[k]=[parseFloat(document.getElementById('b'+k+'x').value)||0,parseFloat(document.getElementById('b'+k+'y').value)||0];});
+  plotRects=generatePlotRects();renderOverlays();
+  const msg=document.getElementById('calibMsg');msg.style.display='inline';setTimeout(()=>msg.style.display='none',1500);
 }
-let coordModeOn=false;
-function showCoords(){
-  coordModeOn = true;
-  document.getElementById('adminModal').classList.remove('open');
-  document.getElementById('coordFloater').style.display='block';
-  document.getElementById('coordFloaterReadout').textContent='x: —, y: —';
-}
-function exitCoordMode(){
-  coordModeOn = false;
-  document.getElementById('coordFloater').style.display='none';
-  document.getElementById('adminModal').classList.add('open');
-}
-document.addEventListener('DOMContentLoaded',()=>{
-  const svg = document.getElementById('plotsLayerSvg');
-  svg.addEventListener('click', e=>{
-    if(!coordModeOn)return;
-    const rect = svg.getBoundingClientRect();
-    const x = (e.clientX-rect.left)/rect.width * IMG_W;
-    const y = (e.clientY-rect.top)/rect.height * IMG_H;
-    document.getElementById('coordFloaterReadout').textContent = `x: ${Math.round(x)}, y: ${Math.round(y)}`;
-  });
-});
 
-// ─── CONTACT INFO ─────────────────────────────────────────────────────────
-function loadContactInputs(){
-  document.getElementById('aph1').value=contactInfo.ph1;
-  document.getElementById('aph2').value=contactInfo.ph2;
-  document.getElementById('aemail').value=contactInfo.email;
-  document.getElementById('aweb').value=contactInfo.web;
-  document.getElementById('rcEnabled').value = reserveConfig.enabled ? '1':'0';
-  document.getElementById('rcFee').value = reserveConfig.feeAmount;
-  document.getElementById('rcLink').value = reserveConfig.paymentLink;
-}
-function saveReserveConfig(){
-  reserveConfig.enabled = document.getElementById('rcEnabled').value==='1';
-  reserveConfig.feeAmount = parseFloat(document.getElementById('rcFee').value)||0;
-  reserveConfig.paymentLink = document.getElementById('rcLink').value.trim();
-  saveToFirestore();
-  const msg=document.getElementById('reserveMsg');
-  msg.style.display='inline';
-  setTimeout(()=>msg.style.display='none',2000);
-}
+// ─── CONTACT & RESERVE ─────────────────────────────────────────────────────
 function applyContactInfoToDOM(){
-  const ph1raw=contactInfo.ph1.replace(/\s/g,'');
-  const ph2raw=contactInfo.ph2.replace(/\s/g,'');
   document.getElementById('ph1Disp').textContent=contactInfo.ph1;
   document.getElementById('ph2Disp').textContent=contactInfo.ph2;
   document.getElementById('emailDisp').textContent=contactInfo.email;
   document.getElementById('webDisp').textContent=contactInfo.web;
-  document.getElementById('ph1Link').href='tel:'+ph1raw;
-  document.getElementById('ph2Link').href='tel:'+ph2raw;
+  document.getElementById('ph1Link').href='tel:'+contactInfo.ph1.replace(/\s/g,'');
+  document.getElementById('ph2Link').href='tel:'+contactInfo.ph2.replace(/\s/g,'');
   document.getElementById('emailLink').href='mailto:'+contactInfo.email;
   document.getElementById('webLink').href='https://'+contactInfo.web.replace('https://','');
   document.getElementById('fph1').textContent=contactInfo.ph1;
@@ -1290,70 +994,139 @@ function applyContactInfoToDOM(){
   document.getElementById('femlLink').href='mailto:'+contactInfo.email;
   document.getElementById('fwebLink').href='https://'+contactInfo.web.replace('https://','');
 }
-function saveContactInfo(){
+function loadAdminInputs(){
+  document.getElementById('aph1').value=contactInfo.ph1;
+  document.getElementById('aph2').value=contactInfo.ph2;
+  document.getElementById('aemail').value=contactInfo.email;
+  document.getElementById('aweb').value=contactInfo.web;
+  document.getElementById('rcEnabled').value=reserveConfig.enabled?'1':'0';
+  document.getElementById('rcFee').value=reserveConfig.feeAmount;
+  document.getElementById('rcLink').value=reserveConfig.paymentLink;
+  renderNotifEmailList();
+  loadBlockValues();
+}
+async function saveContactInfo(){
   contactInfo.ph1=document.getElementById('aph1').value.trim()||contactInfo.ph1;
   contactInfo.ph2=document.getElementById('aph2').value.trim()||contactInfo.ph2;
   contactInfo.email=document.getElementById('aemail').value.trim()||contactInfo.email;
   contactInfo.web=document.getElementById('aweb').value.trim()||contactInfo.web;
   applyContactInfoToDOM();
-  saveToFirestore();
-  const msg=document.getElementById('saveMsg');
-  msg.style.display='inline';
-  setTimeout(()=>msg.style.display='none',2500);
+  await saveToFirestore();
+  const msg=document.getElementById('saveMsg');msg.style.display='inline';setTimeout(()=>msg.style.display='none',2500);
+}
+async function saveReserveConfig(){
+  reserveConfig.enabled=document.getElementById('rcEnabled').value==='1';
+  reserveConfig.feeAmount=parseFloat(document.getElementById('rcFee').value)||0;
+  reserveConfig.paymentLink=document.getElementById('rcLink').value.trim();
+  await saveToFirestore();
+  const msg=document.getElementById('reserveMsg');msg.style.display='inline';setTimeout(()=>msg.style.display='none',2000);
 }
 
-// ─── EXPOSE FUNCTIONS TO GLOBAL SCOPE (for onclick handlers in HTML) ──────
-window.openAdmin = openAdmin;
-window.closeAdmin = closeAdmin;
-window.signInWithGoogle = signInWithGoogle;
-window.adminSignOut = adminSignOut;
-window.setFilter = setFilter;
-window.filterPlots = filterPlots;
-window.searchPlot = searchPlot;
-window.updatePinSize = updatePinSize;
-window.zoomMap = zoomMap;
-window.resetMapZoom = resetMapZoom;
-window.closePopup = closePopup;
-window.enquireFromPopup = enquireFromPopup;
-window.openReserveForm = openReserveForm;
-window.proceedToPayment = proceedToPayment;
-window.submitEnquiry = submitEnquiry;
-window.renderAdminTable = renderAdminTable;
-window.changePublicStatus = changePublicStatus;
-window.changePrivateStatus = changePrivateStatus;
-window.exportExcel = exportExcel;
-window.importExcel = importExcel;
-window.importPinJSON = importPinJSON;
-window.exportPinJSON = exportPinJSON;
-window.downloadPinPositionsFile = downloadPinPositionsFile;
-window.downloadPublicStatusFile = downloadPublicStatusFile;
-window.downloadPrivateStatusFile = downloadPrivateStatusFile;
-window.clearPinOverrides = clearPinOverrides;
-window.loadBlockValues = loadBlockValues;
-window.applyBlock = applyBlock;
-window.showCoords = showCoords;
-window.exitCoordMode = exitCoordMode;
-window.saveContactInfo = saveContactInfo;
-window.saveReserveConfig = saveReserveConfig;
-window.downloadSiteConfigFile = downloadSiteConfigFile;
-window.loadEnquiries = loadEnquiries;
-window.updateEnquiryStatus = updateEnquiryStatus;
-window.exportEnquiriesExcel = exportEnquiriesExcel;
-window.addNotifEmail = addNotifEmail;
-window.removeNotifEmail = removeNotifEmail;
-window.saveNotifEmails = saveNotifEmails;
-window.showPrivateOnMap = showPrivateOnMap;
-window.setMapViewMode = setMapViewMode;
+// ─── AUTH ──────────────────────────────────────────────────────────────────
+onAuthStateChanged(auth,user=>{
+  const isAdmin=user&&user.email.toLowerCase()===ADMIN_EMAIL;
+  document.getElementById('adminLogin').style.display=isAdmin?'none':'flex';
+  document.getElementById('adminPanel').style.display=isAdmin?'block':'none';
+  const badge=document.getElementById('adminUserBadge');
+  if(isAdmin){
+    badge.style.display='inline';
+    badge.innerHTML=`${user.email} <a href="#" id="signOutLink" style="color:#fff;text-decoration:underline;margin-left:.4rem">Sign out</a>`;
+    document.getElementById('signOutLink')?.addEventListener('click',e=>{e.preventDefault();signOut(auth).then(()=>{setMapViewMode('public');document.getElementById('adminModal').classList.remove('open');});});
+    renderAdminTable();loadAdminInputs();loadEnquiries();
+  } else {
+    badge.style.display='none';
+    if(user) document.getElementById('adminErr').textContent=`${user.email} is not authorized.`;
+  }
+});
+
+// ─── EVENT WIRING ──────────────────────────────────────────────────────────
+document.getElementById('adminBtn').addEventListener('click',()=>document.getElementById('adminModal').classList.add('open'));
+document.getElementById('closeAdminBtn').addEventListener('click',()=>{document.getElementById('adminModal').classList.remove('open');if(mapViewMode==='private')setMapViewMode('public');});
+document.getElementById('googleSignInBtn').addEventListener('click',async()=>{try{document.getElementById('adminErr').textContent='';await signInWithPopup(auth,provider);}catch(e){document.getElementById('adminErr').textContent='Sign-in failed: '+e.message;}});
+document.getElementById('closePopupBtn').addEventListener('click',closePopup);
+document.getElementById('popupOverlay').addEventListener('click',e=>{if(e.target===document.getElementById('popupOverlay'))closePopup();});
+document.getElementById('enquireFromPopupBtn').addEventListener('click',enquireFromPopup);
+document.getElementById('reserveBtn').addEventListener('click',()=>{const f=document.getElementById('reserveForm');f.style.display=f.style.display==='none'?'block':'none';});
+document.getElementById('proceedPayBtn').addEventListener('click',()=>{
+  const n=document.getElementById('rname').value.trim(),ph=document.getElementById('rphone').value.trim();
+  if(!n||!ph){alert('Please enter name and phone.');return;}
+  if(!reserveConfig.paymentLink){alert('Payment not configured. Please contact us directly.');return;}
+  window.open(reserveConfig.paymentLink,'_blank');
+  alert(`Thank you, ${n}! A payment page has opened for Plot #${currentPlot.id} (₹${reserveConfig.feeAmount.toLocaleString('en-IN')} reservation fee). After payment, contact us at ${contactInfo.ph1} with your reference number.`);
+  closePopup();
+});
+document.getElementById('submitEnquiryBtn').addEventListener('click',submitEnquiry);
+document.getElementById('zoomIn').addEventListener('click',()=>{mapZoom=Math.min(mapZoom*1.25,4);applyMapZoom();});
+document.getElementById('zoomOut').addEventListener('click',()=>{mapZoom=Math.max(mapZoom*0.8,0.15);applyMapZoom();});
+document.getElementById('zoomReset').addEventListener('click',fitMapToWidth);
+document.getElementById('pinSizeSlider').addEventListener('input',e=>{pinBaseSize=parseFloat(e.target.value)||13;document.getElementById('pinSizeLabel').textContent=Math.round(pinBaseSize);renderOverlays();});
+document.getElementById('searchInput').addEventListener('input',e=>{
+  document.querySelectorAll('.plot-pin').forEach(d=>d.classList.remove('highlighted'));
+  const v=e.target.value.trim();if(!v)return;
+  const pin=document.querySelector(`.plot-pin[data-id="${v}"]`);
+  if(pin){pin.classList.add('highlighted');pin.scrollIntoView({behavior:'smooth',block:'center',inline:'center'});}
+});
+document.getElementById('typeFilter').addEventListener('change',e=>{currentFilter.type=e.target.value;applyFilterVisibility();});
+['filterAll','filterAvail','filterBooked','filterReserved','filterNA'].forEach((id,i)=>{
+  const vals=['all','available','booked','reserved','not-available'];
+  document.getElementById(id).addEventListener('click',e=>{
+    currentFilter.status=vals[i];
+    document.querySelectorAll('.filter-bar button').forEach(b=>b.classList.remove('active'));
+    e.target.classList.add('active');
+    applyFilterVisibility();
+  });
+});
+document.getElementById('adminSearch').addEventListener('input',renderAdminTable);
+document.getElementById('adminStatusFilter').addEventListener('change',renderAdminTable);
+document.getElementById('exportExcelBtn').addEventListener('click',exportExcel);
+document.getElementById('importExcelInput').addEventListener('change',e=>importExcel(e.target));
+document.getElementById('showPrivateMapBtn').addEventListener('click',()=>{setMapViewMode('private');document.getElementById('adminModal').classList.remove('open');document.getElementById('map').scrollIntoView({behavior:'smooth'});});
+document.getElementById('switchPublicBtn').addEventListener('click',()=>setMapViewMode('public'));
+document.getElementById('applyPinsBtn').addEventListener('click',applyPinJSON);
+document.getElementById('exportPinsBtn').addEventListener('click',exportPinJSON);
+document.getElementById('dlPinsBtn').addEventListener('click',downloadPinJSON);
+document.getElementById('clearPinsBtn').addEventListener('click',clearPins);
+document.getElementById('blockSelect').addEventListener('change',loadBlockValues);
+document.getElementById('applyBlockBtn').addEventListener('click',applyBlock);
+document.getElementById('showCoordsBtn').addEventListener('click',()=>{
+  coordModeOn=true;document.getElementById('adminModal').classList.remove('open');
+  document.getElementById('coordFloater').style.display='block';
+  document.getElementById('coordFloaterReadout').textContent='x: —, y: —';
+});
+document.getElementById('exitCoordBtn').addEventListener('click',()=>{
+  coordModeOn=false;document.getElementById('coordFloater').style.display='none';
+  document.getElementById('adminModal').classList.add('open');
+});
+document.getElementById('plotsLayerSvg').addEventListener('click',e=>{
+  if(!coordModeOn)return;
+  const rect=document.getElementById('plotsLayerSvg').getBoundingClientRect();
+  const x=(e.clientX-rect.left)/rect.width*IMG_W;
+  const y=(e.clientY-rect.top)/rect.height*IMG_H;
+  document.getElementById('coordFloaterReadout').textContent=`x: ${Math.round(x)}, y: ${Math.round(y)}`;
+});
+document.getElementById('saveContactBtn').addEventListener('click',saveContactInfo);
+document.getElementById('saveReserveBtn').addEventListener('click',saveReserveConfig);
+document.getElementById('addNotifEmailBtn').addEventListener('click',()=>{
+  const input=document.getElementById('newNotifEmail');
+  const val=input.value.trim().toLowerCase();
+  if(!val||!val.includes('@')){alert('Please enter a valid email address.');return;}
+  if(notifEmails.includes(val)){alert('Already in list.');return;}
+  notifEmails.push(val);input.value='';renderNotifEmailList();
+});
+document.getElementById('saveNotifEmailsBtn').addEventListener('click',saveNotifEmails);
+document.getElementById('refreshEnquiriesBtn').addEventListener('click',loadEnquiries);
+document.getElementById('exportEnquiriesBtn').addEventListener('click',exportEnquiriesExcel);
 
 // ─── INIT ──────────────────────────────────────────────────────────────────
-window.addEventListener('load',()=>{
-  buildMap();
-  populatePlotSelect();
-  loadStoredOverrides();
-  setupPan();
+buildMap();
+setupPan();
+loadFromFirestore().then(loaded=>{
+  if(loaded){refreshPinClasses();populatePlotSelect();applyContactInfoToDOM();}
+  else{populatePlotSelect();}
+  renderOverlays();
   updateEnquiryBadge();
 });
-window.addEventListener('resize',()=>{ fitMapToWidth(); });
+window.addEventListener('resize',fitMapToWidth);
 </script>
 </body>
 </html>
