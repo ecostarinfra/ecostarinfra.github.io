@@ -518,6 +518,21 @@ function draw(){
   var svg=document.getElementById('plotsLayerSvg');
   while(svg.firstChild)svg.removeChild(svg.firstChild);
   var r=pinSize/zoom,fs=(pinSize*0.77)/zoom,priv=viewMode==='private';
+
+  // DEBUG: draw red corner markers to verify SVG coordinate alignment
+  [[0,0,'TL'],[IW,0,'TR'],[IW,IH,'BR'],[0,IH,'BL'],[IW/2,IH/2,'CTR']].forEach(function(pt){
+    var g=document.createElementNS(SVG_NS,'g');
+    var c=document.createElementNS(SVG_NS,'circle');
+    c.setAttribute('cx',pt[0]);c.setAttribute('cy',pt[1]);c.setAttribute('r',r*1.5);
+    c.setAttribute('fill','rgba(255,0,0,0.7)');c.setAttribute('stroke','white');c.setAttribute('stroke-width',2);
+    var t=document.createElementNS(SVG_NS,'text');
+    t.setAttribute('x',pt[0]);t.setAttribute('y',pt[1]);
+    t.setAttribute('text-anchor','middle');t.setAttribute('dominant-baseline','central');
+    t.setAttribute('font-size',fs);t.setAttribute('fill','white');t.setAttribute('font-weight','bold');
+    t.textContent=pt[2];
+    g.appendChild(c);g.appendChild(t);svg.appendChild(g);
+  });
+
   effRects().forEach(function(pr){
     var p=plots.find(function(pl){return String(pl.id)===String(pr.id);});if(!p)return;
     var g=document.createElementNS(SVG_NS,'g');
