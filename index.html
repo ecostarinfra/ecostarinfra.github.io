@@ -535,7 +535,8 @@ function genRects(){
 }
 
 let rects=genRects();
-let overrides={'248B':{x:3115,y:2445}};
+// 248B stored as normalised coords (x/2264, y/1517) from original JPEG placement
+let overrides={'248B':{nx:3115/2264,ny:2445/1517}};
 let pinSize=20,zoom=1,IW=2264,IH=1517,viewMode='public';
 let filter={status:'all',type:'all'};
 let curPlot=null;
@@ -556,11 +557,26 @@ function getXLSX(){
   });
 }
 
-// ─── EFFECTIVE RECTS ───────────────────────────────────────────────────────
+// ─── EFFECTIVE RECTS (coordinates normalised to 0-1, then scaled to actual image size) ──
 function effRects(){
-  const base=rects.map(r=>{const o=overrides[String(r.id)];return o?{id:r.id,cx:o.x,cy:o.y}:r;});
+  const base=rects.map(r=>{
+    const o=overrides[String(r.id)];
+    if(o){
+      // Support both absolute coords (legacy, stored against original image size)
+      // and normalised 0-1 coords (new format)
+      const cx = o.nx != null ? o.nx * IW : o.x;
+      const cy = o.ny != null ? o.ny * IH : o.y;
+      return{id:r.id,cx,cy};
+    }
+    // Block-computed coords are in original 2264x1517 space — scale to actual image
+    return{id:r.id,cx:r.cx/2264*IW,cy:r.cy/1517*IH};
+  });
   const ids=new Set(base.map(r=>String(r.id)));
-  return base.concat(Object.entries(overrides).filter(([id])=>!ids.has(id)).map(([id,p])=>({id,cx:p.x,cy:p.y})));
+  return base.concat(Object.entries(overrides).filter(([id])=>!ids.has(id)).map(([id,p])=>{
+    const cx = p.nx != null ? p.nx * IW : p.x;
+    const cy = p.ny != null ? p.ny * IH : p.y;
+    return{id,cx,cy};
+  }));
 }
 
 // ─── MAP ───────────────────────────────────────────────────────────────────
@@ -830,7 +846,13 @@ async function applyPins(){
   if(!raw){document.getElementById('pinImportStatus').textContent='Paste JSON first.';return;}
   try{
     const d=JSON.parse(raw);let n=0;
-    Object.entries(d).forEach(([id,pos])=>{if(pos&&typeof pos.x==='number'&&typeof pos.y==='number'){overrides[id]={x:pos.x,y:pos.y};n++;}});
+    Object.entries(d).forEach(([id,pos])=>{
+      if(pos&&typeof pos.x==='number'&&typeof pos.y==='number'){
+        // Normalise to 0-1 using current image dimensions so pins are resolution-independent
+        overrides[id]={nx:pos.x/IW, ny:pos.y/IH};
+        n++;
+      }
+    });
     draw();const ok=await save();
     document.getElementById('pinImportStatus').textContent=`✅ Applied ${n} positions${ok?' — saved live.':' (save failed).'}`;
     const m=document.getElementById('pinImportMsg');m.style.display='inline';setTimeout(()=>m.style.display='none',2000);
