@@ -443,7 +443,7 @@ footer a{color:#a8e6c2;text-decoration:none}
   </div>
 </div>
 
-<script type="module">
+<script type="module" onerror="document.getElementById('mapDiag').textContent='Script module failed to load — check browser console'">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import {getFirestore,doc,getDoc,setDoc,collection,addDoc,getDocs,updateDoc,orderBy,query} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -990,16 +990,26 @@ on('saveNotifEmailsBtn','click',saveNotifEmails);
 on('refreshEnquiriesBtn','click',loadEnquiries);on('exportEnquiriesBtn','click',exportEnqExcel);
 
 // ─── INIT ──────────────────────────────────────────────────────────────────
-buildMap();setupPan();
-load().then(ok=>{
-  if(ok){refreshClasses();applyContact();}
-  fillPlotSelect();draw();updateBadge();
-});
-window.addEventListener('resize',fitWidth);
+function init(){
+  buildMap();
+  setupPan();
+  fillPlotSelect();
+  draw();
+  load().then(ok=>{
+    if(ok){refreshClasses();applyContact();}
+    fillPlotSelect();draw();updateBadge();
+  }).catch(e=>console.warn('Firebase load failed:',e));
+  window.addEventListener('resize',fitWidth);
+  if('serviceWorker' in navigator){
+    navigator.serviceWorker.register('./sw.js').catch(e=>console.warn('SW:',e));
+  }
+}
 
-// ─── PWA SERVICE WORKER ────────────────────────────────────────────────────
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('./sw.js').catch(e=>console.warn('SW:',e));
+// Run after DOM is ready — handles both cases (script runs before or after DOM)
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
 }
 </script>
 </body>
