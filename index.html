@@ -667,7 +667,23 @@ function initFirebase(){
       var d=snap.data();
       if(d.plotStatuses)Object.keys(d.plotStatuses).forEach(function(id){var p=plots.find(function(x){return String(x.id)===id;});if(p&&PUB_S[d.plotStatuses[id]])p.status=d.plotStatuses[id];});
       if(d.plotPrivateStatuses)Object.keys(d.plotPrivateStatuses).forEach(function(id){var p=plots.find(function(x){return String(x.id)===id;});if(p&&PRV_S[d.plotPrivateStatuses[id]])p.privateStatus=d.plotPrivateStatuses[id];});
-      if(d.pinOverrides)Object.assign(overrides,d.pinOverrides);
+      if(d.pinOverrides){
+        var po=d.pinOverrides;
+        Object.keys(po).forEach(function(id){
+          var pos=po[id];
+          if(!pos)return;
+          // Handle both normalised {nx,ny} and legacy absolute {x,y} formats
+          // Convert legacy absolute coords to normalised using original JPEG dimensions
+          if(pos.nx!=null&&pos.ny!=null){
+            overrides[id]={nx:pos.nx,ny:pos.ny};
+          } else if(pos.x!=null&&pos.y!=null){
+            // Legacy: stored as absolute pixels against whatever image was active
+            // Assume they were placed against original JPEG (2264x1517)
+            overrides[id]={nx:pos.x/ORIG_W,ny:pos.y/ORIG_H};
+          }
+        });
+        console.log('Loaded',Object.keys(overrides).length,'pin overrides from Firestore');
+      }
       if(d.contactInfo)Object.assign(contact,d.contactInfo);
       if(d.reserveConfig)Object.assign(reserve,d.reserveConfig);
       if(d.notifEmails)notifEmails=d.notifEmails;
