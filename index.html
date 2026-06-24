@@ -1302,6 +1302,49 @@ function saveContactInfo(){
   setTimeout(()=>msg.style.display='none',2500);
 }
 
+// ─── EXPOSE FUNCTIONS TO GLOBAL SCOPE (for onclick handlers in HTML) ──────
+window.openAdmin = openAdmin;
+window.closeAdmin = closeAdmin;
+window.signInWithGoogle = signInWithGoogle;
+window.adminSignOut = adminSignOut;
+window.setFilter = setFilter;
+window.filterPlots = filterPlots;
+window.searchPlot = searchPlot;
+window.updatePinSize = updatePinSize;
+window.zoomMap = zoomMap;
+window.resetMapZoom = resetMapZoom;
+window.closePopup = closePopup;
+window.enquireFromPopup = enquireFromPopup;
+window.openReserveForm = openReserveForm;
+window.proceedToPayment = proceedToPayment;
+window.submitEnquiry = submitEnquiry;
+window.renderAdminTable = renderAdminTable;
+window.changePublicStatus = changePublicStatus;
+window.changePrivateStatus = changePrivateStatus;
+window.exportExcel = exportExcel;
+window.importExcel = importExcel;
+window.importPinJSON = importPinJSON;
+window.exportPinJSON = exportPinJSON;
+window.downloadPinPositionsFile = downloadPinPositionsFile;
+window.downloadPublicStatusFile = downloadPublicStatusFile;
+window.downloadPrivateStatusFile = downloadPrivateStatusFile;
+window.clearPinOverrides = clearPinOverrides;
+window.loadBlockValues = loadBlockValues;
+window.applyBlock = applyBlock;
+window.showCoords = showCoords;
+window.exitCoordMode = exitCoordMode;
+window.saveContactInfo = saveContactInfo;
+window.saveReserveConfig = saveReserveConfig;
+window.downloadSiteConfigFile = downloadSiteConfigFile;
+window.loadEnquiries = loadEnquiries;
+window.updateEnquiryStatus = updateEnquiryStatus;
+window.exportEnquiriesExcel = exportEnquiriesExcel;
+window.addNotifEmail = addNotifEmail;
+window.removeNotifEmail = removeNotifEmail;
+window.saveNotifEmails = saveNotifEmails;
+window.showPrivateOnMap = showPrivateOnMap;
+window.setMapViewMode = setMapViewMode;
+
 // ─── INIT ──────────────────────────────────────────────────────────────────
 window.addEventListener('load',()=>{
   buildMap();
