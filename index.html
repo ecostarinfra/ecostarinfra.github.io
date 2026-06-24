@@ -672,17 +672,15 @@ function initFirebase(){
         Object.keys(po).forEach(function(id){
           var pos=po[id];
           if(!pos)return;
-          // Handle both normalised {nx,ny} and legacy absolute {x,y} formats
-          // Convert legacy absolute coords to normalised using original JPEG dimensions
           if(pos.nx!=null&&pos.ny!=null){
+            // Already normalised — use as-is
             overrides[id]={nx:pos.nx,ny:pos.ny};
           } else if(pos.x!=null&&pos.y!=null){
-            // Legacy: stored as absolute pixels against whatever image was active
-            // Assume they were placed against original JPEG (2264x1517)
-            overrides[id]={nx:pos.x/ORIG_W,ny:pos.y/ORIG_H};
+            // Legacy absolute coords — pins were placed against JPEG (2264×1517)
+            overrides[id]={nx:pos.x/2264,ny:pos.y/1517};
           }
         });
-        console.log('Loaded',Object.keys(overrides).length,'pin overrides from Firestore');
+        console.log('Loaded',Object.keys(overrides).length,'pin overrides. IW='+IW+' IH='+IH);
       }
       if(d.contactInfo)Object.assign(contact,d.contactInfo);
       if(d.reserveConfig)Object.assign(reserve,d.reserveConfig);
