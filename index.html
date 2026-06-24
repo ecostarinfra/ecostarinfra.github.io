@@ -8,11 +8,8 @@
 <meta name="theme-color" content="#1a5c38"/>
 <link rel="manifest" href="manifest.json"/>
 <link rel="apple-touch-icon" href="web-app-manifest-192x192.png"/>
-<!-- Preconnect to speed up Firebase & image load -->
 <link rel="preconnect" href="https://www.gstatic.com"/>
 <link rel="preconnect" href="https://firestore.googleapis.com"/>
-<link rel="preload" as="image" href="https://ecostarinfra.github.io/lotus-valley-map.webp" type="image/webp"/>
-<!-- XLSX loaded lazily on demand -->
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',sans-serif;background:#f5f5f0;color:#2d2d2d}
@@ -55,9 +52,9 @@ nav ul li a:hover{color:#fff}
 .map-section h2{font-size:1.1rem;color:var(--green2);margin-bottom:.8rem;font-weight:600}
 .map-wrapper{width:100%;background:#e8ede5;border-radius:12px;overflow:auto;border:2px solid #c5d5c0;max-height:75vh;cursor:grab}
 .map-wrapper.dragging{cursor:grabbing;user-select:none}
-#mapContainer{position:relative;display:inline-block}
+#mapContainer{position:relative;display:inline-block;line-height:0}
 #layoutImg{display:block;pointer-events:none}
-#plotsLayerSvg{position:absolute;top:0;left:0;display:block}
+#plotsLayerSvg{position:absolute;top:0;left:0;display:block;pointer-events:all}
 .zoom-controls{position:sticky;bottom:12px;float:right;margin-right:12px;display:flex;gap:6px;z-index:50;background:rgba(255,255,255,.92);padding:4px;border-radius:8px}
 .zoom-controls button{width:36px;height:36px;border:1.5px solid var(--green);border-radius:6px;background:#fff;color:var(--green);font-size:1.1rem;font-weight:700;cursor:pointer}
 
@@ -67,12 +64,10 @@ nav ul li a:hover{color:#fff}
 .plot-pin.highlighted circle{stroke:#fff200;stroke-width:3}
 .plot-pin text{font-weight:700;fill:#fff;pointer-events:none}
 .plot-pin.dimmed{opacity:.08}
-/* Public status colors */
 .plot-pin.available circle{fill:rgba(46,160,90,.85)}
 .plot-pin.booked circle{fill:rgba(192,57,43,.9)}
 .plot-pin.reserved circle{fill:rgba(230,126,34,.9)}
 .plot-pin.not-available circle{fill:rgba(100,100,100,.85)}
-/* Private status colors */
 .plot-pin.priv-available circle{fill:rgba(46,160,90,.85)}
 .plot-pin.priv-booked circle{fill:rgba(192,57,43,.9)}
 .plot-pin.priv-reserved-self circle{fill:rgba(155,89,182,.9)}
@@ -221,8 +216,7 @@ footer a{color:#a8e6c2;text-decoration:none}
   <span class="sep"><strong>Types:</strong></span>
   <span>T1:26.2×76.5ft</span><span>T2:24.6×39.4ft</span><span>T3:32.8×50ft</span>
   <span>T4:24.6×50ft</span><span>T5:32.8×65.6ft</span><span>T6:24.6×65.6ft</span>
-  <span>T7:22×45ft</span><span>T8:Irregular</span><span>T9:Mixed Use</span>
-  <span>E/L/M:Special</span>
+  <span>T7:22×45ft</span><span>T8:Irregular</span><span>T9:Mixed Use</span><span>E/L/M:Special</span>
 </div>
 
 <div id="privateMapBanner">
@@ -244,10 +238,10 @@ footer a{color:#a8e6c2;text-decoration:none}
   <h2>🗺️ Interactive Plot Layout – Lotus Valley</h2>
   <div class="map-wrapper" id="mapWrapper">
     <div id="mapContainer">
-      <picture>
-        <source srcset="https://ecostarinfra.github.io/lotus-valley-map.webp" type="image/webp"/>
-        <img id="layoutImg" src="https://ecostarinfra.github.io/lotus-valley-map.jpeg" alt="Lotus Valley Layout"/>
-      </picture>
+      <img id="layoutImg"
+           src="https://ecostarinfra.github.io/lotus-valley-map.webp"
+           alt="Lotus Valley Layout"
+           onerror="this.src='https://ecostarinfra.github.io/lotus-valley-map.jpeg'"/>
       <svg id="plotsLayerSvg"></svg>
     </div>
   </div>
@@ -319,7 +313,6 @@ footer a{color:#a8e6c2;text-decoration:none}
       </div>
     </div>
     <div class="admin-body">
-      <!-- LOGIN -->
       <div class="admin-login" id="adminLogin">
         <h4>Admin Login</h4>
         <p>Sign in with your authorized Google account.</p>
@@ -329,10 +322,7 @@ footer a{color:#a8e6c2;text-decoration:none}
         </button>
         <div class="err" id="adminErr"></div>
       </div>
-
-      <!-- PANEL -->
       <div id="adminPanel" style="display:none">
-        <!-- PLOT TABLE -->
         <div class="admin-tools">
           <button id="exportExcelBtn">⬇ Export Excel</button>
           <label>⬆ Import Excel<input type="file" id="importExcelInput" accept=".xlsx,.xls" style="display:none"/></label>
@@ -347,8 +337,8 @@ footer a{color:#a8e6c2;text-decoration:none}
           <button id="showPrivateMapBtn" class="abtn pur" style="margin:0">🔒 Private Map View</button>
         </div>
         <div style="font-size:.75rem;color:#666;margin-bottom:.5rem;display:flex;gap:1rem">
-          <span><span style="color:var(--green);font-weight:700">●</span> Public Status — visible to all</span>
-          <span><span style="color:#888;font-weight:700">●</span> Private Status — admin only</span>
+          <span><span style="color:var(--green);font-weight:700">●</span> Public Status</span>
+          <span><span style="color:#888;font-weight:700">●</span> Private Status (admin only)</span>
         </div>
         <div style="overflow-x:auto;max-height:240px;overflow-y:auto">
           <table class="admin-table">
@@ -356,8 +346,6 @@ footer a{color:#a8e6c2;text-decoration:none}
             <tbody id="adminTableBody"></tbody>
           </table>
         </div>
-
-        <!-- ENQUIRIES INBOX -->
         <div class="admin-section">
           <h4>📬 Enquiries Inbox <span id="unreadCount" style="background:var(--red);color:#fff;border-radius:10px;padding:1px 8px;font-size:.72rem;margin-left:.4rem;display:none">0 unread</span></h4>
           <p>All plot enquiries submitted via the website.</p>
@@ -372,11 +360,9 @@ footer a{color:#a8e6c2;text-decoration:none}
             <button id="exportEnquiriesBtn" class="abtn sec">⬇ Export Excel</button>
           </div>
         </div>
-
-        <!-- NOTIFICATION EMAILS -->
         <div class="admin-section">
           <h4>🔔 Notification Emails</h4>
-          <p>Email addresses to notify on new enquiries (requires EmailJS setup). Saved to Firebase, changeable anytime.</p>
+          <p>Email addresses to notify on new enquiries. Saved to Firebase.</p>
           <div id="notifEmailList" style="margin-bottom:.6rem"></div>
           <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
             <input id="newNotifEmail" type="email" placeholder="email@example.com" style="padding:.4rem .6rem;border:1.5px solid #ddd;border-radius:6px;font-size:.82rem;width:220px"/>
@@ -387,12 +373,10 @@ footer a{color:#a8e6c2;text-decoration:none}
             <span class="save-msg" id="notifMsg">✅ Saved!</span>
           </div>
         </div>
-
-        <!-- PIN POSITIONS -->
         <div class="admin-section">
           <h4>📍 Pin Positions</h4>
           <p>Paste JSON from the Pin Placement Tool and click Apply to save positions live.</p>
-          <textarea id="pinJsonInput" placeholder='{"22":{"x":600,"y":310},"E1":{"x":200,"y":700}}' style="width:100%;height:90px;font-family:monospace;font-size:.78rem;padding:.5rem;border:1.5px solid #ddd;border-radius:6px"></textarea>
+          <textarea id="pinJsonInput" placeholder='{"22":{"x":600,"y":310}}' style="width:100%;height:90px;font-family:monospace;font-size:.78rem;padding:.5rem;border:1.5px solid #ddd;border-radius:6px"></textarea>
           <div style="margin-top:.5rem;display:flex;gap:.4rem;flex-wrap:wrap">
             <button id="applyPinsBtn" class="abtn">Apply & Save Live</button>
             <button id="exportPinsBtn" class="abtn sec">Show as JSON</button>
@@ -402,21 +386,14 @@ footer a{color:#a8e6c2;text-decoration:none}
           </div>
           <div id="pinImportStatus" style="font-size:.75rem;color:#666;margin-top:.3rem"></div>
         </div>
-
-        <!-- BLOCK CALIBRATION -->
         <div class="admin-section">
-          <h4>📐 Block Calibration (fallback for unplaced pins)</h4>
+          <h4>📐 Block Calibration</h4>
           <div style="margin-bottom:.5rem">
             <select id="blockSelect" style="padding:.35rem .6rem;border:1px solid #ccc;border-radius:6px;font-size:.82rem">
-              <option value="0">A: Plots 1-3</option>
-              <option value="1">B: Plots 4-21</option>
-              <option value="2">C: Plots 22-263</option>
-              <option value="3">D: Plots 264-274</option>
-              <option value="4">E: Plots 275-357</option>
-              <option value="5">F: Plots 358-369</option>
-              <option value="6">G: E1-E32</option>
-              <option value="7">H: L1-L19</option>
-              <option value="8">I: M1-M28</option>
+              <option value="0">A: Plots 1-3</option><option value="1">B: Plots 4-21</option>
+              <option value="2">C: Plots 22-263</option><option value="3">D: Plots 264-274</option>
+              <option value="4">E: Plots 275-357</option><option value="5">F: Plots 358-369</option>
+              <option value="6">G: E1-E32</option><option value="7">H: L1-L19</option><option value="8">I: M1-M28</option>
             </select>
           </div>
           <div class="calib-grid">
@@ -435,62 +412,42 @@ footer a{color:#a8e6c2;text-decoration:none}
             <span class="save-msg" id="calibMsg">✅ Applied!</span>
           </div>
         </div>
-
-        <!-- RESERVATION SETTINGS -->
         <div class="admin-section">
           <h4>💳 Online Reservation Settings</h4>
           <div class="cf-grid">
-            <div class="cf-group"><label>Enable Reserve Online?</label>
-              <select id="rcEnabled"><option value="1">Yes</option><option value="0">No</option></select>
-            </div>
+            <div class="cf-group"><label>Enable?</label><select id="rcEnabled"><option value="1">Yes</option><option value="0">No</option></select></div>
             <div class="cf-group"><label>Reservation Fee (₹)</label><input id="rcFee" type="number" min="0" step="500" placeholder="10000"/></div>
-            <div class="cf-group" style="grid-column:1/-1"><label>Payment Link URL</label><input id="rcLink" type="text" placeholder="https://rzp.io/l/yourlink123"/></div>
+            <div class="cf-group" style="grid-column:1/-1"><label>Payment Link URL</label><input id="rcLink" type="text" placeholder="https://rzp.io/l/yourlink"/></div>
           </div>
           <div style="margin-top:.5rem;display:flex;align-items:center;gap:.5rem">
             <button id="saveReserveBtn" class="abtn">Save</button>
             <span class="save-msg" id="reserveMsg">✅ Saved!</span>
           </div>
         </div>
-
-        <!-- CONTACT INFO -->
         <div class="admin-section">
           <h4>📞 Contact Information</h4>
           <div class="cf-grid">
-            <div class="cf-group"><label>Phone 1</label><input id="aph1" type="text" placeholder="77778 00508"/></div>
-            <div class="cf-group"><label>Phone 2</label><input id="aph2" type="text" placeholder="7777800576"/></div>
-            <div class="cf-group"><label>Email</label><input id="aemail" type="email" placeholder="info@ecostarinfra.com"/></div>
-            <div class="cf-group"><label>Website</label><input id="aweb" type="text" placeholder="ecostarinfra.com"/></div>
+            <div class="cf-group"><label>Phone 1</label><input id="aph1" type="text"/></div>
+            <div class="cf-group"><label>Phone 2</label><input id="aph2" type="text"/></div>
+            <div class="cf-group"><label>Email</label><input id="aemail" type="email"/></div>
+            <div class="cf-group"><label>Website</label><input id="aweb" type="text"/></div>
           </div>
           <div style="margin-top:.5rem;display:flex;align-items:center;gap:.5rem">
             <button id="saveContactBtn" class="abtn">Save Contact Info</button>
             <span class="save-msg" id="saveMsg">✅ Saved!</span>
           </div>
         </div>
-      </div><!-- end adminPanel -->
+      </div>
     </div>
   </div>
 </div>
 
 <script type="module">
-// ─── LAZY XLSX LOADER ──────────────────────────────────────────────────────
-let xlsxLoaded = false;
-function loadXLSX(){
-  return new Promise((resolve,reject)=>{
-    if(xlsxLoaded){ resolve(window.XLSX); return; }
-    const s = document.createElement('script');
-    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
-    s.onload = ()=>{ xlsxLoaded=true; resolve(window.XLSX); };
-    s.onerror = reject;
-    document.head.appendChild(s);
-  });
-}
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import {getFirestore,doc,getDoc,setDoc,collection,addDoc,getDocs,updateDoc,orderBy,query} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-// ─── LAZY FIREBASE LOADER ──────────────────────────────────────────────────
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, collection, addDoc, getDocs, updateDoc, orderBy, query } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-// ─── FIREBASE SETUP ────────────────────────────────────────────────────────
-const firebaseConfig = {
+const FB={
   apiKey:"AIzaSyDVECaT_Y9I0TGzskNgz07vq3x5tGIiRdk",
   authDomain:"lotusvalley-e56b8.firebaseapp.com",
   projectId:"lotusvalley-e56b8",
@@ -498,14 +455,14 @@ const firebaseConfig = {
   messagingSenderId:"361482497260",
   appId:"1:361482497260:web:8cd6a6b62359ba5bb909c9"
 };
-const ADMIN_EMAIL = "ecostarinfra2024@gmail.com";
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const provider = new GoogleAuthProvider();
+const ADMIN_EMAIL="ecostarinfra2024@gmail.com";
+const app=initializeApp(FB);
+const auth=getAuth(app);
+const db=getFirestore(app);
+const gProvider=new GoogleAuthProvider();
 
-// ─── PLOT DATA ─────────────────────────────────────────────────────────────
-const PLOT_TYPES = {
+// ─── DATA ─────────────────────────────────────────────────────────────────
+const PT={
   1:{label:'Type 1',dim:'26.2×76.5 ft',area:2004},
   2:{label:'Type 2',dim:'24.6×39.4 ft',area:969},
   3:{label:'Type 3',dim:'32.8×50 ft',area:1640},
@@ -513,189 +470,156 @@ const PLOT_TYPES = {
   5:{label:'Type 5',dim:'32.8×65.6 ft',area:2152},
   6:{label:'Type 6',dim:'24.6×65.6 ft',area:1614},
   7:{label:'Type 7',dim:'22×45 ft',area:990},
-  8:{label:'Type 8 (Irregular)',dim:'Irregular',area:null},
-  9:{label:'Type 9 (Mixed Use)',dim:'Mixed Use',area:null},
-  'E':{label:'Type E (Special)',dim:'Contact for details',area:null},
-  'L':{label:'Type L (Special)',dim:'Contact for details',area:null},
-  'M':{label:'Type M (Special)',dim:'Contact for details',area:null},
+  8:{label:'Type 8',dim:'Irregular',area:null},
+  9:{label:'Type 9',dim:'Mixed Use',area:null},
+  E:{label:'Type E',dim:'Contact for details',area:null},
+  L:{label:'Type L',dim:'Contact for details',area:null},
+  M:{label:'Type M',dim:'Contact for details',area:null}
 };
-const PUBLIC_STATUSES = {available:'Available',booked:'Booked',reserved:'Reserved','not-available':'Not Available'};
-const PRIVATE_STATUSES = {available:'Available',booked:'Booked','reserved-self':'Reserved for Self','not-available':'Not Available',mortgaged:'Mortgaged','landowner-reserved':'Land-Owner Reserved','agency-lot':'Agency Lot'};
+const PUB_S={available:'Available',booked:'Booked',reserved:'Reserved','not-available':'Not Available'};
+const PRV_S={available:'Available',booked:'Booked','reserved-self':'Reserved for Self','not-available':'Not Available',mortgaged:'Mortgaged','landowner-reserved':'Land-Owner Reserved','agency-lot':'Agency Lot'};
 
-function assignType(n){
-  if(n<=3)return 1;
-  if(n>=4&&n<=21)return 8;
+function aType(n){
+  if(n<=3)return 1;if(n>=4&&n<=21)return 8;
   if([22,65,66,109,110,153,154,197,198,238,239,263].includes(n))return 3;
-  if(n>=22&&n<=263)return 4;
-  if(n>=264&&n<=274)return 9;
-  if(n>=275&&n<=357)return 7;
-  if(n>=358&&n<=369)return 8;
-  return 4;
+  if(n>=22&&n<=263)return 4;if(n>=264&&n<=274)return 9;
+  if(n>=275&&n<=357)return 7;if(n>=358&&n<=369)return 8;return 4;
 }
+const plots=[];
+for(let i=1;i<=369;i++){if(i===248)continue;plots.push({id:i,type:aType(i),status:'available',privateStatus:'available'});}
+plots.push({id:'248A',type:aType(248),status:'available',privateStatus:'available'});
+plots.push({id:'248B',type:aType(248),status:'available',privateStatus:'available'});
+for(let i=1;i<=32;i++)plots.push({id:'E'+i,type:'E',status:'available',privateStatus:'available'});
+for(let i=1;i<=19;i++)plots.push({id:'L'+i,type:'L',status:'available',privateStatus:'available'});
+for(let i=1;i<=28;i++)plots.push({id:'M'+i,type:'M',status:'available',privateStatus:'available'});
 
-const plots = [];
-for(let i=1;i<=369;i++){
-  if(i===248)continue;
-  plots.push({id:i,type:assignType(i),status:'available',privateStatus:'available'});
-}
-plots.push({id:'248A',type:assignType(248),status:'available',privateStatus:'available'});
-plots.push({id:'248B',type:assignType(248),status:'available',privateStatus:'available'});
-for(let i=1;i<=32;i++) plots.push({id:'E'+i,type:'E',status:'available',privateStatus:'available'});
-for(let i=1;i<=19;i++) plots.push({id:'L'+i,type:'L',status:'available',privateStatus:'available'});
-for(let i=1;i<=28;i++) plots.push({id:'M'+i,type:'M',status:'available',privateStatus:'available'});
-
-// ─── BLOCKS (4-corner quad mapping) ───────────────────────────────────────
-const BLOCKS = [
+const BLOCKS=[
   {start:1,end:3,cols:1,rows:3,TL:[455,290],TR:[505,270],BR:[545,430],BL:[495,450]},
   {start:4,end:21,cols:2,rows:9,TL:[330,395],TR:[430,365],BR:[510,640],BL:[410,670]},
-  {start:22,end:263,pattern:'snake-2band',slots:11,bandRows:11,TL:[599,308],TR:[1290,470],BR:[1180,790],BL:[500,620]},
+  {start:22,end:263,pattern:'snake',slots:11,bandRows:11,TL:[599,308],TR:[1290,470],BR:[1180,790],BL:[500,620]},
   {start:264,end:274,cols:6,rows:2,TL:[1380,720],TR:[1620,790],BR:[1580,920],BL:[1340,850]},
   {start:275,end:357,cols:7,rows:12,TL:[1180,140],TR:[1650,290],BR:[1550,600],BL:[1100,460]},
   {start:358,end:369,cols:5,rows:3,TL:[1080,40],TR:[1310,30],BR:[1340,170],BL:[1110,180]},
   {start:1,end:32,cols:2,rows:16,prefix:'E',TL:[170,690],TR:[300,650],BR:[420,1040],BL:[290,1080]},
   {start:1,end:19,cols:1,rows:19,prefix:'L',TL:[290,660],TR:[340,650],BR:[460,1050],BL:[410,1060]},
-  {start:1,end:28,cols:4,rows:7,prefix:'M',TL:[90,1100],TR:[480,1050],BR:[560,1330],BL:[170,1380]},
+  {start:1,end:28,cols:4,rows:7,prefix:'M',TL:[90,1100],TR:[480,1050],BR:[560,1330],BL:[170,1380]}
 ];
 
-function bilerp(quad,u,v){
-  const[TL,TR,BR,BL]=quad;
-  const top=[TL[0]+(TR[0]-TL[0])*u,TL[1]+(TR[1]-TL[1])*u];
-  const bot=[BL[0]+(BR[0]-BL[0])*u,BL[1]+(BR[1]-BL[1])*u];
-  return[top[0]+(bot[0]-top[0])*v,top[1]+(bot[1]-top[1])*v];
+function bl(q,u,v){
+  const[TL,TR,BR,BL]=q;
+  const t=[TL[0]+(TR[0]-TL[0])*u,TL[1]+(TR[1]-TL[1])*u];
+  const b=[BL[0]+(BR[0]-BL[0])*u,BL[1]+(BR[1]-BL[1])*u];
+  return[t[0]+(b[0]-t[0])*v,t[1]+(b[1]-t[1])*v];
 }
-
-function generatePlotRects(){
-  const rects=[];
+function genRects(){
+  const r=[];
   BLOCKS.forEach(b=>{
-    const quad=[b.TL,b.TR,b.BR,b.BL];
-    if(b.pattern==='snake-2band'){
+    const q=[b.TL,b.TR,b.BR,b.BL];
+    if(b.pattern==='snake'){
       let n=b.start;
-      for(let slot=0;slot<b.slots;slot++){
-        const odd=(slot%2===0);
-        const rows=[];
-        if(odd){for(let r=0;r<b.bandRows;r++)rows.push(r);for(let r=b.bandRows;r<2*b.bandRows;r++)rows.push(r);}
-        else{for(let r=2*b.bandRows-1;r>=b.bandRows;r--)rows.push(r);for(let r=b.bandRows-1;r>=0;r--)rows.push(r);}
-        rows.forEach(r=>{
-          const u=(slot+0.5)/b.slots,v=(r+0.5)/(b.bandRows*2);
-          const c=bilerp(quad,u,v);
-          rects.push({id:n,cx:c[0],cy:c[1]});n++;
-        });
-      }
-      return;
+      for(let s=0;s<b.slots;s++){
+        const odd=s%2===0,rows=[];
+        if(odd){for(let i=0;i<b.bandRows;i++)rows.push(i);for(let i=b.bandRows;i<b.bandRows*2;i++)rows.push(i);}
+        else{for(let i=b.bandRows*2-1;i>=b.bandRows;i--)rows.push(i);for(let i=b.bandRows-1;i>=0;i--)rows.push(i);}
+        rows.forEach(row=>{const c=bl(q,(s+0.5)/b.slots,(row+0.5)/(b.bandRows*2));r.push({id:n,cx:c[0],cy:c[1]});n++;});
+      }return;
     }
     let n=b.start,row=0,col=0;
     while(n<=b.end){
-      const u=(col+0.5)/b.cols,v=(row+0.5)/b.rows;
-      const c=bilerp(quad,u,v);
-      rects.push({id:b.prefix?b.prefix+n:n,cx:c[0],cy:c[1]});
+      const c=bl(q,(col+0.5)/b.cols,(row+0.5)/b.rows);
+      r.push({id:b.prefix?b.prefix+n:n,cx:c[0],cy:c[1]});
       n++;col++;if(col>=b.cols){col=0;row++;}
     }
   });
-  return rects;
+  return r;
 }
 
-let plotRects=generatePlotRects();
-let pinOverrides={'248B':{x:3115,y:2445}};
-let pinBaseSize=20;
-let mapZoom=1;
-let IMG_W=2264,IMG_H=1517;
-let mapViewMode='public';
-let currentFilter={status:'all',type:'all'};
-let currentPlot=null;
-let contactInfo={ph1:'77778 00508',ph2:'7777800576',email:'info@ecostarinfra.com',web:'ecostarinfra.com'};
-let reserveConfig={enabled:true,feeAmount:10000,paymentLink:''};
-let notifEmails=[];
-let enquiriesCache=[];
-let coordModeOn=false;
+let rects=genRects();
+let overrides={'248B':{x:3115,y:2445}};
+let pinSize=20,zoom=1,IW=2264,IH=1517,viewMode='public';
+let filter={status:'all',type:'all'};
+let curPlot=null;
+let contact={ph1:'77778 00508',ph2:'7777800576',email:'info@ecostarinfra.com',web:'ecostarinfra.com'};
+let reserve={enabled:true,feeAmount:10000,paymentLink:''};
+let notifEmails=[],enquiries=[],coordMode=false;
 
-// ─── EFFECTIVE RECTS ──────────────────────────────────────────────────────
-function getEffectiveRects(){
-  const fromBlocks=plotRects.map(pr=>{
-    const ov=pinOverrides[String(pr.id)];
-    return ov?{id:pr.id,cx:ov.x,cy:ov.y}:pr;
+// ─── LAZY XLSX ─────────────────────────────────────────────────────────────
+let xlsxReady=false;
+function getXLSX(){
+  return new Promise((res,rej)=>{
+    if(xlsxReady){res(window.XLSX);return;}
+    const s=document.createElement('script');
+    s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+    s.onload=()=>{xlsxReady=true;res(window.XLSX);};
+    s.onerror=rej;
+    document.head.appendChild(s);
   });
-  const blockIds=new Set(fromBlocks.map(pr=>String(pr.id)));
-  const extras=Object.entries(pinOverrides)
-    .filter(([id])=>!blockIds.has(id))
-    .map(([id,pos])=>({id,cx:pos.x,cy:pos.y}));
-  return fromBlocks.concat(extras);
 }
 
-// ─── MAP ──────────────────────────────────────────────────────────────────
+// ─── EFFECTIVE RECTS ───────────────────────────────────────────────────────
+function effRects(){
+  const base=rects.map(r=>{const o=overrides[String(r.id)];return o?{id:r.id,cx:o.x,cy:o.y}:r;});
+  const ids=new Set(base.map(r=>String(r.id)));
+  return base.concat(Object.entries(overrides).filter(([id])=>!ids.has(id)).map(([id,p])=>({id,cx:p.x,cy:p.y})));
+}
+
+// ─── MAP ───────────────────────────────────────────────────────────────────
 function buildMap(){
   const img=document.getElementById('layoutImg');
-  const setup=()=>{
-    IMG_W=img.naturalWidth||IMG_W;
-    IMG_H=img.naturalHeight||IMG_H;
-    document.getElementById('plotsLayerSvg').setAttribute('viewBox',`0 0 ${IMG_W} ${IMG_H}`);
-    fitMapToWidth();
+  const go=()=>{
+    IW=img.naturalWidth||2264;IH=img.naturalHeight||1517;
+    document.getElementById('plotsLayerSvg').setAttribute('viewBox',`0 0 ${IW} ${IH}`);
+    fitWidth();
   };
-  if(img.complete&&img.naturalWidth>0)setup();
-  else img.addEventListener('load',setup);
+  if(img.complete&&img.naturalWidth>0)go();
+  else{img.addEventListener('load',go);img.addEventListener('error',()=>{IW=2264;IH=1517;go();});}
 }
-function fitMapToWidth(){
-  const avail=document.getElementById('mapWrapper').clientWidth-4;
-  mapZoom=Math.min(1,avail/IMG_W);
-  applyMapZoom();
+function fitWidth(){
+  zoom=Math.min(1,(document.getElementById('mapWrapper').clientWidth-4)/IW);
+  applyZoom();
 }
-function applyMapZoom(){
-  const img=document.getElementById('layoutImg');
-  const con=document.getElementById('mapContainer');
-  const svg=document.getElementById('plotsLayerSvg');
-  const w=IMG_W*mapZoom,h=IMG_H*mapZoom;
+function applyZoom(){
+  const img=document.getElementById('layoutImg'),con=document.getElementById('mapContainer'),svg=document.getElementById('plotsLayerSvg');
+  const w=IW*zoom,h=IH*zoom;
   img.style.width=w+'px';img.style.height=h+'px';
   con.style.width=w+'px';con.style.height=h+'px';
   svg.style.width=w+'px';svg.style.height=h+'px';
-  renderOverlays();
+  draw();
 }
-
-function renderOverlays(){
+function draw(){
   const svg=document.getElementById('plotsLayerSvg');
   while(svg.firstChild)svg.removeChild(svg.firstChild);
-  const r=pinBaseSize/mapZoom;
-  const fs=(pinBaseSize*0.77)/mapZoom;
-  const isPriv=mapViewMode==='private';
-  getEffectiveRects().forEach(pr=>{
-    const p=plots.find(pl=>String(pl.id)===String(pr.id));
-    if(!p)return;
-    const cls=isPriv?'priv-'+p.privateStatus:p.status;
+  const r=pinSize/zoom,fs=(pinSize*0.77)/zoom,priv=viewMode==='private';
+  effRects().forEach(pr=>{
+    const p=plots.find(pl=>String(pl.id)===String(pr.id));if(!p)return;
     const g=document.createElementNS('http://www.w3.org/2000/svg','g');
-    g.setAttribute('class','plot-pin '+cls);
+    g.setAttribute('class','plot-pin '+(priv?'priv-'+p.privateStatus:p.status));
     g.setAttribute('data-id',pr.id);
-    g.addEventListener('click',()=>openPlotPopup(p));
-    const circle=document.createElementNS('http://www.w3.org/2000/svg','circle');
-    circle.setAttribute('cx',pr.cx);circle.setAttribute('cy',pr.cy);circle.setAttribute('r',r);
-    const label=document.createElementNS('http://www.w3.org/2000/svg','text');
-    label.setAttribute('x',pr.cx);label.setAttribute('y',pr.cy);
-    label.setAttribute('text-anchor','middle');label.setAttribute('dominant-baseline','central');
-    label.setAttribute('font-size',fs);label.textContent=pr.id;
-    g.appendChild(circle);g.appendChild(label);
-    svg.appendChild(g);
+    g.addEventListener('click',()=>showPopup(p));
+    const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    c.setAttribute('cx',pr.cx);c.setAttribute('cy',pr.cy);c.setAttribute('r',r);
+    const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+    t.setAttribute('x',pr.cx);t.setAttribute('y',pr.cy);t.setAttribute('text-anchor','middle');
+    t.setAttribute('dominant-baseline','central');t.setAttribute('font-size',fs);t.textContent=pr.id;
+    g.appendChild(c);g.appendChild(t);svg.appendChild(g);
   });
-  applyFilterVisibility();
-  updateStats();
+  filterPins();updateStats();
 }
-function refreshPinClasses(){
-  const isPriv=mapViewMode==='private';
-  document.querySelectorAll('.plot-pin').forEach(pin=>{
-    const p=plots.find(pl=>String(pl.id)===pin.dataset.id);
-    if(!p)return;
-    const wasHL=pin.classList.contains('highlighted');
-    const cls=isPriv?'priv-'+p.privateStatus:p.status;
-    pin.setAttribute('class','plot-pin '+cls+(wasHL?' highlighted':''));
+function filterPins(){
+  const sf=filter.status,tf=filter.type;
+  document.querySelectorAll('.plot-pin').forEach(p=>{
+    const pl=plots.find(x=>String(x.id)===p.dataset.id);if(!pl)return;
+    p.classList.toggle('dimmed',!(( tf==='all'||String(pl.type)===tf)&&(sf==='all'||pl.status===sf)));
   });
-  applyFilterVisibility();
-  updateStats();
 }
-function applyFilterVisibility(){
-  const sf=currentFilter.status,tf=currentFilter.type;
-  document.querySelectorAll('.plot-pin').forEach(pin=>{
-    const p=plots.find(pl=>String(pl.id)===pin.dataset.id);
-    if(!p)return;
-    const tm=tf==='all'||String(p.type)===tf;
-    const sm=sf==='all'||p.status===sf;
-    pin.classList.toggle('dimmed',!(tm&&sm));
+function refreshClasses(){
+  const priv=viewMode==='private';
+  document.querySelectorAll('.plot-pin').forEach(p=>{
+    const pl=plots.find(x=>String(x.id)===p.dataset.id);if(!pl)return;
+    const hl=p.classList.contains('highlighted');
+    p.setAttribute('class','plot-pin '+(priv?'priv-'+pl.privateStatus:pl.status)+(hl?' highlighted':''));
   });
+  filterPins();updateStats();
 }
 function updateStats(){
   document.getElementById('statTotal').textContent=plots.length;
@@ -703,347 +627,272 @@ function updateStats(){
   document.getElementById('statBooked').textContent=plots.filter(p=>p.status==='booked').length;
   document.getElementById('statReserved').textContent=plots.filter(p=>p.status==='reserved').length;
 }
-function setMapViewMode(mode){
-  mapViewMode=mode;
+function setView(mode){
+  viewMode=mode;
   document.getElementById('privateMapBanner').style.display=mode==='private'?'block':'none';
   document.getElementById('privateLegend').style.display=mode==='private'?'flex':'none';
-  const pubLeg=document.querySelector('.legend');
-  if(pubLeg)pubLeg.style.display=mode==='private'?'none':'flex';
-  renderOverlays();
+  const leg=document.querySelector('.legend');if(leg)leg.style.display=mode==='private'?'none':'flex';
+  draw();
 }
 
-// ─── PAN ──────────────────────────────────────────────────────────────────
+// ─── PAN ───────────────────────────────────────────────────────────────────
 function setupPan(){
-  const wrap=document.getElementById('mapWrapper');
-  let down=false,moved=false,sx=0,sy=0,sl=0,st=0;
-  wrap.addEventListener('mousedown',e=>{if(e.button!==0)return;down=true;moved=false;sx=e.pageX;sy=e.pageY;sl=wrap.scrollLeft;st=wrap.scrollTop;wrap.classList.add('dragging');});
-  window.addEventListener('mouseup',()=>{down=false;wrap.classList.remove('dragging');});
-  window.addEventListener('mousemove',e=>{if(!down)return;const dx=e.pageX-sx,dy=e.pageY-sy;if(Math.abs(dx)>3||Math.abs(dy)>3)moved=true;wrap.scrollLeft=sl-dx;wrap.scrollTop=st-dy;});
-  wrap.addEventListener('click',e=>{if(moved){e.stopPropagation();moved=false;}},true);
+  const w=document.getElementById('mapWrapper');
+  let dn=false,mv=false,sx=0,sy=0,sl=0,st=0;
+  w.addEventListener('mousedown',e=>{if(e.button!==0)return;dn=true;mv=false;sx=e.pageX;sy=e.pageY;sl=w.scrollLeft;st=w.scrollTop;w.classList.add('dragging');});
+  window.addEventListener('mouseup',()=>{dn=false;w.classList.remove('dragging');});
+  window.addEventListener('mousemove',e=>{if(!dn)return;const dx=e.pageX-sx,dy=e.pageY-sy;if(Math.abs(dx)>3||Math.abs(dy)>3)mv=true;w.scrollLeft=sl-dx;w.scrollTop=st-dy;});
+  w.addEventListener('click',e=>{if(mv){e.stopPropagation();mv=false;}},true);
   let tx=0,ty=0,tl=0,tt=0;
-  wrap.addEventListener('touchstart',e=>{if(e.touches.length!==1)return;tx=e.touches[0].pageX;ty=e.touches[0].pageY;tl=wrap.scrollLeft;tt=wrap.scrollTop;},{passive:true});
-  wrap.addEventListener('touchmove',e=>{if(e.touches.length!==1)return;wrap.scrollLeft=tl-(e.touches[0].pageX-tx);wrap.scrollTop=tt-(e.touches[0].pageY-ty);},{passive:true});
+  w.addEventListener('touchstart',e=>{if(e.touches.length!==1)return;tx=e.touches[0].pageX;ty=e.touches[0].pageY;tl=w.scrollLeft;tt=w.scrollTop;},{passive:true});
+  w.addEventListener('touchmove',e=>{if(e.touches.length!==1)return;w.scrollLeft=tl-(e.touches[0].pageX-tx);w.scrollTop=tt-(e.touches[0].pageY-ty);},{passive:true});
 }
 
-// ─── POPUP ────────────────────────────────────────────────────────────────
-function openPlotPopup(p){
-  currentPlot=p;
-  const pt=PLOT_TYPES[p.type];
-  document.getElementById('ppTitle').textContent=`Plot #${p.id}`;
+// ─── POPUP ─────────────────────────────────────────────────────────────────
+function showPopup(p){
+  curPlot=p;const pt=PT[p.type];
+  document.getElementById('ppTitle').textContent='Plot #'+p.id;
   document.getElementById('ppNum').textContent=p.id;
   document.getElementById('ppType').textContent=pt.label;
   document.getElementById('ppDim').textContent=pt.dim;
   document.getElementById('ppArea').textContent=pt.area?pt.area.toLocaleString()+' sq ft':'—';
   const sb=document.getElementById('ppStatus');
-  if(mapViewMode==='private'){
-    sb.textContent=PRIVATE_STATUSES[p.privateStatus]||p.privateStatus;
-    sb.className='status-badge';sb.style.background='#e1bee7';sb.style.color='#6c3483';
-  } else {
-    sb.textContent=PUBLIC_STATUSES[p.status]||p.status;
-    sb.className='status-badge status-'+p.status;sb.style.background='';sb.style.color='';
-  }
-  const reserveBtn=document.getElementById('reserveBtn');
+  if(viewMode==='private'){sb.textContent=PRV_S[p.privateStatus]||p.privateStatus;sb.className='status-badge';sb.style.cssText='background:#e1bee7;color:#6c3483';}
+  else{sb.textContent=PUB_S[p.status]||p.status;sb.className='status-badge status-'+p.status;sb.style.cssText='';}
+  const rb=document.getElementById('reserveBtn');
   document.getElementById('reserveForm').style.display='none';
   ['rname','rphone','remail'].forEach(id=>document.getElementById(id).value='');
-  reserveBtn.style.display=(reserveConfig.enabled&&reserveConfig.paymentLink&&p.status==='available'&&mapViewMode==='public')?'block':'none';
-  if(reserveBtn.style.display!=='none') document.getElementById('reserveFeeAmt').textContent=reserveConfig.feeAmount.toLocaleString('en-IN');
+  rb.style.display=(reserve.enabled&&reserve.paymentLink&&p.status==='available'&&viewMode==='public')?'block':'none';
+  if(rb.style.display!=='none')document.getElementById('reserveFeeAmt').textContent=reserve.feeAmount.toLocaleString('en-IN');
   document.getElementById('popupOverlay').classList.add('open');
 }
 function closePopup(){document.getElementById('popupOverlay').classList.remove('open');}
-function enquireFromPopup(){
+function enquirePopup(){
   closePopup();
   document.getElementById('enquiry').scrollIntoView({behavior:'smooth'});
   setTimeout(()=>{
-    const sel=document.getElementById('fplot');
-    const id=String(currentPlot.id);
+    const sel=document.getElementById('fplot'),id=String(curPlot.id);
     const opt=Array.from(sel.options).find(o=>String(o.value)===id);
     if(opt){sel.value=opt.value;}
-    else{
-      const pt=PLOT_TYPES[currentPlot.type];
-      const tmp=document.createElement('option');
-      tmp.value=id;tmp.textContent=`Plot #${id} – ${pt.label}`;tmp.dataset.temp='1';
-      sel.insertBefore(tmp,sel.options[1]);sel.value=id;
-    }
+    else{const tmp=document.createElement('option');tmp.value=id;tmp.textContent='Plot #'+id+' – '+PT[curPlot.type].label;tmp.dataset.temp='1';sel.insertBefore(tmp,sel.options[1]);sel.value=id;}
   },300);
 }
 
-// ─── ENQUIRY FORM ─────────────────────────────────────────────────────────
-function populatePlotSelect(){
+// ─── ENQUIRY FORM ──────────────────────────────────────────────────────────
+function fillPlotSelect(){
   const sel=document.getElementById('fplot');
   Array.from(sel.options).forEach(o=>{if(o.dataset.temp)o.remove();});
   sel.innerHTML='<option value="">— Select a plot —</option>';
   plots.filter(p=>p.status==='available').forEach(p=>{
-    const pt=PLOT_TYPES[p.type];
-    const opt=document.createElement('option');
-    opt.value=String(p.id);opt.textContent=`Plot #${p.id} – ${pt.label} (${pt.dim})`;
-    sel.appendChild(opt);
+    const o=document.createElement('option');o.value=String(p.id);o.textContent='Plot #'+p.id+' – '+PT[p.type].label+' ('+PT[p.type].dim+')';sel.appendChild(o);
   });
 }
-async function submitEnquiry(){
-  const n=document.getElementById('fname').value.trim();
-  const ph=document.getElementById('fphone').value.trim();
+async function submitForm(){
+  const n=document.getElementById('fname').value.trim(),ph=document.getElementById('fphone').value.trim();
   if(!n||!ph){alert('Please fill in name and phone number.');return;}
-  try{
-    await addDoc(collection(db,'enquiries'),{
-      name:n,phone:ph,email:document.getElementById('femail').value.trim(),
-      plotId:document.getElementById('fplot').value,
-      message:document.getElementById('fmsg').value.trim(),
-      status:'unread',submittedAt:new Date().toISOString()
-    });
-    updateEnquiryBadge();
-  }catch(e){console.error('Enquiry save failed:',e);}
+  try{await addDoc(collection(db,'enquiries'),{name:n,phone:ph,email:document.getElementById('femail').value.trim(),plotId:document.getElementById('fplot').value,message:document.getElementById('fmsg').value.trim(),status:'unread',submittedAt:new Date().toISOString()});updateBadge();}
+  catch(e){console.error(e);}
   document.getElementById('enquiryForm').style.display='none';
   document.getElementById('formSuccess').style.display='block';
 }
 
-// ─── FIRESTORE PERSISTENCE ─────────────────────────────────────────────────
-async function saveToFirestore(){
+// ─── FIRESTORE ─────────────────────────────────────────────────────────────
+async function save(){
   try{
     await setDoc(doc(db,'lotusValley','siteData'),{
       plotStatuses:Object.fromEntries(plots.map(p=>[String(p.id),p.status])),
       plotPrivateStatuses:Object.fromEntries(plots.map(p=>[String(p.id),p.privateStatus])),
-      pinOverrides,contactInfo,reserveConfig,notifEmails,
+      pinOverrides:overrides,contactInfo:contact,reserveConfig:reserve,notifEmails,
       updatedAt:new Date().toISOString()
-    });
-    return true;
-  }catch(e){console.error('Firestore save failed:',e);return false;}
+    });return true;
+  }catch(e){console.error(e);return false;}
 }
-async function loadFromFirestore(){
+async function load(){
   try{
     const snap=await getDoc(doc(db,'lotusValley','siteData'));
     if(!snap.exists())return false;
     const d=snap.data();
-    if(d.plotStatuses) Object.entries(d.plotStatuses).forEach(([id,s])=>{const p=plots.find(pl=>String(pl.id)===id);if(p&&PUBLIC_STATUSES[s])p.status=s;});
-    if(d.plotPrivateStatuses) Object.entries(d.plotPrivateStatuses).forEach(([id,s])=>{const p=plots.find(pl=>String(pl.id)===id);if(p&&PRIVATE_STATUSES[s])p.privateStatus=s;});
-    if(d.pinOverrides) Object.assign(pinOverrides,d.pinOverrides);
-    if(d.contactInfo) Object.assign(contactInfo,d.contactInfo);
-    if(d.reserveConfig) Object.assign(reserveConfig,d.reserveConfig);
-    if(d.notifEmails) notifEmails=d.notifEmails;
+    if(d.plotStatuses)Object.entries(d.plotStatuses).forEach(([id,s])=>{const p=plots.find(x=>String(x.id)===id);if(p&&PUB_S[s])p.status=s;});
+    if(d.plotPrivateStatuses)Object.entries(d.plotPrivateStatuses).forEach(([id,s])=>{const p=plots.find(x=>String(x.id)===id);if(p&&PRV_S[s])p.privateStatus=s;});
+    if(d.pinOverrides)Object.assign(overrides,d.pinOverrides);
+    if(d.contactInfo)Object.assign(contact,d.contactInfo);
+    if(d.reserveConfig)Object.assign(reserve,d.reserveConfig);
+    if(d.notifEmails)notifEmails=d.notifEmails;
     return true;
-  }catch(e){console.warn('Firestore load failed:',e.message);return false;}
+  }catch(e){console.warn(e);return false;}
 }
 
-// ─── ENQUIRIES ─────────────────────────────────────────────────────────────
+// ─── ENQUIRIES ADMIN ───────────────────────────────────────────────────────
 async function loadEnquiries(){
   try{
-    const q=query(collection(db,'enquiries'),orderBy('submittedAt','desc'));
-    const snap=await getDocs(q);
-    enquiriesCache=snap.docs.map(d=>({id:d.id,...d.data()}));
-    renderEnquiriesTable();
-    updateEnquiryBadge();
-  }catch(e){
-    document.getElementById('enquiriesTableBody').innerHTML=`<tr><td colspan="7" style="color:var(--red);text-align:center;padding:.8rem">Failed: ${e.message}</td></tr>`;
-  }
+    const snap=await getDocs(query(collection(db,'enquiries'),orderBy('submittedAt','desc')));
+    enquiries=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderEnquiries();updateBadge();
+  }catch(e){document.getElementById('enquiriesTableBody').innerHTML=`<tr><td colspan="7" style="color:var(--red);text-align:center;padding:.8rem">Failed: ${e.message}</td></tr>`;}
 }
-function renderEnquiriesTable(){
-  const tbody=document.getElementById('enquiriesTableBody');
-  if(!enquiriesCache.length){tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:#888;padding:.8rem">No enquiries yet.</td></tr>';return;}
-  tbody.innerHTML=enquiriesCache.map(e=>{
-    const d=new Date(e.submittedAt).toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
-    return `<tr style="${e.status==='unread'?'background:#fff8e1;font-weight:600':''}">
-      <td style="font-size:.72rem;white-space:nowrap">${d}</td>
-      <td>${e.name||'—'}</td>
+function renderEnquiries(){
+  const tb=document.getElementById('enquiriesTableBody');
+  if(!enquiries.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:#888;padding:.8rem">No enquiries yet.</td></tr>';return;}
+  tb.innerHTML=enquiries.map(e=>{
+    const dt=new Date(e.submittedAt).toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    return`<tr style="${e.status==='unread'?'background:#fff8e1;font-weight:600':''}">
+      <td style="font-size:.72rem;white-space:nowrap">${dt}</td><td>${e.name||'—'}</td>
       <td><a href="tel:${e.phone}" style="color:var(--green)">${e.phone||'—'}</a></td>
-      <td style="font-size:.78rem">${e.email||'—'}</td>
-      <td>${e.plotId?'#'+e.plotId:'—'}</td>
+      <td style="font-size:.78rem">${e.email||'—'}</td><td>${e.plotId?'#'+e.plotId:'—'}</td>
       <td style="font-size:.78rem;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${e.message||''}">${e.message||'—'}</td>
-      <td><select data-eid="${e.id}" class="enq-status-sel" style="font-size:.75rem;padding:.2rem .3rem;border:1px solid #ccc;border-radius:4px">
+      <td><select data-eid="${e.id}" class="esEl" style="font-size:.75rem;padding:.2rem;border:1px solid #ccc;border-radius:4px">
         <option value="unread"${e.status==='unread'?' selected':''}>Unread</option>
         <option value="read"${e.status==='read'?' selected':''}>Read</option>
         <option value="contacted"${e.status==='contacted'?' selected':''}>Contacted</option>
         <option value="closed"${e.status==='closed'?' selected':''}>Closed</option>
-      </select></td>
-    </tr>`;
+      </select></td></tr>`;
   }).join('');
-  document.querySelectorAll('.enq-status-sel').forEach(sel=>{
-    sel.addEventListener('change',async()=>{
-      try{
-        await updateDoc(doc(db,'enquiries',sel.dataset.eid),{status:sel.value});
-        const e=enquiriesCache.find(e=>e.id===sel.dataset.eid);
-        if(e){e.status=sel.value;renderEnquiriesTable();updateEnquiryBadge();}
-      }catch(err){console.error(err);}
+  document.querySelectorAll('.esEl').forEach(s=>{
+    s.addEventListener('change',async()=>{
+      try{await updateDoc(doc(db,'enquiries',s.dataset.eid),{status:s.value});
+      const e=enquiries.find(x=>x.id===s.dataset.eid);if(e){e.status=s.value;renderEnquiries();updateBadge();}}
+      catch(e){console.error(e);}
     });
   });
 }
-async function updateEnquiryBadge(){
+async function updateBadge(){
   try{
-    const q=query(collection(db,'enquiries'),orderBy('submittedAt','desc'));
-    const snap=await getDocs(q);
-    const unread=snap.docs.filter(d=>d.data().status==='unread').length;
-    const badge=document.getElementById('enquiryBadge');
-    const unreadEl=document.getElementById('unreadCount');
-    badge.style.display=unread>0?'inline':'none';
-    badge.textContent=unread;
-    if(unreadEl){unreadEl.style.display=unread>0?'inline':'none';unreadEl.textContent=unread+' unread';}
+    const snap=await getDocs(query(collection(db,'enquiries'),orderBy('submittedAt','desc')));
+    const n=snap.docs.filter(d=>d.data().status==='unread').length;
+    const b=document.getElementById('enquiryBadge'),u=document.getElementById('unreadCount');
+    b.style.display=n>0?'inline':'none';b.textContent=n;
+    if(u){u.style.display=n>0?'inline':'none';u.textContent=n+' unread';}
   }catch(e){}
 }
-function exportEnquiriesExcel(){
-  if(!enquiriesCache.length){alert('No enquiries to export.');return;}
-  const ws=XLSX.utils.json_to_sheet(enquiriesCache.map(e=>({'Date':new Date(e.submittedAt).toLocaleString('en-IN'),'Name':e.name||'','Phone':e.phone||'','Email':e.email||'','Plot':'#'+(e.plotId||''),'Message':e.message||'','Status':e.status||''})));
-  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Enquiries');
-  XLSX.writeFile(wb,'LotusValley_Enquiries.xlsx');
+async function exportEnqExcel(){
+  if(!enquiries.length){alert('No enquiries to export.');return;}
+  const X=await getXLSX();
+  const ws=X.utils.json_to_sheet(enquiries.map(e=>({'Date':new Date(e.submittedAt).toLocaleString('en-IN'),'Name':e.name||'','Phone':e.phone||'','Email':e.email||'','Plot':'#'+(e.plotId||''),'Message':e.message||'','Status':e.status||''})));
+  const wb=X.utils.book_new();X.utils.book_append_sheet(wb,ws,'Enquiries');X.writeFile(wb,'LotusValley_Enquiries.xlsx');
 }
 
-// ─── NOTIFICATION EMAILS ───────────────────────────────────────────────────
-function renderNotifEmailList(){
+// ─── NOTIF EMAILS ──────────────────────────────────────────────────────────
+function renderNotifList(){
   const c=document.getElementById('notifEmailList');
-  c.innerHTML=notifEmails.length?notifEmails.map((em,i)=>`<div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem"><span style="font-size:.82rem;background:#e8f5e9;padding:.2rem .6rem;border-radius:4px">${em}</span><button data-i="${i}" class="rem-email-btn" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.9rem">×</button></div>`).join(''):'<div style="font-size:.78rem;color:#888">No notification emails added yet.</div>';
-  document.querySelectorAll('.rem-email-btn').forEach(btn=>{
-    btn.addEventListener('click',()=>{notifEmails.splice(parseInt(btn.dataset.i),1);renderNotifEmailList();});
-  });
-}
-async function saveNotifEmails(){
-  try{
-    const snap=await getDoc(doc(db,'lotusValley','siteData'));
-    await setDoc(doc(db,'lotusValley','siteData'),{...(snap.exists()?snap.data():{}),notifEmails},{merge:true});
-    const msg=document.getElementById('notifMsg');msg.style.display='inline';setTimeout(()=>msg.style.display='none',2000);
-  }catch(e){alert('Save failed: '+e.message);}
+  c.innerHTML=notifEmails.length?notifEmails.map((e,i)=>`<div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem"><span style="font-size:.82rem;background:#e8f5e9;padding:.2rem .6rem;border-radius:4px">${e}</span><button data-i="${i}" class="remEml" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.9rem">×</button></div>`).join(''):'<div style="font-size:.78rem;color:#888">No notification emails added yet.</div>';
+  document.querySelectorAll('.remEml').forEach(b=>b.addEventListener('click',()=>{notifEmails.splice(parseInt(b.dataset.i),1);renderNotifList();}));
 }
 
 // ─── ADMIN TABLE ───────────────────────────────────────────────────────────
-function renderAdminTable(){
-  const search=document.getElementById('adminSearch').value.toLowerCase();
-  const sf=document.getElementById('adminStatusFilter').value;
-  const tbody=document.getElementById('adminTableBody');
-  tbody.innerHTML='';
-  plots.filter(p=>{
-    const sm=sf==='all'||p.status===sf;
-    const qm=!search||String(p.id).toLowerCase().includes(search)||PLOT_TYPES[p.type].label.toLowerCase().includes(search);
-    return sm&&qm;
-  }).forEach(p=>{
-    const pt=PLOT_TYPES[p.type];
-    const pubOpts=Object.entries(PUBLIC_STATUSES).map(([k,v])=>`<option value="${k}"${p.status===k?' selected':''}>${v}</option>`).join('');
-    const privOpts=Object.entries(PRIVATE_STATUSES).map(([k,v])=>`<option value="${k}"${p.privateStatus===k?' selected':''}>${v}</option>`).join('');
+function renderTable(){
+  const s=document.getElementById('adminSearch').value.toLowerCase(),sf=document.getElementById('adminStatusFilter').value;
+  const tb=document.getElementById('adminTableBody');tb.innerHTML='';
+  plots.filter(p=>(sf==='all'||p.status===sf)&&(!s||String(p.id).toLowerCase().includes(s)||PT[p.type].label.toLowerCase().includes(s))).forEach(p=>{
+    const pt=PT[p.type];
+    const pubO=Object.entries(PUB_S).map(([k,v])=>`<option value="${k}"${p.status===k?' selected':''}>${v}</option>`).join('');
+    const prvO=Object.entries(PRV_S).map(([k,v])=>`<option value="${k}"${p.privateStatus===k?' selected':''}>${v}</option>`).join('');
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td><strong>#${p.id}</strong></td><td>${pt.label}</td><td>${pt.dim}</td><td>${pt.area?pt.area.toLocaleString()+' sqft':'—'}</td>
-      <td><select class="pub-sel" data-pid="${p.id}" style="border-color:var(--green)">${pubOpts}</select></td>
-      <td><select class="priv-sel" data-pid="${p.id}" style="border-color:#888">${privOpts}</select></td>`;
-    tbody.appendChild(tr);
+    tr.innerHTML=`<td><strong>#${p.id}</strong></td><td>${pt.label}</td><td>${pt.dim}</td><td>${pt.area?pt.area.toLocaleString()+' sqft':'—'}</td><td><select class="pubS" data-pid="${p.id}" style="border-color:var(--green)">${pubO}</select></td><td><select class="prvS" data-pid="${p.id}" style="border-color:#888">${prvO}</select></td>`;
+    tb.appendChild(tr);
   });
-  document.querySelectorAll('.pub-sel').forEach(sel=>{
-    sel.addEventListener('change',()=>{
-      const p=plots.find(pl=>String(pl.id)===sel.dataset.pid);
-      if(p){p.status=sel.value;refreshPinClasses();populatePlotSelect();saveToFirestore();}
-    });
-  });
-  document.querySelectorAll('.priv-sel').forEach(sel=>{
-    sel.addEventListener('change',()=>{
-      const p=plots.find(pl=>String(pl.id)===sel.dataset.pid);
-      if(p){p.privateStatus=sel.value;saveToFirestore();}
-    });
-  });
+  document.querySelectorAll('.pubS').forEach(s=>s.addEventListener('change',()=>{const p=plots.find(x=>String(x.id)===s.dataset.pid);if(p){p.status=s.value;refreshClasses();fillPlotSelect();save();}}));
+  document.querySelectorAll('.prvS').forEach(s=>s.addEventListener('change',()=>{const p=plots.find(x=>String(x.id)===s.dataset.pid);if(p){p.privateStatus=s.value;save();}}));
 }
 
 // ─── EXCEL ─────────────────────────────────────────────────────────────────
-function exportExcel(){
-  const ws=XLSX.utils.json_to_sheet(plots.map(p=>{const pt=PLOT_TYPES[p.type];return{'Plot Number':p.id,'Plot Type':pt.label,'Dimensions':pt.dim,'Area (sqft)':pt.area||'N/A','Public Status':PUBLIC_STATUSES[p.status]||p.status,'Private Status':PRIVATE_STATUSES[p.privateStatus]||p.privateStatus};}));
-  const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Plots');XLSX.writeFile(wb,'LotusValley_Plots.xlsx');
+async function exportExcel(){
+  const X=await getXLSX();
+  const ws=X.utils.json_to_sheet(plots.map(p=>{const t=PT[p.type];return{'Plot Number':p.id,'Plot Type':t.label,'Dimensions':t.dim,'Area':t.area||'N/A','Public Status':PUB_S[p.status]||p.status,'Private Status':PRV_S[p.privateStatus]||p.privateStatus};}));
+  const wb=X.utils.book_new();X.utils.book_append_sheet(wb,ws,'Plots');X.writeFile(wb,'LotusValley_Plots.xlsx');
 }
 function importExcel(input){
   const file=input.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=async e=>{
-    const wb=XLSX.read(e.target.result,{type:'binary'});
-    const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-    const pubMap=Object.fromEntries(Object.entries(PUBLIC_STATUSES).map(([k,v])=>[v.toLowerCase(),k]));
-    const privMap=Object.fromEntries(Object.entries(PRIVATE_STATUSES).map(([k,v])=>[v.toLowerCase(),k]));
-    let upd=0;
-    rows.forEach(row=>{
-      const id=String(row['Plot Number']||row['id']||'').trim();
-      const p=plots.find(pl=>String(pl.id)===id);if(!p)return;
-      const pub=(row['Public Status']||'').toString().toLowerCase().trim();
-      const priv=(row['Private Status']||'').toString().toLowerCase().trim();
-      if(pub&&(PUBLIC_STATUSES[pub]||pubMap[pub])){p.status=PUBLIC_STATUSES[pub]?pub:pubMap[pub];upd++;}
-      if(priv&&(PRIVATE_STATUSES[priv]||privMap[priv])){p.privateStatus=PRIVATE_STATUSES[priv]?priv:privMap[priv];upd++;}
+  const rd=new FileReader();
+  rd.onload=async e=>{
+    const X=await getXLSX();
+    const wb=X.read(e.target.result,{type:'binary'});
+    const rows=X.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+    const pm=Object.fromEntries(Object.entries(PUB_S).map(([k,v])=>[v.toLowerCase(),k]));
+    const rm=Object.fromEntries(Object.entries(PRV_S).map(([k,v])=>[v.toLowerCase(),k]));
+    let n=0;
+    rows.forEach(r=>{
+      const id=String(r['Plot Number']||r['id']||'').trim();
+      const p=plots.find(x=>String(x.id)===id);if(!p)return;
+      const pub=(r['Public Status']||'').toString().toLowerCase().trim();
+      const prv=(r['Private Status']||'').toString().toLowerCase().trim();
+      if(pub&&(PUB_S[pub]||pm[pub])){p.status=PUB_S[pub]?pub:pm[pub];n++;}
+      if(prv&&(PRV_S[prv]||rm[prv])){p.privateStatus=PRV_S[prv]?prv:rm[prv];n++;}
     });
-    refreshPinClasses();populatePlotSelect();renderAdminTable();
-    const saved=await saveToFirestore();
-    alert(`✅ ${upd} field(s) updated${saved?' and saved live.':' (save failed).'}`);
+    refreshClasses();fillPlotSelect();renderTable();
+    const ok=await save();alert(`✅ ${n} field(s) updated${ok?' and saved live.':' (save failed).'}`);
   };
-  reader.readAsBinaryString(file);input.value='';
+  rd.readAsBinaryString(file);input.value='';
 }
 
 // ─── PIN POSITIONS ─────────────────────────────────────────────────────────
-async function applyPinJSON(){
+async function applyPins(){
   const raw=document.getElementById('pinJsonInput').value.trim();
   if(!raw){document.getElementById('pinImportStatus').textContent='Paste JSON first.';return;}
   try{
-    const data=JSON.parse(raw);let count=0;
-    Object.entries(data).forEach(([id,pos])=>{if(pos&&typeof pos.x==='number'&&typeof pos.y==='number'){pinOverrides[id]={x:pos.x,y:pos.y};count++;}});
-    renderOverlays();
-    const saved=await saveToFirestore();
-    document.getElementById('pinImportStatus').textContent=`✅ Applied ${count} positions${saved?' — saved live.':' (save failed).'}`;
-    const msg=document.getElementById('pinImportMsg');msg.style.display='inline';setTimeout(()=>msg.style.display='none',2000);
+    const d=JSON.parse(raw);let n=0;
+    Object.entries(d).forEach(([id,pos])=>{if(pos&&typeof pos.x==='number'&&typeof pos.y==='number'){overrides[id]={x:pos.x,y:pos.y};n++;}});
+    draw();const ok=await save();
+    document.getElementById('pinImportStatus').textContent=`✅ Applied ${n} positions${ok?' — saved live.':' (save failed).'}`;
+    const m=document.getElementById('pinImportMsg');m.style.display='inline';setTimeout(()=>m.style.display='none',2000);
   }catch(e){document.getElementById('pinImportStatus').textContent='❌ Invalid JSON: '+e.message;}
 }
-function exportPinJSON(){
-  document.getElementById('pinJsonInput').value=JSON.stringify(Object.fromEntries(getEffectiveRects().map(pr=>[String(pr.id),{x:Math.round(pr.cx),y:Math.round(pr.cy)}])),null,1);
-}
-function downloadPinJSON(){
-  const blob=new Blob([JSON.stringify(Object.fromEntries(getEffectiveRects().map(pr=>[String(pr.id),{x:Math.round(pr.cx),y:Math.round(pr.cy)}])),null,1)],{type:'application/json'});
+function showPinsJSON(){document.getElementById('pinJsonInput').value=JSON.stringify(Object.fromEntries(effRects().map(r=>[String(r.id),{x:Math.round(r.cx),y:Math.round(r.cy)}])),null,1);}
+function dlPins(){
+  const blob=new Blob([JSON.stringify(Object.fromEntries(effRects().map(r=>[String(r.id),{x:Math.round(r.cx),y:Math.round(r.cy)}])),null,1)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='pin-positions.json';document.body.appendChild(a);a.click();document.body.removeChild(a);
 }
 async function clearPins(){
-  if(!confirm('Clear all pin positions? This affects the live site.'))return;
-  pinOverrides={};renderOverlays();await saveToFirestore();
-  document.getElementById('pinImportStatus').textContent='Overrides cleared and saved.';
+  if(!confirm('Clear all pin positions?'))return;
+  overrides={};draw();await save();
+  document.getElementById('pinImportStatus').textContent='Cleared and saved.';
 }
 
-// ─── BLOCK CALIBRATION ─────────────────────────────────────────────────────
-function loadBlockValues(){
+// ─── BLOCK CALIB ───────────────────────────────────────────────────────────
+function loadBlock(){
   const b=BLOCKS[parseInt(document.getElementById('blockSelect').value)];
   ['TL','TR','BR','BL'].forEach(k=>{document.getElementById('b'+k+'x').value=b[k][0];document.getElementById('b'+k+'y').value=b[k][1];});
 }
 function applyBlock(){
   const b=BLOCKS[parseInt(document.getElementById('blockSelect').value)];
   ['TL','TR','BR','BL'].forEach(k=>{b[k]=[parseFloat(document.getElementById('b'+k+'x').value)||0,parseFloat(document.getElementById('b'+k+'y').value)||0];});
-  plotRects=generatePlotRects();renderOverlays();
-  const msg=document.getElementById('calibMsg');msg.style.display='inline';setTimeout(()=>msg.style.display='none',1500);
+  rects=genRects();draw();
+  const m=document.getElementById('calibMsg');m.style.display='inline';setTimeout(()=>m.style.display='none',1500);
 }
 
 // ─── CONTACT & RESERVE ─────────────────────────────────────────────────────
-function applyContactInfoToDOM(){
-  document.getElementById('ph1Disp').textContent=contactInfo.ph1;
-  document.getElementById('ph2Disp').textContent=contactInfo.ph2;
-  document.getElementById('emailDisp').textContent=contactInfo.email;
-  document.getElementById('webDisp').textContent=contactInfo.web;
-  document.getElementById('ph1Link').href='tel:'+contactInfo.ph1.replace(/\s/g,'');
-  document.getElementById('ph2Link').href='tel:'+contactInfo.ph2.replace(/\s/g,'');
-  document.getElementById('emailLink').href='mailto:'+contactInfo.email;
-  document.getElementById('webLink').href='https://'+contactInfo.web.replace('https://','');
-  document.getElementById('fph1').textContent=contactInfo.ph1;
-  document.getElementById('fph2').textContent=contactInfo.ph2;
-  document.getElementById('femailF').textContent=contactInfo.email;
-  document.getElementById('fwebF').textContent=contactInfo.web;
-  document.getElementById('femlLink').href='mailto:'+contactInfo.email;
-  document.getElementById('fwebLink').href='https://'+contactInfo.web.replace('https://','');
+function applyContact(){
+  document.getElementById('ph1Disp').textContent=contact.ph1;document.getElementById('ph2Disp').textContent=contact.ph2;
+  document.getElementById('emailDisp').textContent=contact.email;document.getElementById('webDisp').textContent=contact.web;
+  document.getElementById('ph1Link').href='tel:'+contact.ph1.replace(/\s/g,'');document.getElementById('ph2Link').href='tel:'+contact.ph2.replace(/\s/g,'');
+  document.getElementById('emailLink').href='mailto:'+contact.email;document.getElementById('webLink').href='https://'+contact.web.replace('https://','');
+  document.getElementById('fph1').textContent=contact.ph1;document.getElementById('fph2').textContent=contact.ph2;
+  document.getElementById('femailF').textContent=contact.email;document.getElementById('fwebF').textContent=contact.web;
+  document.getElementById('femlLink').href='mailto:'+contact.email;document.getElementById('fwebLink').href='https://'+contact.web.replace('https://','');
 }
-function loadAdminInputs(){
-  document.getElementById('aph1').value=contactInfo.ph1;
-  document.getElementById('aph2').value=contactInfo.ph2;
-  document.getElementById('aemail').value=contactInfo.email;
-  document.getElementById('aweb').value=contactInfo.web;
-  document.getElementById('rcEnabled').value=reserveConfig.enabled?'1':'0';
-  document.getElementById('rcFee').value=reserveConfig.feeAmount;
-  document.getElementById('rcLink').value=reserveConfig.paymentLink;
-  renderNotifEmailList();
-  loadBlockValues();
+function fillAdminInputs(){
+  document.getElementById('aph1').value=contact.ph1;document.getElementById('aph2').value=contact.ph2;
+  document.getElementById('aemail').value=contact.email;document.getElementById('aweb').value=contact.web;
+  document.getElementById('rcEnabled').value=reserve.enabled?'1':'0';document.getElementById('rcFee').value=reserve.feeAmount;document.getElementById('rcLink').value=reserve.paymentLink;
+  renderNotifList();loadBlock();
 }
-async function saveContactInfo(){
-  contactInfo.ph1=document.getElementById('aph1').value.trim()||contactInfo.ph1;
-  contactInfo.ph2=document.getElementById('aph2').value.trim()||contactInfo.ph2;
-  contactInfo.email=document.getElementById('aemail').value.trim()||contactInfo.email;
-  contactInfo.web=document.getElementById('aweb').value.trim()||contactInfo.web;
-  applyContactInfoToDOM();
-  await saveToFirestore();
-  const msg=document.getElementById('saveMsg');msg.style.display='inline';setTimeout(()=>msg.style.display='none',2500);
+async function saveContact(){
+  contact.ph1=document.getElementById('aph1').value.trim()||contact.ph1;contact.ph2=document.getElementById('aph2').value.trim()||contact.ph2;
+  contact.email=document.getElementById('aemail').value.trim()||contact.email;contact.web=document.getElementById('aweb').value.trim()||contact.web;
+  applyContact();await save();
+  const m=document.getElementById('saveMsg');m.style.display='inline';setTimeout(()=>m.style.display='none',2500);
 }
-async function saveReserveConfig(){
-  reserveConfig.enabled=document.getElementById('rcEnabled').value==='1';
-  reserveConfig.feeAmount=parseFloat(document.getElementById('rcFee').value)||0;
-  reserveConfig.paymentLink=document.getElementById('rcLink').value.trim();
-  await saveToFirestore();
-  const msg=document.getElementById('reserveMsg');msg.style.display='inline';setTimeout(()=>msg.style.display='none',2000);
+async function saveReserve(){
+  reserve.enabled=document.getElementById('rcEnabled').value==='1';
+  reserve.feeAmount=parseFloat(document.getElementById('rcFee').value)||0;
+  reserve.paymentLink=document.getElementById('rcLink').value.trim();
+  await save();const m=document.getElementById('reserveMsg');m.style.display='inline';setTimeout(()=>m.style.display='none',2000);
+}
+async function saveNotifEmails(){
+  try{
+    const snap=await getDoc(doc(db,'lotusValley','siteData'));
+    await setDoc(doc(db,'lotusValley','siteData'),{...(snap.exists()?snap.data():{}),notifEmails},{merge:true});
+    const m=document.getElementById('notifMsg');m.style.display='inline';setTimeout(()=>m.style.display='none',2000);
+  }catch(e){alert('Save failed: '+e.message);}
 }
 
 // ─── AUTH ──────────────────────────────────────────────────────────────────
@@ -1054,118 +903,82 @@ onAuthStateChanged(auth,user=>{
   const badge=document.getElementById('adminUserBadge');
   if(isAdmin){
     badge.style.display='inline';
-    badge.innerHTML=`${user.email} <a href="#" id="signOutLink" style="color:#fff;text-decoration:underline;margin-left:.4rem">Sign out</a>`;
-    document.getElementById('signOutLink')?.addEventListener('click',e=>{e.preventDefault();signOut(auth).then(()=>{setMapViewMode('public');document.getElementById('adminModal').classList.remove('open');});});
-    renderAdminTable();loadAdminInputs();loadEnquiries();
-  } else {
+    badge.innerHTML=user.email+' <a href="#" id="soLink" style="color:#fff;text-decoration:underline;margin-left:.4rem">Sign out</a>';
+    document.getElementById('soLink')?.addEventListener('click',e=>{e.preventDefault();signOut(auth).then(()=>{setView('public');document.getElementById('adminModal').classList.remove('open');});});
+    renderTable();fillAdminInputs();loadEnquiries();
+  }else{
     badge.style.display='none';
-    if(user) document.getElementById('adminErr').textContent=`${user.email} is not authorized.`;
+    if(user)document.getElementById('adminErr').textContent=user.email+' is not authorized.';
   }
 });
 
 // ─── EVENT WIRING ──────────────────────────────────────────────────────────
-// Wrap in try/catch so one bad wire doesn't break all others
-function wire(id, evt, fn){
-  const el = document.getElementById(id);
-  if(el) el.addEventListener(evt, fn);
-  else console.warn('Missing element:', id);
-}
+const on=(id,ev,fn)=>{const el=document.getElementById(id);if(el)el.addEventListener(ev,fn);};
 
-wire('adminBtn','click',()=>document.getElementById('adminModal').classList.add('open'));
-wire('closeAdminBtn','click',()=>{document.getElementById('adminModal').classList.remove('open');if(mapViewMode==='private')setMapViewMode('public');});
-wire('googleSignInBtn','click',async()=>{try{document.getElementById('adminErr').textContent='';await signInWithPopup(auth,provider);}catch(e){document.getElementById('adminErr').textContent='Sign-in failed: '+e.message;}});
-wire('closePopupBtn','click',closePopup);
-wire('popupOverlay','click',e=>{if(e.target===document.getElementById('popupOverlay'))closePopup();});
-wire('enquireFromPopupBtn','click',enquireFromPopup);
-wire('reserveBtn','click',()=>{const f=document.getElementById('reserveForm');f.style.display=f.style.display==='none'?'block':'none';});
-wire('proceedPayBtn','click',()=>{
+on('adminBtn','click',()=>document.getElementById('adminModal').classList.add('open'));
+on('closeAdminBtn','click',()=>{document.getElementById('adminModal').classList.remove('open');if(viewMode==='private')setView('public');});
+on('googleSignInBtn','click',async()=>{try{document.getElementById('adminErr').textContent='';await signInWithPopup(auth,gProvider);}catch(e){document.getElementById('adminErr').textContent='Sign-in failed: '+e.message;}});
+on('closePopupBtn','click',closePopup);
+on('popupOverlay','click',e=>{if(e.target===document.getElementById('popupOverlay'))closePopup();});
+on('enquireFromPopupBtn','click',enquirePopup);
+on('reserveBtn','click',()=>{const f=document.getElementById('reserveForm');f.style.display=f.style.display==='none'?'block':'none';});
+on('proceedPayBtn','click',()=>{
   const n=document.getElementById('rname').value.trim(),ph=document.getElementById('rphone').value.trim();
   if(!n||!ph){alert('Please enter name and phone.');return;}
-  if(!reserveConfig.paymentLink){alert('Payment not configured. Please contact us directly.');return;}
-  window.open(reserveConfig.paymentLink,'_blank');
-  alert(`Thank you, ${n}! A payment page has opened for Plot #${currentPlot.id} (₹${reserveConfig.feeAmount.toLocaleString('en-IN')} reservation fee). After payment, contact us at ${contactInfo.ph1} with your reference number.`);
+  if(!reserve.paymentLink){alert('Payment not configured. Contact us directly.');return;}
+  window.open(reserve.paymentLink,'_blank');
+  alert(`Thank you, ${n}! A payment page has opened for Plot #${curPlot.id}. After payment, contact us at ${contact.ph1} with your reference number.`);
   closePopup();
 });
-wire('submitEnquiryBtn','click',submitEnquiry);
-wire('zoomIn','click',()=>{mapZoom=Math.min(mapZoom*1.25,4);applyMapZoom();});
-wire('zoomOut','click',()=>{mapZoom=Math.max(mapZoom*0.8,0.15);applyMapZoom();});
-wire('zoomReset','click',fitMapToWidth);
-wire('pinSizeSlider','input',e=>{pinBaseSize=parseFloat(e.target.value)||13;document.getElementById('pinSizeLabel').textContent=Math.round(pinBaseSize);renderOverlays();});
-wire('searchInput','input',e=>{
+on('submitEnquiryBtn','click',submitForm);
+on('zoomIn','click',()=>{zoom=Math.min(zoom*1.25,4);applyZoom();});
+on('zoomOut','click',()=>{zoom=Math.max(zoom*0.8,0.15);applyZoom();});
+on('zoomReset','click',fitWidth);
+on('pinSizeSlider','input',e=>{pinSize=parseFloat(e.target.value)||13;document.getElementById('pinSizeLabel').textContent=Math.round(pinSize);draw();});
+on('searchInput','input',e=>{
   document.querySelectorAll('.plot-pin').forEach(d=>d.classList.remove('highlighted'));
   const v=e.target.value.trim();if(!v)return;
   const pin=document.querySelector(`.plot-pin[data-id="${v}"]`);
   if(pin){pin.classList.add('highlighted');pin.scrollIntoView({behavior:'smooth',block:'center',inline:'center'});}
 });
-wire('typeFilter','change',e=>{currentFilter.type=e.target.value;applyFilterVisibility();});
+on('typeFilter','change',e=>{filter.type=e.target.value;filterPins();});
 ['filterAll','filterAvail','filterBooked','filterReserved','filterNA'].forEach((id,i)=>{
-  const vals=['all','available','booked','reserved','not-available'];
-  wire(id,'click',e=>{
-    currentFilter.status=vals[i];
-    document.querySelectorAll('.filter-bar button').forEach(b=>b.classList.remove('active'));
-    e.target.classList.add('active');
-    applyFilterVisibility();
-  });
+  on(id,'click',e=>{filter.status=['all','available','booked','reserved','not-available'][i];document.querySelectorAll('.filter-bar button').forEach(b=>b.classList.remove('active'));e.target.classList.add('active');filterPins();});
 });
-wire('adminSearch','input',renderAdminTable);
-wire('adminStatusFilter','change',renderAdminTable);
-wire('exportExcelBtn','click',exportExcel);
-wire('importExcelInput','change',e=>importExcel(e.target));
-wire('showPrivateMapBtn','click',()=>{setMapViewMode('private');document.getElementById('adminModal').classList.remove('open');document.getElementById('map').scrollIntoView({behavior:'smooth'});});
-wire('switchPublicBtn','click',()=>setMapViewMode('public'));
-wire('applyPinsBtn','click',applyPinJSON);
-wire('exportPinsBtn','click',exportPinJSON);
-wire('dlPinsBtn','click',downloadPinJSON);
-wire('clearPinsBtn','click',clearPins);
-wire('blockSelect','change',loadBlockValues);
-wire('applyBlockBtn','click',applyBlock);
-wire('showCoordsBtn','click',()=>{
-  coordModeOn=true;document.getElementById('adminModal').classList.remove('open');
-  document.getElementById('coordFloater').style.display='block';
-  document.getElementById('coordFloaterReadout').textContent='x: —, y: —';
-});
-wire('exitCoordBtn','click',()=>{
-  coordModeOn=false;document.getElementById('coordFloater').style.display='none';
-  document.getElementById('adminModal').classList.add('open');
-});
-wire('plotsLayerSvg','click',e=>{
-  if(!coordModeOn)return;
+on('adminSearch','input',renderTable);on('adminStatusFilter','change',renderTable);
+on('exportExcelBtn','click',exportExcel);on('importExcelInput','change',e=>importExcel(e.target));
+on('showPrivateMapBtn','click',()=>{setView('private');document.getElementById('adminModal').classList.remove('open');document.getElementById('map').scrollIntoView({behavior:'smooth'});});
+on('switchPublicBtn','click',()=>setView('public'));
+on('applyPinsBtn','click',applyPins);on('exportPinsBtn','click',showPinsJSON);on('dlPinsBtn','click',dlPins);on('clearPinsBtn','click',clearPins);
+on('blockSelect','change',loadBlock);on('applyBlockBtn','click',applyBlock);
+on('showCoordsBtn','click',()=>{coordMode=true;document.getElementById('adminModal').classList.remove('open');document.getElementById('coordFloater').style.display='block';document.getElementById('coordFloaterReadout').textContent='x: —, y: —';});
+on('exitCoordBtn','click',()=>{coordMode=false;document.getElementById('coordFloater').style.display='none';document.getElementById('adminModal').classList.add('open');});
+on('plotsLayerSvg','click',e=>{
+  if(!coordMode)return;
   const rect=document.getElementById('plotsLayerSvg').getBoundingClientRect();
-  const x=(e.clientX-rect.left)/rect.width*IMG_W;
-  const y=(e.clientY-rect.top)/rect.height*IMG_H;
-  document.getElementById('coordFloaterReadout').textContent=`x: ${Math.round(x)}, y: ${Math.round(y)}`;
+  document.getElementById('coordFloaterReadout').textContent=`x: ${Math.round((e.clientX-rect.left)/rect.width*IW)}, y: ${Math.round((e.clientY-rect.top)/rect.height*IH)}`;
 });
-wire('saveContactBtn','click',saveContactInfo);
-wire('saveReserveBtn','click',saveReserveConfig);
-wire('addNotifEmailBtn','click',()=>{
-  const input=document.getElementById('newNotifEmail');
-  const val=input.value.trim().toLowerCase();
+on('saveContactBtn','click',saveContact);on('saveReserveBtn','click',saveReserve);
+on('addNotifEmailBtn','click',()=>{
+  const inp=document.getElementById('newNotifEmail'),val=inp.value.trim().toLowerCase();
   if(!val||!val.includes('@')){alert('Please enter a valid email address.');return;}
   if(notifEmails.includes(val)){alert('Already in list.');return;}
-  notifEmails.push(val);input.value='';renderNotifEmailList();
+  notifEmails.push(val);inp.value='';renderNotifList();
 });
-wire('saveNotifEmailsBtn','click',saveNotifEmails);
-wire('refreshEnquiriesBtn','click',loadEnquiries);
-wire('exportEnquiriesBtn','click',exportEnquiriesExcel);
+on('saveNotifEmailsBtn','click',saveNotifEmails);
+on('refreshEnquiriesBtn','click',loadEnquiries);on('exportEnquiriesBtn','click',exportEnqExcel);
 
 // ─── INIT ──────────────────────────────────────────────────────────────────
-buildMap();
-setupPan();
-loadFromFirestore().then(loaded=>{
-  if(loaded){refreshPinClasses();populatePlotSelect();applyContactInfoToDOM();}
-  else{populatePlotSelect();}
-  renderOverlays();
-  updateEnquiryBadge();
+buildMap();setupPan();
+load().then(ok=>{
+  if(ok){refreshClasses();applyContact();}
+  fillPlotSelect();draw();updateBadge();
 });
-window.addEventListener('resize',fitMapToWidth);
+window.addEventListener('resize',fitWidth);
 
-// ─── PWA SERVICE WORKER REGISTRATION ──────────────────────────────────────
+// ─── PWA SERVICE WORKER ────────────────────────────────────────────────────
 if('serviceWorker' in navigator){
-  window.addEventListener('load',()=>{
-    navigator.serviceWorker.register('./sw.js')
-      .then(()=>console.log('Service Worker registered'))
-      .catch(e=>console.warn('SW registration failed:',e));
-  });
+  navigator.serviceWorker.register('./sw.js').catch(e=>console.warn('SW:',e));
 }
 </script>
 </body>
