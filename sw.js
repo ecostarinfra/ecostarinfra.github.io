@@ -1,9 +1,8 @@
-const CACHE = 'lotus-valley-v3';
+const CACHE = 'lotus-valley-v4';
 const ASSETS = [
   '/',
   '/index.html',
   '/lotus-valley-map.webp',
-  '/lotus-valley-map.jpeg',
   '/manifest.json',
   '/web-app-manifest-192x192.png',
   '/web-app-manifest-512x512.png',
