@@ -445,6 +445,28 @@ footer a{color:#a8e6c2;text-decoration:none}
   </div>
 </div>
 
+<!-- Fallback non-module script to ensure map always loads -->
+<script>
+window.addEventListener('DOMContentLoaded', function(){
+  var diag = document.getElementById('mapDiag');
+  var img = document.getElementById('layoutImg');
+  if(!img){ if(diag)diag.textContent='ERROR: layoutImg not found!'; return; }
+  if(diag)diag.textContent='DOM ready. img.complete='+img.complete+' naturalW='+img.naturalWidth;
+  function go(){
+    if(diag)diag.textContent='Image ready: '+img.naturalWidth+'x'+img.naturalHeight+' src='+img.currentSrc;
+  }
+  if(img.complete && img.naturalWidth>0){ go(); }
+  else{
+    img.addEventListener('load', go);
+    img.addEventListener('error', function(){ if(diag)diag.textContent='Image ERROR: failed to load '+img.src; });
+    setTimeout(function(){
+      if(diag && diag.textContent.indexOf('DOM ready')===0){
+        diag.textContent='Timeout: img still not loaded after 3s. complete='+img.complete+' naturalW='+img.naturalWidth;
+      }
+    }, 3000);
+  }
+});
+</script>
 <script type="module" onerror="document.getElementById('mapDiag').textContent='Script module failed to load — check browser console'">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import {getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
