@@ -251,6 +251,7 @@ footer a{color:#a8e6c2;text-decoration:none}
     <button id="zoomReset" style="font-size:.65rem">Reset</button>
   </div>
   <div style="margin-top:.5rem;font-size:.78rem;color:#888;clear:both">💡 Drag to pan · +/− to zoom · click a pin to view details</div>
+  <div id="mapDiag" style="margin-top:.3rem;font-size:.72rem;color:#c0392b;font-family:monospace">Waiting for image...</div>
 </div>
 
 <div class="popup-overlay" id="popupOverlay">
@@ -847,13 +848,12 @@ async function applyPins(){
     const d=JSON.parse(raw);let n=0;
     Object.entries(d).forEach(([id,pos])=>{
       if(pos&&typeof pos.x==='number'&&typeof pos.y==='number'){
-        // Normalise to 0-1 using current image dimensions so pins are resolution-independent
-        overrides[id]={nx:pos.x/IW, ny:pos.y/IH};
+        overrides[id]={nx:pos.x/IW,ny:pos.y/IH};
         n++;
       }
     });
     draw();const ok=await save();
-    document.getElementById('pinImportStatus').textContent=`✅ Applied ${n} positions${ok?' — saved live.':' (save failed).'}`;
+    document.getElementById('pinImportStatus').textContent=`✅ Applied ${n} positions (normalised against ${IW}×${IH})${ok?' — saved live.':' (save failed).'}`;
     const m=document.getElementById('pinImportMsg');m.style.display='inline';setTimeout(()=>m.style.display='none',2000);
   }catch(e){document.getElementById('pinImportStatus').textContent='❌ Invalid JSON: '+e.message;}
 }
