@@ -811,12 +811,10 @@ function renderEnquiries(){
 }
 function updateBadge(){
   if(!fbReady||!db)return;
-  db.collection('enquiries').get().then(function(snap){
-    var n=snap.docs.filter(function(d){return d.data().status==='unread';}).length;
-    var b=document.getElementById('enquiryBadge'),u=document.getElementById('unreadCount');
-    b.style.display=n>0?'inline':'none';b.textContent=n;
-    if(u){u.style.display=n>0?'inline':'none';u.textContent=n+' unread';}
-  }).catch(function(){});
+  var unread=enquiries.filter(function(e){return e.status==='unread';}).length;
+  var b=document.getElementById('enquiryBadge'),u=document.getElementById('unreadCount');
+  if(b){b.style.display=unread>0?'inline':'none';b.textContent=unread;}
+  if(u){u.style.display=unread>0?'inline':'none';u.textContent=unread+' unread';}
 }
 function exportEnqExcel(){
   loadXLSX().then(function(X){
