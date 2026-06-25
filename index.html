@@ -13,7 +13,7 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Segoe UI',sans-serif;background:#f5f5f0;color:#2d2d2d}
-:root{--green:#2d7a4f;--green2:#1a5c38;--gold:#c8960c;--red:#c0392b;--orange:#e67e22}
+:root{--green:#2d7a4f;--green2:#1a5c38;--gold:#c8960c;--red:#c0392b}
 nav{background:var(--green2);padding:0 2rem;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100}
 nav .logo{color:#fff;font-size:1.3rem;font-weight:700;letter-spacing:1px}
 nav .logo span{color:var(--gold)}
@@ -117,6 +117,11 @@ footer a{color:#a8e6c2;text-decoration:none}
 .admin-section{margin-top:1.2rem;border-top:2px solid #e0e0d8;padding-top:.8rem}
 .admin-section h4{color:var(--green2);font-size:.95rem;margin-bottom:.4rem;font-weight:600}
 .admin-section p{font-size:.78rem;color:#666;margin-bottom:.5rem}
+.enq-card{border:1px solid #e0e0d8;border-radius:8px;padding:.8rem 1rem;margin-bottom:.6rem}
+.enq-card.unread{background:#fff8e1}
+.enq-card .enq-info{display:flex;gap:.8rem;flex-wrap:wrap;font-size:.82rem;margin-bottom:.5rem;align-items:center}
+.enq-card .enq-msg{font-size:.82rem;color:#555;padding:.4rem .6rem;background:#f9f9f6;border-radius:4px;margin-bottom:.6rem}
+.enq-card .enq-actions{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .calib-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem}
 .calib-grid label{font-size:.72rem;color:#555;font-weight:600;display:block;margin-bottom:.15rem}
 .calib-grid input{width:100%;padding:.35rem;border:1.5px solid #ddd;border-radius:6px;font-size:.8rem}
@@ -131,19 +136,17 @@ footer a{color:#a8e6c2;text-decoration:none}
 .abtn.pur{background:#6c3483}.abtn.pur:hover{background:#512e76}
 .save-msg{font-size:.78rem;color:#155724;margin-left:.5rem;display:none}
 #coordFloater{display:none;position:fixed;bottom:16px;left:16px;background:rgba(26,92,56,.95);color:#fff;padding:.8rem 1rem;border-radius:10px;z-index:400;font-size:.85rem;max-width:280px}
-@media(max-width:600px){
-  .form-grid,.cf-grid{grid-template-columns:1fr}
-  .hero h1{font-size:2rem}
-  .calib-grid{grid-template-columns:repeat(2,1fr)}
-}
+@media(max-width:600px){.form-grid,.cf-grid{grid-template-columns:1fr}.hero h1{font-size:2rem}.calib-grid{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
+
 <nav>
   <div class="logo">🌸 Lotus <span>Valley</span></div>
   <ul><li><a href="#map">Plot Map</a></li><li><a href="#enquiry">Enquire</a></li></ul>
   <button class="admin-btn" id="adminBtn">Admin Panel <span id="enquiryBadge" style="display:none;background:#c0392b;color:#fff;border-radius:50%;padding:1px 6px;font-size:.72rem;margin-left:.3rem">0</span></button>
 </nav>
+
 <div class="hero">
   <h1>LOTUS VALLEY</h1>
   <div class="tagline">Live Life River Side</div>
@@ -155,12 +158,14 @@ footer a{color:#a8e6c2;text-decoration:none}
     <div class="hero-stat"><div class="num" id="statReserved">0</div><div class="lbl">Reserved</div></div>
   </div>
 </div>
+
 <div class="contact-bar">
   <span>📞 <a id="ph1Link" href="tel:7777800508"><span id="ph1Disp">77778 00508</span></a></span>
   <span>📞 <a id="ph2Link" href="tel:7777800576"><span id="ph2Disp">7777800576</span></a></span>
   <span>✉️ <a id="emailLink" href="mailto:info@ecostarinfra.com"><span id="emailDisp">info@ecostarinfra.com</span></a></span>
   <span>🌐 <a id="webLink" href="https://ecostarinfra.com" target="_blank"><span id="webDisp">ecostarinfra.com</span></a></span>
 </div>
+
 <div class="filter-bar">
   <label>Status:</label>
   <button class="active" id="filterAll">All</button>
@@ -171,22 +176,19 @@ footer a{color:#a8e6c2;text-decoration:none}
   <span class="sep"><label>Type:</label>
     <select id="typeFilter">
       <option value="all">All Types</option>
-      <option value="1">Type 1</option><option value="2">Type 2</option>
-      <option value="3">Type 3</option><option value="4">Type 4</option>
-      <option value="5">Type 5</option><option value="6">Type 6</option>
-      <option value="7">Type 7</option><option value="8">Type 8</option>
-      <option value="9">Type 9</option>
+      <option value="1">Type 1</option><option value="2">Type 2</option><option value="3">Type 3</option>
+      <option value="4">Type 4</option><option value="5">Type 5</option><option value="6">Type 6</option>
+      <option value="7">Type 7</option><option value="8">Type 8</option><option value="9">Type 9</option>
       <option value="E">Type E</option><option value="L">Type L</option><option value="M">Type M</option>
     </select>
   </span>
-  <span class="sep"><label>Search:</label>
-    <input type="text" id="searchInput" placeholder="e.g. 101 or E5" style="width:90px"/>
-  </span>
+  <span class="sep"><label>Search:</label><input type="text" id="searchInput" placeholder="e.g. 101 or E5" style="width:90px"/></span>
   <span class="sep"><label for="pinSizeSlider">Pin size:</label>
     <input type="range" id="pinSizeSlider" min="6" max="30" value="20" step="1"/>
     <span id="pinSizeLabel" style="font-size:.78rem;color:#666">20</span>
   </span>
 </div>
+
 <div class="legend">
   <strong>Status:</strong>
   <span><span class="leg-dot" style="background:rgba(46,160,90,.85)"></span>Available</span>
@@ -198,6 +200,7 @@ footer a{color:#a8e6c2;text-decoration:none}
   <span>T4:24.6×50ft</span><span>T5:32.8×65.6ft</span><span>T6:24.6×65.6ft</span>
   <span>T7:22×45ft</span><span>T8:Irregular</span><span>T9:Mixed Use</span><span>E/L/M:Special</span>
 </div>
+
 <div id="privateMapBanner">
   🔒 PRIVATE/ADMIN VIEW — internal status only, not visible to public.
   <button id="switchPublicBtn">Switch to Public View</button>
@@ -211,13 +214,12 @@ footer a{color:#a8e6c2;text-decoration:none}
   <span><span class="leg-dot" style="background:rgba(41,128,185,.9)"></span>Land-Owner Reserved</span>
   <span><span class="leg-dot" style="background:rgba(243,156,18,.9)"></span>Agency Lot</span>
 </div>
+
 <div class="map-section" id="map">
   <h2>🗺️ Interactive Plot Layout – Lotus Valley</h2>
   <div class="map-wrapper" id="mapWrapper">
     <div id="mapContainer">
-      <img id="layoutImg" src="https://ecostarinfra.github.io/lotus-valley-map.webp"
-           alt="Lotus Valley Layout"
-           onerror="this.src='https://ecostarinfra.github.io/lotus-valley-map.jpeg'"/>
+      <img id="layoutImg" src="https://ecostarinfra.github.io/lotus-valley-map.webp" alt="Lotus Valley Layout" onerror="this.src='https://ecostarinfra.github.io/lotus-valley-map.jpeg'"/>
       <svg id="plotsLayerSvg"></svg>
     </div>
   </div>
@@ -228,6 +230,7 @@ footer a{color:#a8e6c2;text-decoration:none}
   </div>
   <div style="margin-top:.5rem;font-size:.78rem;color:#888;clear:both">💡 Drag to pan · +/− to zoom · click a pin to view details</div>
 </div>
+
 <div class="popup-overlay" id="popupOverlay">
   <div class="popup">
     <button class="close-btn" id="closePopupBtn">×</button>
@@ -248,6 +251,7 @@ footer a{color:#a8e6c2;text-decoration:none}
     </div>
   </div>
 </div>
+
 <div class="enquiry-section" id="enquiry">
   <h2>📩 Send an Enquiry</h2>
   <div class="form-grid" id="enquiryForm">
@@ -260,6 +264,7 @@ footer a{color:#a8e6c2;text-decoration:none}
   </div>
   <div class="form-success" id="formSuccess">✅ Thank you! Our team will contact you shortly.</div>
 </div>
+
 <footer>
   <div style="font-size:1.1rem;font-weight:700;color:#fff;margin-bottom:.3rem">🌸 LOTUS VALLEY by Ecostar Infra</div>
   <div>📞 <span id="fph1">77778 00508</span> / <span id="fph2">7777800576</span> &nbsp;|&nbsp;
@@ -268,11 +273,13 @@ footer a{color:#a8e6c2;text-decoration:none}
   </div>
   <div style="margin-top:.5rem;font-size:.75rem;color:#7aaa8a">Near Bhopal Bypass, Hoshangabad Road, Bhopal</div>
 </footer>
+
 <div id="coordFloater">
   <div style="font-weight:700;margin-bottom:.3rem">📐 Click map to get coordinates</div>
   <div id="coordFloaterReadout" style="font-family:monospace;margin-bottom:.5rem">x: —, y: —</div>
   <button id="exitCoordBtn" style="padding:.4rem .9rem;background:#fff;color:#1a5c38;border:none;border-radius:6px;cursor:pointer;font-weight:700;font-size:.8rem">Done – Back to Admin</button>
 </div>
+
 <div class="admin-modal" id="adminModal">
   <div class="admin-box">
     <div class="admin-header">
@@ -283,6 +290,8 @@ footer a{color:#a8e6c2;text-decoration:none}
       </div>
     </div>
     <div class="admin-body">
+
+      <!-- LOGIN -->
       <div class="admin-login" id="adminLogin">
         <h4>Admin Login</h4>
         <p>Sign in with your authorized Google account.</p>
@@ -292,7 +301,11 @@ footer a{color:#a8e6c2;text-decoration:none}
         </button>
         <div class="err" id="adminErr"></div>
       </div>
+
+      <!-- ADMIN PANEL -->
       <div id="adminPanel" style="display:none">
+
+        <!-- PLOT STATUS TABLE -->
         <div class="admin-tools">
           <button id="exportExcelBtn">⬇ Export Excel</button>
           <label>⬆ Import Excel<input type="file" id="importExcelInput" accept=".xlsx,.xls" style="display:none"/></label>
@@ -308,25 +321,25 @@ footer a{color:#a8e6c2;text-decoration:none}
           <span><span style="color:var(--green);font-weight:700">●</span> Public Status</span>
           <span><span style="color:#888;font-weight:700">●</span> Private Status (admin only)</span>
         </div>
-        <div style="overflow-x:auto;max-height:240px;overflow-y:auto">
+        <div style="overflow-x:auto;max-height:220px;overflow-y:auto">
           <table class="admin-table">
             <thead><tr><th>Plot #</th><th>Type</th><th>Dimensions</th><th>Area</th><th>Public Status</th><th>Private Status</th></tr></thead>
             <tbody id="adminTableBody"></tbody>
           </table>
         </div>
+
+        <!-- ENQUIRIES INBOX -->
         <div class="admin-section">
           <h4>📬 Enquiries Inbox <span id="unreadCount" style="background:var(--red);color:#fff;border-radius:10px;padding:1px 8px;font-size:.72rem;margin-left:.4rem;display:none">0 unread</span></h4>
-          <div style="overflow-x:auto;max-height:280px;overflow-y:auto">
-            <table class="admin-table">
-              <thead><tr><th>Date</th><th>Name</th><th>Phone</th><th>Email</th><th>Plot</th><th>Message</th><th style="min-width:160px">Response</th><th>Status</th></tr></thead>
-              <tbody id="enquiriesTableBody"><tr><td colspan="7" style="text-align:center;color:#888;padding:.8rem">Loading...</td></tr></tbody>
-            </table>
-          </div>
+          <p>Click ✅ or ❌ to send an email response to the enquirer.</p>
+          <div id="enquiriesContainer" style="max-height:320px;overflow-y:auto"></div>
           <div style="margin-top:.5rem;display:flex;gap:.5rem">
             <button id="refreshEnquiriesBtn" class="abtn sec">🔄 Refresh</button>
             <button id="exportEnquiriesBtn" class="abtn sec">⬇ Export Excel</button>
           </div>
         </div>
+
+        <!-- NOTIFICATION EMAILS -->
         <div class="admin-section">
           <h4>🔔 Notification Emails</h4>
           <div id="notifEmailList" style="margin-bottom:.6rem"></div>
@@ -339,10 +352,12 @@ footer a{color:#a8e6c2;text-decoration:none}
             <span class="save-msg" id="notifMsg">✅ Saved!</span>
           </div>
         </div>
+
+        <!-- PIN POSITIONS -->
         <div class="admin-section">
           <h4>📍 Pin Positions</h4>
-          <p>Paste JSON from the Pin Placement Tool and click Apply.</p>
-          <textarea id="pinJsonInput" placeholder='{"22":{"x":600,"y":310}}' style="width:100%;height:90px;font-family:monospace;font-size:.78rem;padding:.5rem;border:1.5px solid #ddd;border-radius:6px"></textarea>
+          <p>Paste converted JSON from the Pin Converter tool and click Apply.</p>
+          <textarea id="pinJsonInput" placeholder='{"22":{"x":491,"y":291}}' style="width:100%;height:90px;font-family:monospace;font-size:.78rem;padding:.5rem;border:1.5px solid #ddd;border-radius:6px"></textarea>
           <div style="margin-top:.5rem;display:flex;gap:.4rem;flex-wrap:wrap">
             <button id="applyPinsBtn" class="abtn">Apply & Save Live</button>
             <button id="exportPinsBtn" class="abtn sec">Show as JSON</button>
@@ -352,6 +367,8 @@ footer a{color:#a8e6c2;text-decoration:none}
           </div>
           <div id="pinImportStatus" style="font-size:.75rem;color:#666;margin-top:.3rem"></div>
         </div>
+
+        <!-- BLOCK CALIBRATION -->
         <div class="admin-section">
           <h4>📐 Block Calibration</h4>
           <select id="blockSelect" style="padding:.35rem .6rem;border:1px solid #ccc;border-radius:6px;font-size:.82rem;margin-bottom:.5rem">
@@ -376,6 +393,8 @@ footer a{color:#a8e6c2;text-decoration:none}
             <span class="save-msg" id="calibMsg">✅ Applied!</span>
           </div>
         </div>
+
+        <!-- RESERVATION SETTINGS -->
         <div class="admin-section">
           <h4>💳 Online Reservation Settings</h4>
           <div class="cf-grid">
@@ -388,6 +407,8 @@ footer a{color:#a8e6c2;text-decoration:none}
             <span class="save-msg" id="reserveMsg">✅ Saved!</span>
           </div>
         </div>
+
+        <!-- CONTACT INFO -->
         <div class="admin-section">
           <h4>📞 Contact Information</h4>
           <div class="cf-grid">
@@ -401,31 +422,30 @@ footer a{color:#a8e6c2;text-decoration:none}
             <span class="save-msg" id="saveMsg">✅ Saved!</span>
           </div>
         </div>
-      </div>
+
+      </div><!-- end adminPanel -->
     </div>
   </div>
 </div>
 
-<!-- ALL APP LOGIC IN ONE PLAIN SCRIPT — no module, no imports, Firebase loaded dynamically -->
 <script>
 'use strict';
-
-// ─── PLOT DATA ─────────────────────────────────────────────────────────────
 var PT={1:{label:'Type 1',dim:'26.2×76.5 ft',area:2004},2:{label:'Type 2',dim:'24.6×39.4 ft',area:969},3:{label:'Type 3',dim:'32.8×50 ft',area:1640},4:{label:'Type 4',dim:'24.6×50 ft',area:1230},5:{label:'Type 5',dim:'32.8×65.6 ft',area:2152},6:{label:'Type 6',dim:'24.6×65.6 ft',area:1614},7:{label:'Type 7',dim:'22×45 ft',area:990},8:{label:'Type 8',dim:'Irregular',area:null},9:{label:'Type 9',dim:'Mixed Use',area:null},E:{label:'Type E',dim:'Contact for details',area:null},L:{label:'Type L',dim:'Contact for details',area:null},M:{label:'Type M',dim:'Contact for details',area:null}};
 var PUB_S={available:'Available',booked:'Booked',reserved:'Reserved','not-available':'Not Available'};
 var PRV_S={available:'Available',booked:'Booked','reserved-self':'Reserved for Self','not-available':'Not Available',mortgaged:'Mortgaged','landowner-reserved':'Land-Owner Reserved','agency-lot':'Agency Lot'};
 var ADMIN_EMAIL='ecostarinfra2024@gmail.com';
+var EMAILJS_SVC='service_rl40rta',EMAILJS_TPL='template_auopxsx',EMAILJS_KEY='EJsyKa-5MmR5cGjI-';
+var ORIG_W=5856,ORIG_H=4280,SVG_W=1800,SVG_H=1316;
 
 function aType(n){if(n<=3)return 1;if(n>=4&&n<=21)return 8;if([22,65,66,109,110,153,154,197,198,238,239,263].indexOf(n)>=0)return 3;if(n>=22&&n<=263)return 4;if(n>=264&&n<=274)return 9;if(n>=275&&n<=357)return 7;if(n>=358&&n<=369)return 8;return 4;}
 var plots=[];
-for(var i=1;i<=369;i++){if(i===248)continue;plots.push({id:i,type:aType(i),status:'available',privateStatus:'available'});}
+for(var _i=1;_i<=369;_i++){if(_i===248)continue;plots.push({id:_i,type:aType(_i),status:'available',privateStatus:'available'});}
 plots.push({id:'248A',type:aType(248),status:'available',privateStatus:'available'});
 plots.push({id:'248B',type:aType(248),status:'available',privateStatus:'available'});
-for(var i=1;i<=32;i++)plots.push({id:'E'+i,type:'E',status:'available',privateStatus:'available'});
-for(var i=1;i<=19;i++)plots.push({id:'L'+i,type:'L',status:'available',privateStatus:'available'});
-for(var i=1;i<=28;i++)plots.push({id:'M'+i,type:'M',status:'available',privateStatus:'available'});
+for(var _i=1;_i<=32;_i++)plots.push({id:'E'+_i,type:'E',status:'available',privateStatus:'available'});
+for(var _i=1;_i<=19;_i++)plots.push({id:'L'+_i,type:'L',status:'available',privateStatus:'available'});
+for(var _i=1;_i<=28;_i++)plots.push({id:'M'+_i,type:'M',status:'available',privateStatus:'available'});
 
-// ─── BLOCKS ────────────────────────────────────────────────────────────────
 var BLOCKS=[
   {start:1,end:3,cols:1,rows:3,TL:[455,290],TR:[505,270],BR:[545,430],BL:[495,450]},
   {start:4,end:21,cols:2,rows:9,TL:[330,395],TR:[430,365],BR:[510,640],BL:[410,670]},
@@ -437,8 +457,6 @@ var BLOCKS=[
   {start:1,end:19,cols:1,rows:19,prefix:'L',TL:[290,660],TR:[340,650],BR:[460,1050],BL:[410,1060]},
   {start:1,end:28,cols:4,rows:7,prefix:'M',TL:[90,1100],TR:[480,1050],BR:[560,1330],BL:[170,1380]}
 ];
-// Block coords defined against original JPEG 2264x1517
-var ORIG_W=2264,ORIG_H=1517;
 
 function bl(q,u,v){var TL=q[0],TR=q[1],BR=q[2],BL=q[3];var tx=TL[0]+(TR[0]-TL[0])*u,ty=TL[1]+(TR[1]-TL[1])*u;var bx=BL[0]+(BR[0]-BL[0])*u,by=BL[1]+(BR[1]-BL[1])*u;return[tx+(bx-tx)*v,ty+(by-ty)*v];}
 function genRects(){
@@ -461,52 +479,40 @@ function genRects(){
 }
 
 var rects=genRects();
-var overrides={'248B':{x:Math.round(3115/2264*1800),y:Math.round(2445/1517*1316)}};
-var pinSize=20,zoom=1,IW=1800,IH=1316,viewMode='public';
+var overrides={'248B':{x:Math.round(3115/ORIG_W*SVG_W),y:Math.round(2445/ORIG_H*SVG_H)}};
+var pinSize=20,zoom=1,IW=SVG_W,IH=SVG_H,viewMode='public';
 var filter={status:'all',type:'all'};
 var curPlot=null;
 var contact={ph1:'77778 00508',ph2:'7777800576',email:'info@ecostarinfra.com',web:'ecostarinfra.com'};
 var reserve={enabled:true,feeAmount:10000,paymentLink:''};
 var notifEmails=[],enquiries=[],coordMode=false;
-var db=null,auth=null,fbReady=false;
+var db=null,auth=null,fbReady=false,ejsReady=false;
 
-// ─── EFFECTIVE RECTS ───────────────────────────────────────────────────────
 function effRects(){
   var base=rects.map(function(r){
     var o=overrides[String(r.id)];
-    if(o){
-      // Use coordinates directly — Pin Tool and SVG viewBox both use same image dimensions
-      // Support both {x,y} (direct) and legacy {nx,ny} (normalised) formats
-      var cx=o.nx!=null?(o.nx*IW):o.x;
-      var cy=o.ny!=null?(o.ny*IH):o.y;
-      return{id:r.id,cx:cx,cy:cy};
-    }
-    // Block-computed coords defined against original JPEG (2264x1517), scale to current image
-    return{id:r.id,cx:r.cx/ORIG_W*IW,cy:r.cy/ORIG_H*IH};
+    if(o) return{id:r.id,cx:o.x!=null?o.x:o.nx*IW,cy:o.y!=null?o.y:o.ny*IH};
+    return{id:r.id,cx:r.cx/1800*IW,cy:r.cy/1316*IH};
   });
   var ids={};base.forEach(function(r){ids[String(r.id)]=true;});
-  var extras=Object.keys(overrides).filter(function(id){return!ids[id];}).map(function(id){
-    var p=overrides[id];
-    return{id:id,cx:p.nx!=null?(p.nx*IW):p.x,cy:p.ny!=null?(p.ny*IH):p.y};
+  Object.keys(overrides).filter(function(id){return!ids[id];}).forEach(function(id){
+    var o=overrides[id];
+    base.push({id:id,cx:o.x!=null?o.x:o.nx*IW,cy:o.y!=null?o.y:o.ny*IH});
   });
-  return base.concat(extras);
+  return base;
 }
 
-// ─── MAP ───────────────────────────────────────────────────────────────────
 function buildMap(){
   var img=document.getElementById('layoutImg');
   function go(){
-    IW=img.naturalWidth||1800;IH=img.naturalHeight||1316;
+    IW=img.naturalWidth||SVG_W;IH=img.naturalHeight||SVG_H;
     document.getElementById('plotsLayerSvg').setAttribute('viewBox','0 0 '+IW+' '+IH);
     fitWidth();
   }
-  if(img.complete&&img.naturalWidth>0){go();}
-  else{img.addEventListener('load',go);img.addEventListener('error',function(){IW=1800;IH=1316;go();});}
+  if(img.complete&&img.naturalWidth>0)go();
+  else{img.addEventListener('load',go);img.addEventListener('error',function(){IW=SVG_W;IH=SVG_H;go();});}
 }
-function fitWidth(){
-  zoom=Math.min(1,(document.getElementById('mapWrapper').clientWidth-4)/IW);
-  applyZoom();
-}
+function fitWidth(){zoom=Math.min(1,(document.getElementById('mapWrapper').clientWidth-4)/IW);applyZoom();}
 function applyZoom(){
   var img=document.getElementById('layoutImg'),con=document.getElementById('mapContainer'),svg=document.getElementById('plotsLayerSvg');
   var w=IW*zoom,h=IH*zoom;
@@ -515,23 +521,20 @@ function applyZoom(){
   svg.style.width=w+'px';svg.style.height=h+'px';
   draw();
 }
-var SVG_NS='http://www.w3.org/2000/svg';
+var NS='http://www.w3.org/2000/svg';
 function draw(){
   var svg=document.getElementById('plotsLayerSvg');
   while(svg.firstChild)svg.removeChild(svg.firstChild);
   var r=pinSize/zoom,fs=(pinSize*0.77)/zoom,priv=viewMode==='private';
   effRects().forEach(function(pr){
     var p=plots.find(function(pl){return String(pl.id)===String(pr.id);});if(!p)return;
-    var g=document.createElementNS(SVG_NS,'g');
+    var g=document.createElementNS(NS,'g');
     g.setAttribute('class','plot-pin '+(priv?'priv-'+p.privateStatus:p.status));
     g.setAttribute('data-id',pr.id);
     g.addEventListener('click',function(){showPopup(p);});
-    var c=document.createElementNS(SVG_NS,'circle');
-    c.setAttribute('cx',pr.cx);c.setAttribute('cy',pr.cy);c.setAttribute('r',r);
-    var t=document.createElementNS(SVG_NS,'text');
-    t.setAttribute('x',pr.cx);t.setAttribute('y',pr.cy);
-    t.setAttribute('text-anchor','middle');t.setAttribute('dominant-baseline','central');
-    t.setAttribute('font-size',fs);t.textContent=pr.id;
+    var c=document.createElementNS(NS,'circle');c.setAttribute('cx',pr.cx);c.setAttribute('cy',pr.cy);c.setAttribute('r',r);
+    var t=document.createElementNS(NS,'text');t.setAttribute('x',pr.cx);t.setAttribute('y',pr.cy);
+    t.setAttribute('text-anchor','middle');t.setAttribute('dominant-baseline','central');t.setAttribute('font-size',fs);t.textContent=pr.id;
     g.appendChild(c);g.appendChild(t);svg.appendChild(g);
   });
   filterPins();updateStats();
@@ -540,8 +543,7 @@ function filterPins(){
   var sf=filter.status,tf=filter.type;
   document.querySelectorAll('.plot-pin').forEach(function(p){
     var pl=plots.find(function(x){return String(x.id)===p.dataset.id;});if(!pl)return;
-    var show=(tf==='all'||String(pl.type)===tf)&&(sf==='all'||pl.status===sf);
-    p.classList.toggle('dimmed',!show);
+    p.classList.toggle('dimmed',!((tf==='all'||String(pl.type)===tf)&&(sf==='all'||pl.status===sf)));
   });
 }
 function refreshClasses(){
@@ -566,8 +568,6 @@ function setView(mode){
   var leg=document.querySelector('.legend');if(leg)leg.style.display=mode==='private'?'none':'flex';
   draw();
 }
-
-// ─── PAN ───────────────────────────────────────────────────────────────────
 function setupPan(){
   var w=document.getElementById('mapWrapper');
   var dn=false,mv=false,sx=0,sy=0,sl=0,st=0;
@@ -579,8 +579,6 @@ function setupPan(){
   w.addEventListener('touchstart',function(e){if(e.touches.length!==1)return;tx=e.touches[0].pageX;ty=e.touches[0].pageY;tl=w.scrollLeft;tt=w.scrollTop;},{passive:true});
   w.addEventListener('touchmove',function(e){if(e.touches.length!==1)return;w.scrollLeft=tl-(e.touches[0].pageX-tx);w.scrollTop=tt-(e.touches[0].pageY-ty);},{passive:true});
 }
-
-// ─── POPUP ─────────────────────────────────────────────────────────────────
 function showPopup(p){
   curPlot=p;var pt=PT[p.type];
   document.getElementById('ppTitle').textContent='Plot #'+p.id;
@@ -609,8 +607,6 @@ function enquirePopup(){
     else{var tmp=document.createElement('option');tmp.value=id;tmp.textContent='Plot #'+id+' – '+PT[curPlot.type].label;tmp.dataset.temp='1';sel.insertBefore(tmp,sel.options[1]);sel.value=id;}
   },300);
 }
-
-// ─── ENQUIRY FORM ──────────────────────────────────────────────────────────
 function fillPlotSelect(){
   var sel=document.getElementById('fplot');
   Array.from(sel.options).forEach(function(o){if(o.dataset&&o.dataset.temp)o.remove();});
@@ -623,74 +619,81 @@ function submitForm(){
   var n=document.getElementById('fname').value.trim(),ph=document.getElementById('fphone').value.trim();
   if(!n||!ph){alert('Please fill in name and phone number.');return;}
   if(fbReady&&db){
-    firebase.firestore().collection('enquiries').add({name:n,phone:ph,email:document.getElementById('femail').value.trim(),plotId:document.getElementById('fplot').value,message:document.getElementById('fmsg').value.trim(),status:'unread',submittedAt:new Date().toISOString()}).then(function(){updateBadge();}).catch(function(e){console.error(e);});
+    db.collection('enquiries').add({name:n,phone:ph,email:document.getElementById('femail').value.trim(),plotId:document.getElementById('fplot').value,message:document.getElementById('fmsg').value.trim(),status:'unread',submittedAt:new Date().toISOString()}).then(function(){updateBadge();}).catch(function(e){console.error(e);});
   }
   document.getElementById('enquiryForm').style.display='none';
   document.getElementById('formSuccess').style.display='block';
 }
 
-// ─── FIREBASE (loaded dynamically after map renders) ───────────────────────
-function loadFirebase(){
-  // Load Firebase compat SDK (simpler, no ESM imports needed)
-  var scripts=[
-    'https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js',
-    'https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js',
-    'https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js'
-  ];
-  var loaded=0;
-  scripts.forEach(function(src){
+// ── EMAILJS ────────────────────────────────────────────────────────────────
+function loadEJS(){
+  return new Promise(function(res,rej){
+    if(ejsReady){res();return;}
     var s=document.createElement('script');
-    s.src=src;
-    s.onload=function(){
-      loaded++;
-      if(loaded===scripts.length)initFirebase();
-    };
-    s.onerror=function(){console.warn('Failed to load Firebase SDK:',src);};
+    s.src='https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js';
+    s.onload=function(){emailjs.init(EMAILJS_KEY);ejsReady=true;res();};
+    s.onerror=rej;document.head.appendChild(s);
+  });
+}
+function sendEnquiryResponse(enq,isAvail){
+  if(!enq.email){alert('No email address for this enquiry.');return;}
+  var p=plots.find(function(x){return String(x.id)===String(enq.plotId);});
+  var pt=p?PT[p.type]:{label:'—',dim:'—'};
+  var params={
+    to_name:enq.name||'Valued Customer',to_email:enq.email,
+    plot_id:enq.plotId||'—',plot_details:pt.label+' · '+pt.dim,
+    plot_status:isAvail?'Available':'Not Available',
+    status_icon:isAvail?'✅':'❌',
+    status_bg:isAvail?'#e8f5e9':'#fde8e8',
+    status_color:isAvail?'#1a5c38':'#c0392b',
+    status_message:isAvail
+      ?'Great news! This plot is currently available for booking. Please contact us at your earliest convenience to reserve it.'
+      :'We regret to inform you that this plot is currently not available. However, we have other plots that may suit your requirements. Please contact us to explore options.',
+    contact_phone:contact.ph1,contact_email:contact.email,contact_web:contact.web
+  };
+  loadEJS().then(function(){return emailjs.send(EMAILJS_SVC,EMAILJS_TPL,params);}).then(function(){
+    if(fbReady&&db){
+      db.collection('enquiries').doc(enq.id).update({status:'contacted',respondedAt:new Date().toISOString(),responseType:isAvail?'available':'not-available'}).then(function(){
+        var e=enquiries.find(function(x){return x.id===enq.id;});
+        if(e){e.status='contacted';e.responseType=isAvail?'available':'not-available';renderEnquiries();updateBadge();}
+      });
+    }
+    alert('✅ Response sent to '+enq.email+'!');
+  }).catch(function(e){alert('❌ Failed to send: '+(e.text||e.message||JSON.stringify(e)));});
+}
+
+// ── FIREBASE ───────────────────────────────────────────────────────────────
+function loadFirebase(){
+  var srcs=['https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js','https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js','https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js'];
+  var n=0;
+  srcs.forEach(function(src){
+    var s=document.createElement('script');s.src=src;
+    s.onload=function(){if(++n===srcs.length)initFirebase();};
+    s.onerror=function(){console.warn('Firebase SDK failed:',src);};
     document.head.appendChild(s);
   });
 }
-
 function initFirebase(){
   try{
-    var app=firebase.initializeApp({
-      apiKey:"AIzaSyDVECaT_Y9I0TGzskNgz07vq3x5tGIiRdk",
-      authDomain:"lotusvalley-e56b8.firebaseapp.com",
-      projectId:"lotusvalley-e56b8",
-      storageBucket:"lotusvalley-e56b8.firebasestorage.app",
-      messagingSenderId:"361482497260",
-      appId:"1:361482497260:web:8cd6a6b62359ba5bb909c9"
-    });
-    db=firebase.firestore();
-    auth=firebase.auth();
-    fbReady=true;
-    // Load site data
+    firebase.initializeApp({apiKey:'AIzaSyDVECaT_Y9I0TGzskNgz07vq3x5tGIiRdk',authDomain:'lotusvalley-e56b8.firebaseapp.com',projectId:'lotusvalley-e56b8',storageBucket:'lotusvalley-e56b8.firebasestorage.app',messagingSenderId:'361482497260',appId:'1:361482497260:web:8cd6a6b62359ba5bb909c9'});
+    db=firebase.firestore();auth=firebase.auth();fbReady=true;
     db.collection('lotusValley').doc('siteData').get().then(function(snap){
       if(!snap.exists)return;
       var d=snap.data();
       if(d.plotStatuses)Object.keys(d.plotStatuses).forEach(function(id){var p=plots.find(function(x){return String(x.id)===id;});if(p&&PUB_S[d.plotStatuses[id]])p.status=d.plotStatuses[id];});
       if(d.plotPrivateStatuses)Object.keys(d.plotPrivateStatuses).forEach(function(id){var p=plots.find(function(x){return String(x.id)===id;});if(p&&PRV_S[d.plotPrivateStatuses[id]])p.privateStatus=d.plotPrivateStatuses[id];});
       if(d.pinOverrides){
-        var po=d.pinOverrides;
-        Object.keys(po).forEach(function(id){
-          var pos=po[id];
-          if(!pos)return;
-          if(pos.x!=null&&pos.y!=null){
-            // Direct format — use as-is
-            overrides[id]={x:pos.x,y:pos.y};
-          } else if(pos.nx!=null&&pos.ny!=null){
-            // Normalised format (legacy) — convert back to absolute 1800x1316 coords
-            overrides[id]={x:pos.nx*1800,y:pos.ny*1316};
-          }
+        Object.keys(d.pinOverrides).forEach(function(id){
+          var pos=d.pinOverrides[id];if(!pos)return;
+          if(pos.x!=null&&pos.y!=null)overrides[id]={x:pos.x,y:pos.y};
+          else if(pos.nx!=null&&pos.ny!=null)overrides[id]={x:Math.round(pos.nx*SVG_W),y:Math.round(pos.ny*SVG_H)};
         });
-        console.log('Loaded',Object.keys(overrides).length,'pin overrides. Sample:',
-          Object.keys(overrides).slice(0,2).map(function(k){return k+':'+JSON.stringify(overrides[k]);}));
       }
       if(d.contactInfo)Object.assign(contact,d.contactInfo);
       if(d.reserveConfig)Object.assign(reserve,d.reserveConfig);
       if(d.notifEmails)notifEmails=d.notifEmails;
       refreshClasses();applyContact();fillPlotSelect();draw();
     }).catch(function(e){console.warn('Firestore load failed:',e);});
-    // Auth state
     auth.onAuthStateChanged(function(user){
       var isAdmin=user&&user.email.toLowerCase()===ADMIN_EMAIL;
       document.getElementById('adminLogin').style.display=isAdmin?'none':'flex';
@@ -699,8 +702,8 @@ function initFirebase(){
       if(isAdmin){
         badge.style.display='inline';
         badge.innerHTML=user.email+' <a href="#" id="soLink" style="color:#fff;text-decoration:underline;margin-left:.4rem">Sign out</a>';
-        var soLink=document.getElementById('soLink');
-        if(soLink)soLink.addEventListener('click',function(e){e.preventDefault();auth.signOut().then(function(){setView('public');document.getElementById('adminModal').classList.remove('open');});});
+        var sl=document.getElementById('soLink');
+        if(sl)sl.addEventListener('click',function(e){e.preventDefault();auth.signOut().then(function(){setView('public');document.getElementById('adminModal').classList.remove('open');});});
         renderTable();fillAdminInputs();loadEnquiries();
       }else{
         badge.style.display='none';
@@ -710,8 +713,6 @@ function initFirebase(){
     updateBadge();
   }catch(e){console.error('Firebase init failed:',e);}
 }
-
-// ─── FIRESTORE SAVE ────────────────────────────────────────────────────────
 function save(){
   if(!fbReady||!db)return Promise.resolve(false);
   return db.collection('lotusValley').doc('siteData').set({
@@ -722,116 +723,72 @@ function save(){
   }).then(function(){return true;}).catch(function(e){console.error(e);return false;});
 }
 
-// ─── EMAILJS ───────────────────────────────────────────────────────────────
-var EMAILJS_SERVICE  = 'service_rl40rta';
-var EMAILJS_TEMPLATE = 'template_auopxsx';
-var EMAILJS_KEY      = 'EJsyKa-5MmR5cGjI-';
-var emailJSReady = false;
-
-function loadEmailJS(){
-  return new Promise(function(res,rej){
-    if(emailJSReady){res();return;}
-    var s=document.createElement('script');
-    s.src='https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js';
-    s.onload=function(){
-      emailjs.init(EMAILJS_KEY);
-      emailJSReady=true;
-      res();
-    };
-    s.onerror=rej;
-    document.head.appendChild(s);
-  });
-}
-
-function sendEnquiryResponse(enquiry, isAvailable){
-  if(!enquiry.email){
-    alert('This enquiry has no email address — cannot send response.');
-    return;
-  }
-  var plotId = enquiry.plotId||'—';
-  var p = plots.find(function(x){return String(x.id)===String(plotId);});
-  var pt = p?PT[p.type]:{label:'—',dim:'—'};
-  var params = {
-    to_name:    enquiry.name||'Valued Customer',
-    to_email:   enquiry.email,
-    plot_id:    plotId,
-    plot_details: pt.label+' · '+pt.dim,
-    plot_status:  isAvailable?'Available':'Not Available',
-    status_icon:  isAvailable?'✅':'❌',
-    status_bg:    isAvailable?'#e8f5e9':'#fde8e8',
-    status_color: isAvailable?'#1a5c38':'#c0392b',
-    status_message: isAvailable
-      ? 'Great news! This plot is currently available for booking. Please contact us at your earliest convenience to reserve it.'
-      : 'We regret to inform you that this plot is currently not available. However, we have other plots that may suit your requirements. Please contact us to explore options.',
-    contact_phone: contact.ph1,
-    contact_email: contact.email,
-    contact_web:   contact.web
-  };
-  loadEmailJS().then(function(){
-    return emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, params);
-  }).then(function(){
-    // Mark enquiry as contacted in Firestore
-    if(fbReady&&db){
-      db.collection('enquiries').doc(enquiry.id).update({
-        status:'contacted',
-        respondedAt: new Date().toISOString(),
-        responseType: isAvailable?'available':'not-available'
-      }).then(function(){
-        var e=enquiries.find(function(x){return x.id===enquiry.id;});
-        if(e){e.status='contacted';renderEnquiries();updateBadge();}
-      });
-    }
-    alert('✅ Response sent to '+enquiry.email+' successfully!');
-  }).catch(function(e){
-    alert('❌ Failed to send email: '+(e.text||e.message||JSON.stringify(e)));
-  });
-}
+// ── ENQUIRIES ──────────────────────────────────────────────────────────────
 function loadEnquiries(){
   if(!fbReady||!db)return;
   db.collection('enquiries').orderBy('submittedAt','desc').get().then(function(snap){
     enquiries=snap.docs.map(function(d){return Object.assign({id:d.id},d.data());});
     renderEnquiries();updateBadge();
-  }).catch(function(e){document.getElementById('enquiriesTableBody').innerHTML='<tr><td colspan="7" style="color:red;text-align:center;padding:.8rem">Failed: '+e.message+'</td></tr>';});
+  }).catch(function(e){
+    var c=document.getElementById('enquiriesContainer');
+    if(c)c.innerHTML='<p style="color:red;padding:1rem">Failed to load: '+e.message+'</p>';
+  });
 }
 function renderEnquiries(){
-  var tb=document.getElementById('enquiriesTableBody');
-  if(!enquiries.length){tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:#888;padding:.8rem">No enquiries yet.</td></tr>';return;}
-  tb.innerHTML=enquiries.map(function(e){
+  var container=document.getElementById('enquiriesContainer');
+  if(!container){console.error('enquiriesContainer not found!');return;}
+  container.innerHTML='';
+  if(!enquiries.length){container.innerHTML='<p style="text-align:center;color:#888;padding:1rem">No enquiries yet.</p>';return;}
+  enquiries.forEach(function(e){
+    var hasEmail=!!(e.email&&e.email.trim());
     var dt=new Date(e.submittedAt).toLocaleString('en-IN',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
-    return'<tr style="'+(e.status==='unread'?'background:#fff8e1;font-weight:600':'')+'"><td style="font-size:.72rem;white-space:nowrap">'+dt+'</td><td>'+(e.name||'—')+'</td><td><a href="tel:'+e.phone+'" style="color:var(--green)">'+(e.phone||'—')+'</a></td><td style="font-size:.78rem">'+(e.email||'—')+'</td><td>'+(e.plotId?'#'+e.plotId:'—')+'</td><td style="font-size:.78rem;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+(e.message||'')+'">'+(e.message||'—')+'</td><td><select data-eid="'+e.id+'" class="esEl" style="font-size:.75rem;padding:.2rem;border:1px solid #ccc;border-radius:4px"><option value="unread"'+(e.status==='unread'?' selected':'')+'>Unread</option><option value="read"'+(e.status==='read'?' selected':'')+'>Read</option><option value="contacted"'+(e.status==='contacted'?' selected':'')+'>Contacted</option><option value="closed"'+(e.status==='closed'?' selected':'')+'>Closed</option></select></td></tr>';
-  }).join('');
-  document.querySelectorAll('.esEl').forEach(function(s){
-    s.addEventListener('change',function(){
-      if(!fbReady||!db)return;
-      db.collection('enquiries').doc(s.dataset.eid).update({status:s.value}).then(function(){
-        var e=enquiries.find(function(x){return x.id===s.dataset.eid;});if(e){e.status=s.value;renderEnquiries();updateBadge();}
-      }).catch(function(e){console.error(e);});
-    });
+    var card=document.createElement('div');
+    card.className='enq-card'+(e.status==='unread'?' unread':'');
+    var info=document.createElement('div');info.className='enq-info';
+    info.innerHTML='<span style="color:#888;font-size:.75rem">'+dt+'</span><strong>'+(e.name||'—')+'</strong>'+
+      '<a href="tel:'+(e.phone||'')+'" style="color:var(--green)">📞 '+(e.phone||'—')+'</a>'+
+      (e.email?'<span>✉️ '+e.email+'</span>':'<span style="color:#aaa">No email</span>')+
+      (e.plotId?'<span style="background:#e8f5e9;padding:.15rem .5rem;border-radius:4px;color:#1a5c38;font-weight:700">Plot #'+e.plotId+'</span>':'');
+    card.appendChild(info);
+    if(e.message){var msg=document.createElement('div');msg.className='enq-msg';msg.textContent=e.message;card.appendChild(msg);}
+    var actions=document.createElement('div');actions.className='enq-actions';
+    if(e.responseType==='available'){
+      var s=document.createElement('span');s.style.cssText='font-size:.78rem;background:#d4edda;color:#155724;padding:.25rem .7rem;border-radius:4px;font-weight:700';s.textContent='✅ Available response sent';actions.appendChild(s);
+    } else if(e.responseType==='not-available'){
+      var s=document.createElement('span');s.style.cssText='font-size:.78rem;background:#f8d7da;color:#721c24;padding:.25rem .7rem;border-radius:4px;font-weight:700';s.textContent='❌ Not Available response sent';actions.appendChild(s);
+    } else {
+      var ab=document.createElement('button');ab.textContent='✅ Plot Available';ab.style.cssText='padding:.35rem .8rem;background:#2d7a4f;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:.82rem;font-weight:700';
+      if(!hasEmail){ab.disabled=true;ab.style.opacity='.5';ab.title='No email';}
+      (function(enq){ab.addEventListener('click',function(){if(!confirm('Send "Plot Available" email to '+enq.email+'?'))return;sendEnquiryResponse(enq,true);});})(e);
+      actions.appendChild(ab);
+      var nb=document.createElement('button');nb.textContent='❌ Not Available';nb.style.cssText='padding:.35rem .8rem;background:#c0392b;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:.82rem;font-weight:700';
+      if(!hasEmail){nb.disabled=true;nb.style.opacity='.5';nb.title='No email';}
+      (function(enq){nb.addEventListener('click',function(){if(!confirm('Send "Not Available" email to '+enq.email+'?'))return;sendEnquiryResponse(enq,false);});})(e);
+      actions.appendChild(nb);
+    }
+    var sel=document.createElement('select');sel.style.cssText='padding:.3rem .5rem;border:1px solid #ccc;border-radius:6px;font-size:.78rem;margin-left:auto';
+    ['unread','read','contacted','closed'].forEach(function(v){var o=document.createElement('option');o.value=v;o.textContent=v.charAt(0).toUpperCase()+v.slice(1);if(e.status===v)o.selected=true;sel.appendChild(o);});
+    (function(enq){sel.addEventListener('change',function(){if(!fbReady||!db)return;db.collection('enquiries').doc(enq.id).update({status:sel.value}).then(function(){enq.status=sel.value;renderEnquiries();updateBadge();}).catch(function(e){console.error(e);});});})(e);
+    actions.appendChild(sel);
+    card.appendChild(actions);
+    container.appendChild(card);
   });
 }
 function updateBadge(){
-  if(!fbReady||!db)return;
   var unread=enquiries.filter(function(e){return e.status==='unread';}).length;
   var b=document.getElementById('enquiryBadge'),u=document.getElementById('unreadCount');
   if(b){b.style.display=unread>0?'inline':'none';b.textContent=unread;}
   if(u){u.style.display=unread>0?'inline':'none';u.textContent=unread+' unread';}
 }
-function exportEnqExcel(){
-  loadXLSX().then(function(X){
-    if(!enquiries.length){alert('No enquiries to export.');return;}
-    var ws=X.utils.json_to_sheet(enquiries.map(function(e){return{'Date':new Date(e.submittedAt).toLocaleString('en-IN'),'Name':e.name||'','Phone':e.phone||'','Email':e.email||'','Plot':'#'+(e.plotId||''),'Message':e.message||'','Response Sent':e.responseType||'None','Status':e.status||''};}));
-    var wb=X.utils.book_new();X.utils.book_append_sheet(wb,ws,'Enquiries');X.writeFile(wb,'LotusValley_Enquiries.xlsx');
-  });
-}
 
-// ─── NOTIF EMAILS ──────────────────────────────────────────────────────────
+// ── NOTIF EMAILS ───────────────────────────────────────────────────────────
 function renderNotifList(){
-  var c=document.getElementById('notifEmailList');
-  c.innerHTML=notifEmails.length?notifEmails.map(function(e,i){return'<div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem"><span style="font-size:.82rem;background:#e8f5e9;padding:.2rem .6rem;border-radius:4px">'+e+'</span><button data-i="'+i+'" class="remEml" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.9rem">×</button></div>';}).join(''):'<div style="font-size:.78rem;color:#888">No notification emails added yet.</div>';
+  var c=document.getElementById('notifEmailList');if(!c)return;
+  c.innerHTML=notifEmails.length?notifEmails.map(function(e,i){return'<div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem"><span style="font-size:.82rem;background:#e8f5e9;padding:.2rem .6rem;border-radius:4px">'+e+'</span><button data-i="'+i+'" class="remEml" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.9rem">×</button></div>';}).join(''):'<div style="font-size:.78rem;color:#888">No notification emails yet.</div>';
   document.querySelectorAll('.remEml').forEach(function(b){b.addEventListener('click',function(){notifEmails.splice(parseInt(b.dataset.i),1);renderNotifList();});});
 }
 
-// ─── ADMIN TABLE ───────────────────────────────────────────────────────────
+// ── ADMIN TABLE ────────────────────────────────────────────────────────────
 function renderTable(){
   var s=document.getElementById('adminSearch').value.toLowerCase(),sf=document.getElementById('adminStatusFilter').value;
   var tb=document.getElementById('adminTableBody');tb.innerHTML='';
@@ -847,105 +804,41 @@ function renderTable(){
   document.querySelectorAll('.prvS').forEach(function(s){s.addEventListener('change',function(){var p=plots.find(function(x){return String(x.id)===s.dataset.pid;});if(p){p.privateStatus=s.value;save();}});});
 }
 
-// ─── LAZY XLSX ─────────────────────────────────────────────────────────────
+// ── EXCEL ──────────────────────────────────────────────────────────────────
 var xlsxReady=false;
-function loadXLSX(){
-  return new Promise(function(res,rej){
-    if(xlsxReady){res(window.XLSX);return;}
-    var s=document.createElement('script');
-    s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
-    s.onload=function(){xlsxReady=true;res(window.XLSX);};
-    s.onerror=rej;
-    document.head.appendChild(s);
-  });
-}
-function exportExcel(){
-  loadXLSX().then(function(X){
-    var ws=X.utils.json_to_sheet(plots.map(function(p){var t=PT[p.type];return{'Plot Number':p.id,'Plot Type':t.label,'Dimensions':t.dim,'Area':t.area||'N/A','Public Status':PUB_S[p.status]||p.status,'Private Status':PRV_S[p.privateStatus]||p.privateStatus};}));
-    var wb=X.utils.book_new();X.utils.book_append_sheet(wb,ws,'Plots');X.writeFile(wb,'LotusValley_Plots.xlsx');
-  });
-}
-function importExcel(input){
-  var file=input.files[0];if(!file)return;
-  var rd=new FileReader();
-  rd.onload=function(e){
-    loadXLSX().then(function(X){
-      var wb=X.read(e.target.result,{type:'binary'});
-      var rows=X.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
-      var pm={};Object.keys(PUB_S).forEach(function(k){pm[PUB_S[k].toLowerCase()]=k;});
-      var rm={};Object.keys(PRV_S).forEach(function(k){rm[PRV_S[k].toLowerCase()]=k;});
-      var n=0;
-      rows.forEach(function(r){
-        var id=String(r['Plot Number']||r['id']||'').trim();
-        var p=plots.find(function(x){return String(x.id)===id;});if(!p)return;
-        var pub=(r['Public Status']||'').toString().toLowerCase().trim();
-        var prv=(r['Private Status']||'').toString().toLowerCase().trim();
-        if(pub&&(PUB_S[pub]||pm[pub])){p.status=PUB_S[pub]?pub:pm[pub];n++;}
-        if(prv&&(PRV_S[prv]||rm[prv])){p.privateStatus=PRV_S[prv]?prv:rm[prv];n++;}
-      });
-      refreshClasses();fillPlotSelect();renderTable();
-      save().then(function(ok){alert('✅ '+n+' field(s) updated'+(ok?' and saved live.':' (save failed).'));});
-    });
-  };
-  rd.readAsBinaryString(file);input.value='';
-}
+function loadXLSX(){return new Promise(function(res,rej){if(xlsxReady){res(window.XLSX);return;}var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';s.onload=function(){xlsxReady=true;res(window.XLSX);};s.onerror=rej;document.head.appendChild(s);});}
+function exportExcel(){loadXLSX().then(function(X){var ws=X.utils.json_to_sheet(plots.map(function(p){var t=PT[p.type];return{'Plot Number':p.id,'Plot Type':t.label,'Dimensions':t.dim,'Area':t.area||'N/A','Public Status':PUB_S[p.status]||p.status,'Private Status':PRV_S[p.privateStatus]||p.privateStatus};}));var wb=X.utils.book_new();X.utils.book_append_sheet(wb,ws,'Plots');X.writeFile(wb,'LotusValley_Plots.xlsx');});}
+function importExcel(input){var file=input.files[0];if(!file)return;var rd=new FileReader();rd.onload=function(e){loadXLSX().then(function(X){var wb=X.read(e.target.result,{type:'binary'});var rows=X.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);var pm={};Object.keys(PUB_S).forEach(function(k){pm[PUB_S[k].toLowerCase()]=k;});var rm={};Object.keys(PRV_S).forEach(function(k){rm[PRV_S[k].toLowerCase()]=k;});var n=0;rows.forEach(function(r){var id=String(r['Plot Number']||r['id']||'').trim();var p=plots.find(function(x){return String(x.id)===id;});if(!p)return;var pub=(r['Public Status']||'').toString().toLowerCase().trim();var prv=(r['Private Status']||'').toString().toLowerCase().trim();if(pub&&(PUB_S[pub]||pm[pub])){p.status=PUB_S[pub]?pub:pm[pub];n++;}if(prv&&(PRV_S[prv]||rm[prv])){p.privateStatus=PRV_S[prv]?prv:rm[prv];n++;}});refreshClasses();fillPlotSelect();renderTable();save().then(function(ok){alert('✅ '+n+' field(s) updated'+(ok?' and saved.':' (save failed).'));});});};rd.readAsBinaryString(file);input.value='';}
+function exportEnqExcel(){loadXLSX().then(function(X){if(!enquiries.length){alert('No enquiries to export.');return;}var ws=X.utils.json_to_sheet(enquiries.map(function(e){return{'Date':new Date(e.submittedAt).toLocaleString('en-IN'),'Name':e.name||'','Phone':e.phone||'','Email':e.email||'','Plot':'#'+(e.plotId||''),'Message':e.message||'','Response':e.responseType||'None','Status':e.status||''};}));var wb=X.utils.book_new();X.utils.book_append_sheet(wb,ws,'Enquiries');X.writeFile(wb,'LotusValley_Enquiries.xlsx');});}
 
-// ─── PIN POSITIONS ─────────────────────────────────────────────────────────
+// ── PIN POSITIONS ──────────────────────────────────────────────────────────
 function applyPins(){
   var raw=document.getElementById('pinJsonInput').value.trim();
   if(!raw){document.getElementById('pinImportStatus').textContent='Paste JSON first.';return;}
   try{
     var d=JSON.parse(raw);var n=0;
-    Object.keys(d).forEach(function(id){
-      var pos=d[id];
-      if(pos&&typeof pos.x==='number'&&typeof pos.y==='number'){
-        // Store as direct {x,y} — Pin Tool and SVG viewBox use same 1800x1316 coordinates
-        overrides[id]={x:pos.x,y:pos.y};n++;
-      }
-    });
-    draw();
-    save().then(function(ok){
-      document.getElementById('pinImportStatus').textContent='✅ Applied '+n+' positions'+(ok?' — saved live.':' (save failed).');
-      var m=document.getElementById('pinImportMsg');m.style.display='inline';setTimeout(function(){m.style.display='none';},2000);
-    });
+    Object.keys(d).forEach(function(id){var pos=d[id];if(pos&&typeof pos.x==='number'&&typeof pos.y==='number'){overrides[id]={x:pos.x,y:pos.y};n++;}});
+    draw();save().then(function(ok){document.getElementById('pinImportStatus').textContent='✅ Applied '+n+' positions'+(ok?' — saved live.':' (save failed).');var m=document.getElementById('pinImportMsg');m.style.display='inline';setTimeout(function(){m.style.display='none';},2000);});
   }catch(e){document.getElementById('pinImportStatus').textContent='❌ Invalid JSON: '+e.message;}
 }
-function showPinsJSON(){
-  document.getElementById('pinJsonInput').value=JSON.stringify(
-    effRects().reduce(function(acc,r){acc[String(r.id)]={x:Math.round(r.cx),y:Math.round(r.cy)};return acc;},{}),null,1);
-}
-function dlPins(){
-  var data=JSON.stringify(effRects().reduce(function(acc,r){acc[String(r.id)]={x:Math.round(r.cx),y:Math.round(r.cy)};return acc;},{}),null,1);
-  var blob=new Blob([data],{type:'application/json'});
-  var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='pin-positions.json';document.body.appendChild(a);a.click();document.body.removeChild(a);
-}
-function clearPins(){
-  if(!confirm('Clear all pin positions?'))return;
-  overrides={};draw();
-  save().then(function(){document.getElementById('pinImportStatus').textContent='Cleared and saved.';});
-}
+function showPinsJSON(){document.getElementById('pinJsonInput').value=JSON.stringify(effRects().reduce(function(acc,r){acc[String(r.id)]={x:Math.round(r.cx),y:Math.round(r.cy)};return acc;},{}),null,1);}
+function dlPins(){var data=JSON.stringify(effRects().reduce(function(acc,r){acc[String(r.id)]={x:Math.round(r.cx),y:Math.round(r.cy)};return acc;},{}),null,1);var blob=new Blob([data],{type:'application/json'});var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='pin-positions.json';document.body.appendChild(a);a.click();document.body.removeChild(a);}
+function clearPins(){if(!confirm('Clear all pin positions?'))return;overrides={};draw();save().then(function(){document.getElementById('pinImportStatus').textContent='Cleared.';});}
 
-// ─── BLOCK CALIB ───────────────────────────────────────────────────────────
-function loadBlock(){
-  var b=BLOCKS[parseInt(document.getElementById('blockSelect').value)];
-  ['TL','TR','BR','BL'].forEach(function(k){document.getElementById('b'+k+'x').value=b[k][0];document.getElementById('b'+k+'y').value=b[k][1];});
-}
-function applyBlock(){
-  var b=BLOCKS[parseInt(document.getElementById('blockSelect').value)];
-  ['TL','TR','BR','BL'].forEach(function(k){b[k]=[parseFloat(document.getElementById('b'+k+'x').value)||0,parseFloat(document.getElementById('b'+k+'y').value)||0];});
-  rects=genRects();draw();
-  var m=document.getElementById('calibMsg');m.style.display='inline';setTimeout(function(){m.style.display='none';},1500);
-}
+// ── BLOCK CALIB ────────────────────────────────────────────────────────────
+function loadBlock(){var b=BLOCKS[parseInt(document.getElementById('blockSelect').value)];['TL','TR','BR','BL'].forEach(function(k){document.getElementById('b'+k+'x').value=b[k][0];document.getElementById('b'+k+'y').value=b[k][1];});}
+function applyBlock(){var b=BLOCKS[parseInt(document.getElementById('blockSelect').value)];['TL','TR','BR','BL'].forEach(function(k){b[k]=[parseFloat(document.getElementById('b'+k+'x').value)||0,parseFloat(document.getElementById('b'+k+'y').value)||0];});rects=genRects();draw();var m=document.getElementById('calibMsg');m.style.display='inline';setTimeout(function(){m.style.display='none';},1500);}
 
-// ─── CONTACT & RESERVE ─────────────────────────────────────────────────────
+// ── CONTACT ────────────────────────────────────────────────────────────────
 function applyContact(){
-  document.getElementById('ph1Disp').textContent=contact.ph1;document.getElementById('ph2Disp').textContent=contact.ph2;
-  document.getElementById('emailDisp').textContent=contact.email;document.getElementById('webDisp').textContent=contact.web;
-  document.getElementById('ph1Link').href='tel:'+contact.ph1.replace(/\s/g,'');document.getElementById('ph2Link').href='tel:'+contact.ph2.replace(/\s/g,'');
-  document.getElementById('emailLink').href='mailto:'+contact.email;document.getElementById('webLink').href='https://'+contact.web.replace('https://','');
-  document.getElementById('fph1').textContent=contact.ph1;document.getElementById('fph2').textContent=contact.ph2;
-  document.getElementById('femailF').textContent=contact.email;document.getElementById('fwebF').textContent=contact.web;
-  document.getElementById('femlLink').href='mailto:'+contact.email;document.getElementById('fwebLink').href='https://'+contact.web.replace('https://','');
+  ['ph1Disp','ph2Disp','emailDisp','webDisp'].forEach(function(id,i){document.getElementById(id).textContent=[contact.ph1,contact.ph2,contact.email,contact.web][i];});
+  document.getElementById('ph1Link').href='tel:'+contact.ph1.replace(/\s/g,'');
+  document.getElementById('ph2Link').href='tel:'+contact.ph2.replace(/\s/g,'');
+  document.getElementById('emailLink').href='mailto:'+contact.email;
+  document.getElementById('webLink').href='https://'+contact.web.replace('https://','');
+  ['fph1','fph2','femailF','fwebF'].forEach(function(id,i){document.getElementById(id).textContent=[contact.ph1,contact.ph2,contact.email,contact.web][i];});
+  document.getElementById('femlLink').href='mailto:'+contact.email;
+  document.getElementById('fwebLink').href='https://'+contact.web.replace('https://','');
 }
 function fillAdminInputs(){
   document.getElementById('aph1').value=contact.ph1;document.getElementById('aph2').value=contact.ph2;
@@ -953,69 +846,28 @@ function fillAdminInputs(){
   document.getElementById('rcEnabled').value=reserve.enabled?'1':'0';document.getElementById('rcFee').value=reserve.feeAmount;document.getElementById('rcLink').value=reserve.paymentLink;
   renderNotifList();loadBlock();
 }
-function saveContact(){
-  contact.ph1=document.getElementById('aph1').value.trim()||contact.ph1;contact.ph2=document.getElementById('aph2').value.trim()||contact.ph2;
-  contact.email=document.getElementById('aemail').value.trim()||contact.email;contact.web=document.getElementById('aweb').value.trim()||contact.web;
-  applyContact();save();
-  var m=document.getElementById('saveMsg');m.style.display='inline';setTimeout(function(){m.style.display='none';},2500);
-}
-function saveReserve(){
-  reserve.enabled=document.getElementById('rcEnabled').value==='1';
-  reserve.feeAmount=parseFloat(document.getElementById('rcFee').value)||0;
-  reserve.paymentLink=document.getElementById('rcLink').value.trim();
-  save();var m=document.getElementById('reserveMsg');m.style.display='inline';setTimeout(function(){m.style.display='none';},2000);
-}
-function saveNotifEmails(){
-  if(!fbReady||!db){alert('Firebase not ready.');return;}
-  db.collection('lotusValley').doc('siteData').get().then(function(snap){
-    var existing=snap.exists?snap.data():{};
-    existing.notifEmails=notifEmails;
-    return db.collection('lotusValley').doc('siteData').set(existing);
-  }).then(function(){var m=document.getElementById('notifMsg');m.style.display='inline';setTimeout(function(){m.style.display='none';},2000);})
-  .catch(function(e){alert('Save failed: '+e.message);});
-}
+function saveContact(){contact.ph1=document.getElementById('aph1').value.trim()||contact.ph1;contact.ph2=document.getElementById('aph2').value.trim()||contact.ph2;contact.email=document.getElementById('aemail').value.trim()||contact.email;contact.web=document.getElementById('aweb').value.trim()||contact.web;applyContact();save();var m=document.getElementById('saveMsg');m.style.display='inline';setTimeout(function(){m.style.display='none';},2500);}
+function saveReserve(){reserve.enabled=document.getElementById('rcEnabled').value==='1';reserve.feeAmount=parseFloat(document.getElementById('rcFee').value)||0;reserve.paymentLink=document.getElementById('rcLink').value.trim();save();var m=document.getElementById('reserveMsg');m.style.display='inline';setTimeout(function(){m.style.display='none';},2000);}
+function saveNotifEmails(){if(!fbReady||!db){alert('Firebase not ready.');return;}db.collection('lotusValley').doc('siteData').get().then(function(snap){var ex=snap.exists?snap.data():{};ex.notifEmails=notifEmails;return db.collection('lotusValley').doc('siteData').set(ex);}).then(function(){var m=document.getElementById('notifMsg');m.style.display='inline';setTimeout(function(){m.style.display='none';},2000);}).catch(function(e){alert('Save failed: '+e.message);});}
 
-// ─── EVENT WIRING ──────────────────────────────────────────────────────────
+// ── EVENT WIRING ───────────────────────────────────────────────────────────
 function on(id,ev,fn){var el=document.getElementById(id);if(el)el.addEventListener(ev,fn);}
-
 on('adminBtn','click',function(){document.getElementById('adminModal').classList.add('open');});
 on('closeAdminBtn','click',function(){document.getElementById('adminModal').classList.remove('open');if(viewMode==='private')setView('public');});
-on('googleSignInBtn','click',function(){
-  if(!fbReady||!auth){alert('Authentication not ready yet. Please wait a moment and try again.');return;}
-  var provider=new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider).catch(function(e){document.getElementById('adminErr').textContent='Sign-in failed: '+e.message;});
-});
+on('googleSignInBtn','click',function(){if(!fbReady||!auth){alert('Please wait a moment and try again.');return;}var prov=new firebase.auth.GoogleAuthProvider();auth.signInWithPopup(prov).catch(function(e){document.getElementById('adminErr').textContent='Sign-in failed: '+e.message;});});
 on('closePopupBtn','click',closePopup);
 on('popupOverlay','click',function(e){if(e.target===document.getElementById('popupOverlay'))closePopup();});
 on('enquireFromPopupBtn','click',enquirePopup);
 on('reserveBtn','click',function(){var f=document.getElementById('reserveForm');f.style.display=f.style.display==='none'?'block':'none';});
-on('proceedPayBtn','click',function(){
-  var n=document.getElementById('rname').value.trim(),ph=document.getElementById('rphone').value.trim();
-  if(!n||!ph){alert('Please enter name and phone.');return;}
-  if(!reserve.paymentLink){alert('Payment not configured. Contact us directly.');return;}
-  window.open(reserve.paymentLink,'_blank');
-  alert('Thank you, '+n+'! A payment page has opened for Plot #'+curPlot.id+'. After payment, contact us at '+contact.ph1+' with your reference number.');
-  closePopup();
-});
+on('proceedPayBtn','click',function(){var n=document.getElementById('rname').value.trim(),ph=document.getElementById('rphone').value.trim();if(!n||!ph){alert('Please enter name and phone.');return;}if(!reserve.paymentLink){alert('Payment not configured.');return;}window.open(reserve.paymentLink,'_blank');alert('Thank you, '+n+'! Payment page opened for Plot #'+curPlot.id+'. Contact us at '+contact.ph1+' after payment.');closePopup();});
 on('submitEnquiryBtn','click',submitForm);
 on('zoomIn','click',function(){zoom=Math.min(zoom*1.25,4);applyZoom();});
 on('zoomOut','click',function(){zoom=Math.max(zoom*0.8,0.15);applyZoom();});
 on('zoomReset','click',fitWidth);
 on('pinSizeSlider','input',function(e){pinSize=parseFloat(e.target.value)||13;document.getElementById('pinSizeLabel').textContent=Math.round(pinSize);draw();});
-on('searchInput','input',function(e){
-  document.querySelectorAll('.plot-pin').forEach(function(d){d.classList.remove('highlighted');});
-  var v=e.target.value.trim();if(!v)return;
-  var pin=document.querySelector('.plot-pin[data-id="'+v+'"]');
-  if(pin){pin.classList.add('highlighted');pin.scrollIntoView({behavior:'smooth',block:'center',inline:'center'});}
-});
+on('searchInput','input',function(e){document.querySelectorAll('.plot-pin').forEach(function(d){d.classList.remove('highlighted');});var v=e.target.value.trim();if(!v)return;var pin=document.querySelector('.plot-pin[data-id="'+v+'"]');if(pin){pin.classList.add('highlighted');pin.scrollIntoView({behavior:'smooth',block:'center',inline:'center'});}});
 on('typeFilter','change',function(e){filter.type=e.target.value;filterPins();});
-['filterAll','filterAvail','filterBooked','filterReserved','filterNA'].forEach(function(id,i){
-  on(id,'click',function(e){
-    filter.status=['all','available','booked','reserved','not-available'][i];
-    document.querySelectorAll('.filter-bar button').forEach(function(b){b.classList.remove('active');});
-    e.target.classList.add('active');filterPins();
-  });
-});
+['filterAll','filterAvail','filterBooked','filterReserved','filterNA'].forEach(function(id,i){on(id,'click',function(e){filter.status=['all','available','booked','reserved','not-available'][i];document.querySelectorAll('.filter-bar button').forEach(function(b){b.classList.remove('active');});e.target.classList.add('active');filterPins();});});
 on('adminSearch','input',renderTable);on('adminStatusFilter','change',renderTable);
 on('exportExcelBtn','click',exportExcel);on('importExcelInput','change',function(e){importExcel(e.target);});
 on('showPrivateMapBtn','click',function(){setView('private');document.getElementById('adminModal').classList.remove('open');document.getElementById('map').scrollIntoView({behavior:'smooth'});});
@@ -1024,37 +876,17 @@ on('applyPinsBtn','click',applyPins);on('exportPinsBtn','click',showPinsJSON);on
 on('blockSelect','change',loadBlock);on('applyBlockBtn','click',applyBlock);
 on('showCoordsBtn','click',function(){coordMode=true;document.getElementById('adminModal').classList.remove('open');document.getElementById('coordFloater').style.display='block';document.getElementById('coordFloaterReadout').textContent='x: —, y: —';});
 on('exitCoordBtn','click',function(){coordMode=false;document.getElementById('coordFloater').style.display='none';document.getElementById('adminModal').classList.add('open');});
-on('plotsLayerSvg','click',function(e){
-  if(!coordMode)return;
-  var rect=document.getElementById('plotsLayerSvg').getBoundingClientRect();
-  document.getElementById('coordFloaterReadout').textContent='x: '+Math.round((e.clientX-rect.left)/rect.width*IW)+', y: '+Math.round((e.clientY-rect.top)/rect.height*IH);
-});
+on('plotsLayerSvg','click',function(e){if(!coordMode)return;var rect=document.getElementById('plotsLayerSvg').getBoundingClientRect();document.getElementById('coordFloaterReadout').textContent='x: '+Math.round((e.clientX-rect.left)/rect.width*IW)+', y: '+Math.round((e.clientY-rect.top)/rect.height*IH);});
 on('saveContactBtn','click',saveContact);on('saveReserveBtn','click',saveReserve);
-on('addNotifEmailBtn','click',function(){
-  var inp=document.getElementById('newNotifEmail'),val=inp.value.trim().toLowerCase();
-  if(!val||val.indexOf('@')<0){alert('Please enter a valid email address.');return;}
-  if(notifEmails.indexOf(val)>=0){alert('Already in list.');return;}
-  notifEmails.push(val);inp.value='';renderNotifList();
-});
+on('addNotifEmailBtn','click',function(){var inp=document.getElementById('newNotifEmail'),val=inp.value.trim().toLowerCase();if(!val||val.indexOf('@')<0){alert('Please enter a valid email.');return;}if(notifEmails.indexOf(val)>=0){alert('Already in list.');return;}notifEmails.push(val);inp.value='';renderNotifList();});
 on('saveNotifEmailsBtn','click',saveNotifEmails);
 on('refreshEnquiriesBtn','click',loadEnquiries);on('exportEnquiriesBtn','click',exportEnqExcel);
 
-// ─── INIT ──────────────────────────────────────────────────────────────────
-buildMap();
-setupPan();
-fillPlotSelect();
-
-// Load Firebase after map renders — won't block UI
-setTimeout(loadFirebase, 100);
-
+// ── INIT ───────────────────────────────────────────────────────────────────
+buildMap();setupPan();fillPlotSelect();
+setTimeout(loadFirebase,100);
 window.addEventListener('resize',fitWidth);
-
-// PWA
-if('serviceWorker' in navigator){
-  window.addEventListener('load',function(){
-    navigator.serviceWorker.register('./sw.js').catch(function(e){console.warn('SW:',e);});
-  });
-}
+if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('./sw.js').catch(function(e){console.warn('SW:',e);});});}
 </script>
 </body>
 </html>
