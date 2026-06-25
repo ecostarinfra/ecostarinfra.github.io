@@ -461,8 +461,7 @@ function genRects(){
 }
 
 var rects=genRects();
-// 248B normalised against original JPEG
-var overrides={'248B':{nx:3115/2264,ny:2445/1517}};
+var overrides={'248B':{x:Math.round(3115/2264*1800),y:Math.round(2445/1517*1316)}};
 var pinSize=20,zoom=1,IW=1800,IH=1316,viewMode='public';
 var filter={status:'all',type:'all'};
 var curPlot=null;
@@ -476,16 +475,19 @@ function effRects(){
   var base=rects.map(function(r){
     var o=overrides[String(r.id)];
     if(o){
-      var cx=o.nx!=null?o.nx*IW:o.x;
-      var cy=o.ny!=null?o.ny*IH:o.y;
+      // Use coordinates directly — Pin Tool and SVG viewBox both use same image dimensions
+      // Support both {x,y} (direct) and legacy {nx,ny} (normalised) formats
+      var cx=o.nx!=null?(o.nx*IW):o.x;
+      var cy=o.ny!=null?(o.ny*IH):o.y;
       return{id:r.id,cx:cx,cy:cy};
     }
-    // Scale block coords from original image size to current image size
+    // Block-computed coords defined against original JPEG (2264x1517), scale to current image
     return{id:r.id,cx:r.cx/ORIG_W*IW,cy:r.cy/ORIG_H*IH};
   });
   var ids={};base.forEach(function(r){ids[String(r.id)]=true;});
   var extras=Object.keys(overrides).filter(function(id){return!ids[id];}).map(function(id){
-    var p=overrides[id];return{id:id,cx:p.nx!=null?p.nx*IW:p.x,cy:p.ny!=null?p.ny*IH:p.y};
+    var p=overrides[id];
+    return{id:id,cx:p.nx!=null?(p.nx*IW):p.x,cy:p.ny!=null?(p.ny*IH):p.y};
   });
   return base.concat(extras);
 }
@@ -518,21 +520,6 @@ function draw(){
   var svg=document.getElementById('plotsLayerSvg');
   while(svg.firstChild)svg.removeChild(svg.firstChild);
   var r=pinSize/zoom,fs=(pinSize*0.77)/zoom,priv=viewMode==='private';
-
-  // DEBUG: draw red corner markers to verify SVG coordinate alignment
-  [[0,0,'TL'],[IW,0,'TR'],[IW,IH,'BR'],[0,IH,'BL'],[IW/2,IH/2,'CTR']].forEach(function(pt){
-    var g=document.createElementNS(SVG_NS,'g');
-    var c=document.createElementNS(SVG_NS,'circle');
-    c.setAttribute('cx',pt[0]);c.setAttribute('cy',pt[1]);c.setAttribute('r',r*1.5);
-    c.setAttribute('fill','rgba(255,0,0,0.7)');c.setAttribute('stroke','white');c.setAttribute('stroke-width',2);
-    var t=document.createElementNS(SVG_NS,'text');
-    t.setAttribute('x',pt[0]);t.setAttribute('y',pt[1]);
-    t.setAttribute('text-anchor','middle');t.setAttribute('dominant-baseline','central');
-    t.setAttribute('font-size',fs);t.setAttribute('fill','white');t.setAttribute('font-weight','bold');
-    t.textContent=pt[2];
-    g.appendChild(c);g.appendChild(t);svg.appendChild(g);
-  });
-
   effRects().forEach(function(pr){
     var p=plots.find(function(pl){return String(pl.id)===String(pr.id);});if(!p)return;
     var g=document.createElementNS(SVG_NS,'g');
@@ -687,15 +674,16 @@ function initFirebase(){
         Object.keys(po).forEach(function(id){
           var pos=po[id];
           if(!pos)return;
-          if(pos.nx!=null&&pos.ny!=null){
-            // Already normalised — use as-is
-            overrides[id]={nx:pos.nx,ny:pos.ny};
-          } else if(pos.x!=null&&pos.y!=null){
-            // Legacy absolute coords — pins were placed against JPEG (2264×1517)
-            overrides[id]={nx:pos.x/2264,ny:pos.y/1517};
+          if(pos.x!=null&&pos.y!=null){
+            // Direct format — use as-is
+            overrides[id]={x:pos.x,y:pos.y};
+          } else if(pos.nx!=null&&pos.ny!=null){
+            // Normalised format (legacy) — convert back to absolute 1800x1316 coords
+            overrides[id]={x:pos.nx*1800,y:pos.ny*1316};
           }
         });
-        console.log('Loaded',Object.keys(overrides).length,'pin overrides. IW='+IW+' IH='+IH);
+        console.log('Loaded',Object.keys(overrides).length,'pin overrides. Sample:',
+          Object.keys(overrides).slice(0,2).map(function(k){return k+':'+JSON.stringify(overrides[k]);}));
       }
       if(d.contactInfo)Object.assign(contact,d.contactInfo);
       if(d.reserveConfig)Object.assign(reserve,d.reserveConfig);
@@ -850,12 +838,13 @@ function applyPins(){
     Object.keys(d).forEach(function(id){
       var pos=d[id];
       if(pos&&typeof pos.x==='number'&&typeof pos.y==='number'){
-        overrides[id]={nx:pos.x/IW,ny:pos.y/IH};n++;
+        // Store as direct {x,y} — Pin Tool and SVG viewBox use same 1800x1316 coordinates
+        overrides[id]={x:pos.x,y:pos.y};n++;
       }
     });
     draw();
     save().then(function(ok){
-      document.getElementById('pinImportStatus').textContent='✅ Applied '+n+' positions (normalised against '+IW+'×'+IH+')'+(ok?' — saved live.':' (save failed).');
+      document.getElementById('pinImportStatus').textContent='✅ Applied '+n+' positions'+(ok?' — saved live.':' (save failed).');
       var m=document.getElementById('pinImportMsg');m.style.display='inline';setTimeout(function(){m.style.display='none';},2000);
     });
   }catch(e){document.getElementById('pinImportStatus').textContent='❌ Invalid JSON: '+e.message;}
