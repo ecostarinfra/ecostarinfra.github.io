@@ -318,7 +318,7 @@ footer a{color:#a8e6c2;text-decoration:none}
           <h4>📬 Enquiries Inbox <span id="unreadCount" style="background:var(--red);color:#fff;border-radius:10px;padding:1px 8px;font-size:.72rem;margin-left:.4rem;display:none">0 unread</span></h4>
           <div style="overflow-x:auto;max-height:280px;overflow-y:auto">
             <table class="admin-table">
-              <thead><tr><th>Date</th><th>Name</th><th>Phone</th><th>Email</th><th>Plot</th><th>Message</th><th>Status</th></tr></thead>
+              <thead><tr><th>Date</th><th>Name</th><th>Phone</th><th>Email</th><th>Plot</th><th>Message</th><th>Response</th><th>Status</th></tr></thead>
               <tbody id="enquiriesTableBody"><tr><td colspan="7" style="text-align:center;color:#888;padding:.8rem">Loading...</td></tr></tbody>
             </table>
           </div>
@@ -722,7 +722,70 @@ function save(){
   }).then(function(){return true;}).catch(function(e){console.error(e);return false;});
 }
 
-// ─── ENQUIRIES ADMIN ───────────────────────────────────────────────────────
+// ─── EMAILJS ───────────────────────────────────────────────────────────────
+var EMAILJS_SERVICE  = 'service_rl40rta';
+var EMAILJS_TEMPLATE = 'template_auopxsx';
+var EMAILJS_KEY      = 'EJsyKa-5MmR5cGjI-';
+var emailJSReady = false;
+
+function loadEmailJS(){
+  return new Promise(function(res,rej){
+    if(emailJSReady){res();return;}
+    var s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js';
+    s.onload=function(){
+      emailjs.init(EMAILJS_KEY);
+      emailJSReady=true;
+      res();
+    };
+    s.onerror=rej;
+    document.head.appendChild(s);
+  });
+}
+
+function sendEnquiryResponse(enquiry, isAvailable){
+  if(!enquiry.email){
+    alert('This enquiry has no email address — cannot send response.');
+    return;
+  }
+  var plotId = enquiry.plotId||'—';
+  var p = plots.find(function(x){return String(x.id)===String(plotId);});
+  var pt = p?PT[p.type]:{label:'—',dim:'—'};
+  var params = {
+    to_name:    enquiry.name||'Valued Customer',
+    to_email:   enquiry.email,
+    plot_id:    plotId,
+    plot_details: pt.label+' · '+pt.dim,
+    plot_status:  isAvailable?'Available':'Not Available',
+    status_icon:  isAvailable?'✅':'❌',
+    status_bg:    isAvailable?'#e8f5e9':'#fde8e8',
+    status_color: isAvailable?'#1a5c38':'#c0392b',
+    status_message: isAvailable
+      ? 'Great news! This plot is currently available for booking. Please contact us at your earliest convenience to reserve it.'
+      : 'We regret to inform you that this plot is currently not available. However, we have other plots that may suit your requirements. Please contact us to explore options.',
+    contact_phone: contact.ph1,
+    contact_email: contact.email,
+    contact_web:   contact.web
+  };
+  loadEmailJS().then(function(){
+    return emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, params);
+  }).then(function(){
+    // Mark enquiry as contacted in Firestore
+    if(fbReady&&db){
+      db.collection('enquiries').doc(enquiry.id).update({
+        status:'contacted',
+        respondedAt: new Date().toISOString(),
+        responseType: isAvailable?'available':'not-available'
+      }).then(function(){
+        var e=enquiries.find(function(x){return x.id===enquiry.id;});
+        if(e){e.status='contacted';renderEnquiries();updateBadge();}
+      });
+    }
+    alert('✅ Response sent to '+enquiry.email+' successfully!');
+  }).catch(function(e){
+    alert('❌ Failed to send email: '+(e.text||e.message||JSON.stringify(e)));
+  });
+}
 function loadEnquiries(){
   if(!fbReady||!db)return;
   db.collection('enquiries').orderBy('submittedAt','desc').get().then(function(snap){
@@ -758,7 +821,7 @@ function updateBadge(){
 function exportEnqExcel(){
   loadXLSX().then(function(X){
     if(!enquiries.length){alert('No enquiries to export.');return;}
-    var ws=X.utils.json_to_sheet(enquiries.map(function(e){return{'Date':new Date(e.submittedAt).toLocaleString('en-IN'),'Name':e.name||'','Phone':e.phone||'','Email':e.email||'','Plot':'#'+(e.plotId||''),'Message':e.message||'','Status':e.status||''};}));
+    var ws=X.utils.json_to_sheet(enquiries.map(function(e){return{'Date':new Date(e.submittedAt).toLocaleString('en-IN'),'Name':e.name||'','Phone':e.phone||'','Email':e.email||'','Plot':'#'+(e.plotId||''),'Message':e.message||'','Response Sent':e.responseType||'None','Status':e.status||''};}));
     var wb=X.utils.book_new();X.utils.book_append_sheet(wb,ws,'Enquiries');X.writeFile(wb,'LotusValley_Enquiries.xlsx');
   });
 }
